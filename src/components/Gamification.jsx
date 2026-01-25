@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Star, Trophy } from 'lucide-react';
+import { Gift, X, Star, Trophy, Sparkles, TrendingUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useRewards } from '../context/RewardsContext';
 
 const prizes = [
     { label: "10% Off", color: "#B76E79" },
@@ -62,6 +63,58 @@ const SpinWheel = ({ onWin }) => {
     );
 };
 
+// New Component: Rewards Widget
+const RewardsWidget = () => {
+    const { points, level, levels, getNextLevel } = useRewards();
+    const nextLevel = getNextLevel();
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Calculate progress to next level
+    const currentMin = levels.find(l => l.name === level).min;
+    const nextMin = nextLevel ? nextLevel.min : currentMin;
+    const progress = nextLevel ? ((points - currentMin) / (nextMin - currentMin)) * 100 : 100;
+
+    return (
+        <div className="fixed top-24 right-4 z-40 transition-all">
+            <motion.div
+                layout
+                onClick={() => setIsOpen(!isOpen)}
+                className={`bg-white/90 backdrop-blur-md border border-primary/20 shadow-xl overflow-hidden cursor-pointer ${isOpen ? 'rounded-2xl w-64' : 'rounded-full w-auto'}`}
+            >
+                <div className="p-3 flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-inner`} style={{ backgroundColor: levels.find(l => l.name === level).color }}>
+                        {level[0]}
+                    </div>
+                    {isOpen && (
+                        <div className="flex-1">
+                            <h4 className="font-bold text-charcoal text-sm">{level} Member</h4>
+                            <p className="text-xs text-primary font-bold">{points} pts</p>
+                        </div>
+                    )}
+                    {!isOpen && <span className="text-xs font-bold pr-2">{points}</span>}
+                </div>
+
+                {isOpen && nextLevel && (
+                    <div className="px-3 pb-3">
+                        <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+                            <span>Progress to {nextLevel.name}</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-primary"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progress}%` }}
+                            />
+                        </div>
+                        <p className="text-[10px] text-gray-400 mt-2 text-center">Earn {nextLevel.min - points} more points to upgrade!</p>
+                    </div>
+                )}
+            </motion.div>
+        </div>
+    );
+};
+
 const SocialProof = () => {
     const [notification, setNotification] = useState(null);
     const messages = [
@@ -101,9 +154,22 @@ const SocialProof = () => {
 const Gamification = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [hasWon, setHasWon] = useState(false);
+    const { earnPoints } = useRewards();
 
     useEffect(() => {
-        // Auto-open after 30 seconds
+        // Daily login bonus simulation
+        const lastVisit = localStorage.getItem('last_visit_date');
+        const today = new Date().toDateString();
+
+        if (lastVisit !== today) {
+            setTimeout(() => {
+                earnPoints(50, 'Daily Login');
+                // Could trigger a special toast here
+            }, 2000);
+            localStorage.setItem('last_visit_date', today);
+        }
+
+        // Auto-open spinner after 30 seconds
         const timer = setTimeout(() => {
             if (!hasWon) setIsOpen(true);
         }, 30000);
@@ -112,6 +178,7 @@ const Gamification = () => {
 
     const handleWin = () => {
         setHasWon(true);
+        earnPoints(500, 'Spin Wheel Win'); // Earn points on win
         confetti({
             particleCount: 200,
             spread: 90,
@@ -123,6 +190,7 @@ const Gamification = () => {
     return (
         <>
             <SocialProof />
+            <RewardsWidget />
 
             {/* Floating Trigger */}
             {!isOpen && !hasWon && (
@@ -164,7 +232,7 @@ const Gamification = () => {
                             {!hasWon ? (
                                 <>
                                     <h3 className="text-2xl font-serif font-bold text-charcoal mb-2">Spin & Win!</h3>
-                                    <p className="text-charcoal/60 mb-6">Unlock exclusive discounts for your first visit.</p>
+                                    <p className="text-charcoal/60 mb-6">Unlock points and exclusive discounts.</p>
                                     <SpinWheel onWin={handleWin} />
                                 </>
                             ) : (
@@ -177,14 +245,14 @@ const Gamification = () => {
                                     </div>
                                     <h3 className="text-2xl font-serif font-bold text-charcoal mb-2">Congratulations!</h3>
                                     <div className="bg-primary/10 p-4 rounded-xl border border-primary/20 mb-6">
-                                        <p className="text-primary font-bold text-xl tracking-widest">SAVE10</p>
-                                        <p className="text-xs text-charcoal/60 mt-1">Use this code at checkout</p>
+                                        <p className="text-primary font-bold text-xl tracking-widest">+500 PTS</p>
+                                        <p className="text-xs text-charcoal/60 mt-1">Added to your balance</p>
                                     </div>
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="w-full py-3 bg-charcoal text-white rounded-xl font-bold hover:bg-primary transition-colors"
                                     >
-                                        Claim Reward
+                                        Awesome!
                                     </button>
                                 </motion.div>
                             )}
