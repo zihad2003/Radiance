@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { FACE_MESH_INDICES, getPoints } from '../../utils/faceLandmarks';
 
-const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
+const FaceCanvas = ({ activeMakeup, landmarks, videoRef, beautySettings }) => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -19,7 +19,15 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Render Makeup Layers
+        // 1. SKIN SMOOTHING (Beauty Filter)
+        if (beautySettings && beautySettings.smoothing > 0) {
+            renderSkinSmoothing(ctx, landmarks, video, beautySettings.smoothing);
+        }
+
+        // 2. Render Makeup Layers
+        if (activeMakeup.face) {
+            renderFoundation(ctx, landmarks, activeMakeup.face);
+        }
         if (activeMakeup.eyes) {
             renderEyes(ctx, landmarks, activeMakeup.eyes);
         }
@@ -30,9 +38,95 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
             renderLips(ctx, landmarks, activeMakeup.lips);
         }
 
-    }, [landmarks, activeMakeup, videoRef]);
+    }, [landmarks, activeMakeup, videoRef, beautySettings]);
 
     // --- RENDER FUNCTIONS ---
+
+    const renderSkinSmoothing = (ctx, mesh, video, intensity) => {
+        if (!mesh) return;
+        const indices = FACE_MESH_INDICES.face; // Use face oval or similar large area
+
+        // Create a temporary canvas for the blur mask
+        // Note: Creating canvas every frame is expensive in React, 
+        // ideally this should be a ref, but for MVP implementation:
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = ctx.canvas.width;
+        tempCanvas.height = ctx.canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        // Draw Skin Mask (Face Outline - Eyes - Mouth)
+        tempCtx.beginPath();
+        const facePath = getPoints(mesh, FACE_MESH_INDICES.faceOval);
+        if (facePath.length > 0) {
+            tempCtx.moveTo(facePath[0].x, facePath[0].y);
+            for (let i = 1; i < facePath.length; i++) tempCtx.lineTo(facePath[i].x, facePath[i].y);
+            tempCtx.closePath();
+        }
+        tempCtx.fillStyle = '#FFFFFF';
+        tempCtx.fill();
+
+        // Cut out eyes and mouth from the mask
+        tempCtx.globalCompositeOperation = 'destination-out';
+
+        // Eyes
+        [FACE_MESH_INDICES.eyes.leftEye, FACE_MESH_INDICES.eyes.rightEye].forEach(eyeIdx => {
+            const eye = getPoints(mesh, eyeIdx);
+            tempCtx.beginPath();
+            if (eye.length > 0) {
+                tempCtx.moveTo(eye[0].x, eye[0].y);
+                for (let i = 1; i < eye.length; i++) tempCtx.lineTo(eye[i].x, eye[i].y);
+                tempCtx.closePath();
+                tempCtx.fill();
+            }
+        });
+
+        // Mouth
+        const mouth = getPoints(mesh, FACE_MESH_INDICES.lips.inner);
+        tempCtx.beginPath();
+        if (mouth.length > 0) {
+            tempCtx.moveTo(mouth[0].x, mouth[0].y);
+            for (let i = 1; i < mouth.length; i++) tempCtx.lineTo(mouth[i].x, mouth[i].y);
+            tempCtx.closePath();
+            tempCtx.fill(); // Cut out mouth
+        }
+
+        // Reset Ops for drawing video
+        tempCtx.globalCompositeOperation = 'source-in';
+        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Apply Blur
+        // Since context filter applies to drawing, we need to draw *this* canvas back to itself or main?
+        // Actually, standard canvas 'filter' property is supported in most modern browsers.
+        // But blurring the *whole* mask content is what we want.
+
+        ctx.save();
+        ctx.globalAlpha = intensity / 100; // opacity based on smoothing level (0-1)
+        ctx.filter = `blur(${intensity / 5}px)`; // Max blur ~20px
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.filter = 'none';
+        ctx.restore();
+    };
+
+    const renderFoundation = (ctx, mesh, style) => {
+        // Similar to smoothing but applies color
+        if (!mesh) return;
+        const points = getPoints(mesh, FACE_MESH_INDICES.faceOval);
+        if (points.length === 0) return;
+
+        ctx.save();
+        ctx.globalAlpha = style.opacity || 0.2;
+        ctx.globalCompositeOperation = 'multiply'; // or 'hard-light'
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+        ctx.closePath();
+
+        ctx.fillStyle = style.color;
+        ctx.filter = 'blur(30px)'; // Soft edges
+        ctx.fill();
+        ctx.restore();
+    };
 
     const renderLips = (ctx, mesh, style) => {
         if (!mesh) return;
