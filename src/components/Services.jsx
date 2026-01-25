@@ -9,6 +9,7 @@ const services = [
         price: "৳4,000+",
         icon: Scissors,
         color: "from-pink-500 to-rose-500",
+        image: "/assets/services/hair.png",
         description: "Expert cuts, coloring, and styling tailored to your unique look."
     },
     {
@@ -17,6 +18,7 @@ const services = [
         price: "৳8,000+",
         icon: Sparkles,
         color: "from-purple-500 to-indigo-500",
+        image: "/assets/services/makeup.png",
         description: "Radiant looks for your special day or any occasion."
     },
     {
@@ -25,6 +27,7 @@ const services = [
         price: "৳4,500+",
         icon: Droplets,
         color: "from-blue-400 to-cyan-500",
+        image: "/assets/services/skin.png",
         description: "Rejuvenating facials and treatments for glowing skin."
     },
     {
@@ -33,6 +36,7 @@ const services = [
         price: "৳2,000+",
         icon: Palette,
         color: "from-teal-400 to-emerald-500",
+        image: "/assets/services/nails.png",
         description: "Creative designs and premium care for your hands and feet."
     },
     {
@@ -41,6 +45,7 @@ const services = [
         price: "৳800+",
         icon: Zap,
         color: "from-orange-400 to-amber-500",
+        image: "/assets/services/threading.png",
         description: "Precise hair removal for smooth, silky skin."
     },
     {
@@ -49,11 +54,12 @@ const services = [
         price: "৳6,000+",
         icon: Flower2,
         color: "from-rose-400 to-pink-600",
+        image: "/assets/services/spa.png",
         description: "Relaxing massages and body therapies to unwind."
     }
 ];
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, onBook }) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
@@ -94,22 +100,28 @@ const ServiceCard = ({ service }) => {
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative min-w-[300px] h-[450px] rounded-3xl overflow-hidden cursor-pointer group perspective-1000 snap-center mx-4"
+            className="relative min-w-[300px] h-[450px] rounded-3xl overflow-hidden cursor-pointer group perspective-1000 snap-center mx-4 border border-white/20 shadow-xl"
         >
-            {/* Background with Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-80 group-hover:opacity-100 transition-opacity duration-500`} />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
+            {/* Background Image & Overlay */}
+            <div className="absolute inset-0">
+                <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+            </div>
 
             {/* Content */}
             <div className="absolute inset-0 p-8 flex flex-col justify-between z-10 transform-style-3d">
                 <div className="transform translate-z-20">
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-glow border border-white/10 group-hover:scale-110 transition-transform duration-300">
                         <Icon className="text-white w-8 h-8 group-hover:animate-pulse" />
                     </div>
-                    <h3 className="text-3xl font-serif font-bold text-white mb-2 leading-tight">
+                    <h3 className="text-3xl font-serif font-bold text-white mb-2 leading-tight drop-shadow-md">
                         {service.title}
                     </h3>
-                    <p className="text-white/80 text-sm font-light">
+                    <p className="text-white/80 text-sm font-light leading-relaxed">
                         {service.description}
                     </p>
                 </div>
@@ -117,27 +129,30 @@ const ServiceCard = ({ service }) => {
                 <div className="transform translate-z-30">
                     <div className="overflow-hidden">
                         <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                            <span className="block text-4xl font-bold text-white mb-4 drop-shadow-md">
+                            <span className="block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-white mb-4 drop-shadow-sm">
                                 {service.price}
                             </span>
-                            <button className="w-full py-3 bg-white text-charcoal rounded-xl font-semibold hover:bg-white/90 transition-colors shadow-lg interactive">
-                                Book Now
+                            <button
+                                onClick={() => onBook && onBook(service.title)}
+                                className="w-full py-3 bg-white text-charcoal rounded-xl font-semibold hover:bg-gold hover:text-white transition-all shadow-lg interactive uppercase tracking-wider text-xs"
+                            >
+                                Book Appointment
                             </button>
                         </div>
                         <div className="transform group-hover:-translate-y-full transition-transform duration-500 absolute bottom-0 left-0">
-                            <span className="text-white/60 text-sm tracking-widest uppercase">Explore</span>
+                            <span className="text-white/60 text-xs tracking-[0.2em] uppercase border-b border-white/20 pb-1">Tap to Explore</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Sparkles on Hover (CSS based for simplicity in this component or could use canvas) */}
-            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+            {/* Premium Sparkle Overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-soft-light bg-gradient-to-tr from-gold/10 to-transparent"></div>
         </motion.div>
     );
 };
 
-const Services = () => {
+const Services = ({ onBook }) => {
     return (
         <section id="services" className="py-20 bg-pearl relative overflow-hidden">
             {/* Background Decorative Elements */}
@@ -162,7 +177,7 @@ const Services = () => {
             <div className="overflow-x-auto pb-12 pt-8 hide-scrollbar cursor-grab active:cursor-grabbing px-6">
                 <div className="flex space-x-8 w-max px-6">
                     {services.map((service) => (
-                        <ServiceCard key={service.id} service={service} />
+                        <ServiceCard key={service.id} service={service} onBook={onBook} />
                     ))}
                 </div>
             </div>

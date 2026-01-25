@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import SmartBooking from './SmartBooking';
 
-const Booking = () => {
+const Booking = ({ initialService }) => {
     return (
         <section className="py-24 bg-pearl relative min-h-screen flex items-center" id="booking">
             <div className="container mx-auto px-6">
@@ -44,7 +44,7 @@ const Booking = () => {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                         >
-                            <SmartBooking />
+                            <SmartBooking initialService={initialService} />
                         </motion.div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Mic, MessageCircle, Calendar, User, Clock, Loader2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const SmartBooking = () => {
+const SmartBooking = ({ initialService }) => {
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi! I'm Radiance AI. I can help you book an appointment or suggest a look. What can I do for you today?", sender: 'bot' }
     ]);
@@ -15,6 +15,18 @@ const SmartBooking = () => {
 
     const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     useEffect(scrollToBottom, [messages, isTyping]);
+
+    // Handle pre-selected service from other components
+    useEffect(() => {
+        if (initialService) {
+            setBookingState(prev => ({ ...prev, service: initialService }));
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                text: `I see you're interested in ${initialService}. A wonderful choice! When would you like to come in?`,
+                sender: 'bot'
+            }]);
+        }
+    }, [initialService]);
 
     const handleSend = (e) => {
         e.preventDefault();
