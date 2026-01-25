@@ -1,3 +1,6 @@
+import femaleWaves from '../assets/hairstyles/female_long_waves.png';
+import maleUndercut from '../assets/hairstyles/male_undercut.png';
+
 export const hairstyles = [
     {
         id: "female_long_waves",
@@ -6,7 +9,7 @@ export const hairstyles = [
         faceShapes: ["oval", "heart", "square"],
         texture: "wavy",
         length: "long",
-        image: "/assets/hairstyles/female_long_waves.png", // specific overlay assets would be needed
+        image: femaleWaves,
         tags: ["casual", "trendy", "voluminous"]
     },
     {
@@ -16,6 +19,7 @@ export const hairstyles = [
         faceShapes: ["oval", "heart"],
         texture: "straight",
         length: "short",
+        image: femaleWaves, // Fallback for demo
         tags: ["professional", "chic"]
     },
     {
@@ -25,6 +29,7 @@ export const hairstyles = [
         faceShapes: ["square", "diamond", "oval"],
         texture: "curly",
         length: "medium",
+        image: femaleWaves, // Fallback for demo
         tags: ["glam", "volume"]
     },
     {
@@ -34,6 +39,7 @@ export const hairstyles = [
         faceShapes: ["oval", "oblong"],
         texture: "straight",
         length: "long",
+        image: femaleWaves, // Fallback for demo
         tags: ["cute", "youthful"]
     },
     {
@@ -43,6 +49,7 @@ export const hairstyles = [
         faceShapes: ["round", "oval", "heart", "square", "diamond", "oblong"],
         texture: "straight",
         length: "updo",
+        image: femaleWaves, // Fallback for demo
         tags: ["wedding", "traditional", "elegant"]
     },
     {
@@ -52,6 +59,7 @@ export const hairstyles = [
         faceShapes: ["square", "oval", "diamond"],
         texture: "straight",
         length: "short",
+        image: maleUndercut,
         tags: ["trendy", "sharp"]
     },
     {
@@ -61,6 +69,7 @@ export const hairstyles = [
         faceShapes: ["round", "oval", "square"],
         texture: "wavy",
         length: "medium",
+        image: maleUndercut, // Fallback for demo
         tags: ["vintage", "bold"]
     },
     {
@@ -70,6 +79,7 @@ export const hairstyles = [
         faceShapes: ["square", "oval"],
         texture: "straight",
         length: "short",
+        image: maleUndercut, // Fallback for demo
         tags: ["clean", "low-maintenance"]
     }
 ];

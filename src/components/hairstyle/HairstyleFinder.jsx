@@ -5,6 +5,7 @@ import { initFaceDetection, detectFaceLandmarks, calculateFaceShape, guessGender
 import { hairstyles, hairColors } from '../../data/hairstyles';
 import GlassCard from '../ui/GlassCard';
 import PinkButton from '../ui/PinkButton';
+import HairOverlay from './HairOverlay';
 
 const HairstyleFinder = () => {
     const [mode, setMode] = useState('upload'); // 'camera', 'upload'
@@ -186,76 +187,25 @@ const HairstyleFinder = () => {
                         )}
 
                         {imageSrc && (
-                            <div className="relative w-full rounded-2xl overflow-hidden" ref={containerRef}>
-                                <img src={imageSrc} alt="User" className="w-full h-auto object-contain max-h-[600px]" />
+                            <div className="relative w-full rounded-2xl overflow-hidden touch-none" ref={containerRef}>
+                                <img src={imageSrc} alt="User" className="w-full h-auto object-contain max-h-[600px] select-none" draggable={false} />
 
                                 {/* Hairstyle Overlay */}
                                 <AnimatePresence>
                                     {selectedStyle && analysis && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 0.95, scale: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="absolute pointer-events-none z-20"
-                                            style={{
-                                                // Dynamic positioning relative to the IMAGE container
-                                                // We must translate 'analysis.box' (which is in original image coords) to displayed image coords.
-                                                // Requires calculating scaling factor.
-                                                // Assuming img fits width:
-                                                top: '0',
-                                                left: '0',
-                                                width: '100%',
-                                                height: '100%',
-                                                // The image we overlay should be positioned using percentage relative to the face box?
-                                                // Actually, simpler to just put a div at the face box location.
-                                            }}
-                                        >
-                                            {(() => {
-                                                // Calculate rendered scaling
-                                                // This is checking the rendered size vs original size
-                                                // Ideally we use a helper, but here we can try a CSS Custom Property approach or inline calculation if we had refs.
-                                                // For now, let's use a simpler trick: Top of div = face top.
-                                                // The box is { xMin, yMin, width, height }
-                                                // We need to render the wig image such that it fits.
-                                                // Let's assume the wig image is a square centered on the face? No.
-
-                                                // Percentage based positioning for responsiveness (assuming image is object-contain)
-                                                // top = (box.yMin / originalHeight) * 100 %
-                                                const topPct = (analysis.box.yMin / analysis.originalHeight) * 100;
-                                                const leftPct = (analysis.box.xMin / analysis.originalWidth) * 100;
-                                                const wPct = (analysis.box.width / analysis.originalWidth) * 100;
-                                                const hPct = (analysis.box.height / analysis.originalHeight) * 100;
-
-                                                // Wig needs to be slightly larger than face width and positioned higher
-                                                const wigWidth = wPct * 2.0;
-                                                const wigLeft = leftPct - (wPct * 0.5);
-                                                const wigTop = topPct - (hPct * 0.6); // Higher up
-                                                const wigHeight = hPct * 2.5;
-
-                                                return (
-                                                    <div
-                                                        style={{
-                                                            position: 'absolute',
-                                                            top: `${wigTop}%`,
-                                                            left: `${wigLeft}%`,
-                                                            width: `${wigWidth}%`,
-                                                            height: `${wigHeight}%`,
-                                                            backgroundImage: `url(${selectedStyle.image})`,
-                                                            backgroundSize: 'contain',
-                                                            backgroundRepeat: 'no-repeat',
-                                                            backgroundPosition: 'top center',
-                                                            filter: selectedColor ? `sepia(1) hue-rotate(${parseInt(selectedColor.hex.slice(1), 16) % 360}deg) saturate(1.5)` : 'none'
-                                                        }}
-                                                    />
-                                                );
-                                            })()}
-                                        </motion.div>
+                                        <HairOverlay
+                                            style={selectedStyle}
+                                            color={selectedColor}
+                                            analysis={analysis}
+                                            containerWidth={containerRef.current?.offsetWidth}
+                                            containerHeight={containerRef.current?.offsetHeight}
+                                        />
                                     )}
                                 </AnimatePresence>
 
                                 <button
                                     onClick={() => { setImageSrc(null); setMode('upload'); setAnalysis(null); }}
-                                    className="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors backdrop-blur-md"
+                                    className="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors backdrop-blur-md z-30"
                                 >
                                     <X size={20} />
                                 </button>
