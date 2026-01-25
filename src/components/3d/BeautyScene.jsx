@@ -1,122 +1,51 @@
-import { useRef, useMemo, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Float, Text3D, Center, Sparkles, GradientTexture, AccumulativeShadows, RandomizedLight } from '@react-three/drei';
-import * as THREE from 'three';
-
-const FloatingLipstick = (props) => {
-    return (
-        <Float speed={2} rotationIntensity={1} floatIntensity={1} {...props}>
-            <group>
-                {/* Case */}
-                <mesh position={[0, -0.5, 0]}>
-                    <boxGeometry args={[0.5, 1.5, 0.5]} />
-                    <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.2} />
-                </mesh>
-                {/* Gold Rim */}
-                <mesh position={[0, 0.3, 0]}>
-                    <cylinderGeometry args={[0.26, 0.26, 0.1, 32]} />
-                    <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.1} />
-                </mesh>
-                {/* Stick */}
-                <mesh position={[0, 0.8, 0]}>
-                    <cylinderGeometry args={[0.2, 0.25, 0.8, 32]} />
-                    <meshStandardMaterial color="#D60036" roughness={0.3} />
-                </mesh>
-                {/* Tip */}
-                <mesh position={[0, 1.25, 0]} rotation={[Math.PI / 4, 0, 0]}>
-                    <cylinderGeometry args={[0.2, 0.2, 0.2, 32]} />
-                    <meshStandardMaterial color="#D60036" roughness={0.3} />
-                </mesh>
-            </group>
-        </Float>
-    );
-};
-
-const FloatingCompact = (props) => {
-    return (
-        <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.8} {...props}>
-            <group rotation={[Math.PI / 3, 0, 0]}>
-                {/* Base */}
-                <mesh>
-                    <cylinderGeometry args={[0.8, 0.8, 0.1, 64]} />
-                    <meshStandardMaterial color="#FFC0CB" metalness={0.3} roughness={0.2} />
-                </mesh>
-                {/* Powder */}
-                <mesh position={[0, 0.06, 0]}>
-                    <cylinderGeometry args={[0.7, 0.7, 0.05, 64]} />
-                    <meshStandardMaterial color="#F4E4D7" roughness={1} />
-                </mesh>
-                {/* Mirror Lid (Open) */}
-                <group position={[0, 0, -0.8]} rotation={[-Math.PI / 1.5, 0, 0]}>
-                    <mesh position={[0, 0.4, 0]}>
-                        <cylinderGeometry args={[0.8, 0.8, 0.1, 64]} />
-                        <meshStandardMaterial color="#FFC0CB" metalness={0.3} roughness={0.2} />
-                    </mesh>
-                    <mesh position={[0, 0.4, 0.06]}>
-                        <cylinderGeometry args={[0.7, 0.7, 0.02, 64]} />
-                        <meshStandardMaterial color="white" metalness={1} roughness={0} />
-                    </mesh>
-                </group>
-            </group>
-        </Float>
-    );
-};
+import { Environment, Float, Sparkles, ContactShadows } from '@react-three/drei';
+import { EffectComposer, Bloom, DepthOfField, Vignette } from '@react-three/postprocessing';
+import { Lipstick, Brush, Pearl, Compact } from './BeautyItems';
 
 const BeautyScene = () => {
-    // Standard font URL (hosted by three/drei or similar CDN usually required for Text3D)
-    // We will use a standard google font JSON if available or fallback to a loader.
-    // DREI Text3D requires a typeface.json. I will assume using one from a public CDN if needed or local.
-    // For safety, I'll use a simpler Text abstraction or just Shapes if font fails.
-    // Actually, I can use @react-three/drei's Text which uses woff/ttf.
-
     return (
-        <group>
-            <ambientLight intensity={0.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-            <pointLight position={[-10, -10, -10]} intensity={0.5} color="#FFC0CB" />
+        <>
+            {/* Atmosphere */}
+            <color attach="background" args={['#FFF9F5']} />
+            <fog attach="fog" args={['#FFF9F5', 8, 25]} />
 
-            {/* Floating Products */}
-            <FloatingLipstick position={[-3, 0, -2]} rotation={[0, 0.5, 0]} />
-            <FloatingLipstick position={[3.5, 2, -4]} rotation={[0.5, 1, 0]} />
+            {/* Lighting */}
+            <Environment preset="city" />
+            <ambientLight intensity={0.8} />
+            <spotLight position={[10, 10, 10]} angle={0.5} penumbra={1} intensity={2} castShadow color="#ffdde1" />
+            <pointLight position={[-10, -5, -10]} intensity={1} color="#B76E79" />
 
-            <FloatingCompact position={[2.5, -1.5, 0]} />
-            <FloatingCompact position={[-2.5, 2.5, -3]} />
+            {/* Floating Objects */}
+            <group position={[0, 0, 0]}>
+                <Float speed={2} rotationIntensity={0.8} floatIntensity={1} floatingRange={[-0.5, 0.5]}>
+                    <Lipstick position={[-2.2, 0.5, 0]} rotation={[0.4, 0.5, -0.2]} scale={1.8} />
+                    <Brush position={[2.8, -0.5, -1]} rotation={[-0.2, -0.4, 0.6]} scale={1.8} />
+                    <Compact position={[0, -1.8, 0.5]} rotation={[0.2, -0.3, 0]} scale={1.5} />
+                </Float>
 
-            {/* Central Logo Area - Since 3D Text needs a font file, using a billboard graphic or specialized mesh is safer 
-                without external assets. I'll stick to a stylized Torus or abstract shape that represents "Radiance" 
-                with the text DOM overlay handling the actual reading. 
-            */}
+                {/* Floating Pearls Background */}
+                <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.5} floatingRange={[-1, 1]}>
+                    <Pearl position={[-1.5, 2.5, -2]} scale={0.7} />
+                    <Pearl position={[3.5, 1.5, -3]} scale={1.0} />
+                    <Pearl position={[-3.5, -1.5, 0]} scale={0.9} />
+                    <Pearl position={[1.5, -2.5, -2]} scale={0.5} />
+                    <Pearl position={[0, 3, -4]} scale={1.2} />
+                </Float>
+            </group>
 
-            {/* Soft Particles */}
-            <Sparkles
-                count={150}
-                scale={10}
-                size={4}
-                speed={0.4}
-                opacity={0.6}
-                color="#FFD700"
-            />
-            <Sparkles
-                count={100}
-                scale={12}
-                size={2}
-                speed={0.2}
-                opacity={0.4}
-                color="#FFC0CB"
-            />
+            {/* Ground Shadows */}
+            <ContactShadows resolution={1024} scale={20} blur={2} opacity={0.3} far={10} color="#63383f" />
 
-            {/* Background Gradient Plane */}
-            <mesh position={[0, 0, -10]} scale={[30, 20, 1]}>
-                <planeGeometry />
-                <meshBasicMaterial>
-                    <GradientTexture
-                        stops={[0, 0.5, 1]} // As many stops as you want
-                        colors={['#F9F9F9', '#FFEFF4', '#E6E6FA']} // White -> Soft Pink -> Lavender
-                        size={1024} // Width of the texture (res)
-                    />
-                </meshBasicMaterial>
-            </mesh>
-        </group>
+            {/* Particles */}
+            <Sparkles count={80} scale={12} size={6} speed={0.4} opacity={0.6} color="#D4AF37" noise={0.5} />
+
+            {/* Post Processing */}
+            <EffectComposer disableNormalPass>
+                <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={3} height={480} />
+                <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.9} height={300} intensity={0.8} radius={0.6} />
+                <Vignette eskil={false} offset={0.1} darkness={0.3} />
+            </EffectComposer>
+        </>
     );
 };
 

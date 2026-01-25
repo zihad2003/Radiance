@@ -1,25 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@200;300;400;500;600&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
+@theme {
   --color-pearl: #FFF9F5;
   --color-charcoal: #1A1A1D;
-  --color-primary: #B76E79; /* Soft Rose */
-  --color-secondary: #F4E4D7; /* Champagne */
+  --color-primary: #B76E79;
+  /* Soft Rose */
+  --color-secondary: #F4E4D7;
+  /* Champagne */
   --color-gold: #D4AF37;
   --color-plum: #4A1942;
-  
-  font-family: 'Poppins', sans-serif;
+  --color-rose-50: #FFF0F5;
+
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Poppins', sans-serif;
+  --font-script: 'Great Vibes', cursive;
+}
+
+/* 
+  Re-declare critical variables in :root for external JS/Canvas usage 
+  that might be using getComputedStyle(document.body).getPropertyValue('--color-primary')
+*/
+:root {
+  --color-primary: #B76E79;
+  --color-pearl: #FFF9F5;
+  --color-charcoal: #1A1A1D;
+  --color-gold: #D4AF37;
 }
 
 body {
   background-color: var(--color-pearl);
   color: var(--color-charcoal);
   overflow-x: hidden;
-  cursor: none; /* Custom cursor takes over */
+  cursor: none;
+  font-family: var(--font-sans);
 }
 
 /* Custom Cursor */
@@ -33,11 +46,13 @@ body {
   z-index: 9999;
   pointer-events: none;
 }
+
 .cursor-dot {
   width: 8px;
   height: 8px;
   background-color: var(--color-primary);
 }
+
 .cursor-outline {
   width: 40px;
   height: 40px;
@@ -45,72 +60,49 @@ body {
   transition: width 0.2s, height 0.2s, background-color 0.2s;
 }
 
-/* Typography Utilities */
-.font-serif {
-  font-family: 'Playfair Display', serif;
-}
-.font-sans {
-  font-family: 'Poppins', sans-serif;
-}
-.font-script {
-  font-family: 'Great Vibes', cursive;
-}
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
 
-/* Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.glass-card {
+  .glass-card {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 8px 32px 0 rgba(183, 110, 121, 0.15);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+  }
 }
 
-/* Utilities */
-.text-gold {
-    color: var(--color-gold);
-}
-.bg-pearl {
-    background-color: var(--color-pearl);
-}
-.text-charcoal {
-    color: var(--color-charcoal);
-}
-.text-primary {
-    color: var(--color-primary);
-}
-.bg-primary {
-    background-color: var(--color-primary);
-}
-.border-primary {
-    border-color: var(--color-primary);
-}
-
-/* Hide Scrollbar */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Animations */
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
-    animation: float 6s ease-in-out infinite;
-}
-
-.gold-glow {
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+  animation: float 6s ease-in-out infinite;
 }

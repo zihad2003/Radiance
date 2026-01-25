@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, CheckCircle } from 'lucide-react';
-import SmartBooking from './SmartBooking'; // Import the new component
+import { motion } from 'framer-motion';
+import { Clock } from 'lucide-react';
+import SmartBooking from './SmartBooking';
 
 const Booking = () => {
     return (
-        <section className="py-24 bg-pearl relative min-h-screen flex items-center">
+        <section className="py-24 bg-pearl relative min-h-screen flex items-center" id="booking">
             <div className="container mx-auto px-6">
                 <div className="flex flex-col lg:flex-row gap-16 items-center">
                     {/* Left: Info */}

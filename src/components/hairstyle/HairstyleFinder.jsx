@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, RefreshCw, X, Check, Share2, Download } from 'lucide-react';
+import { Camera, Upload, RefreshCw, X, Check, Share2, Download, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { initFaceDetection, detectFaceLandmarks, calculateFaceShape, guessGender } from '../../utils/faceDetection';
 import { hairstyles, hairColors } from '../../data/hairstyles';
+import GlassCard from '../ui/GlassCard';
+import PinkButton from '../ui/PinkButton';
 
 const HairstyleFinder = () => {
     const [mode, setMode] = useState('upload'); // 'camera', 'upload'
@@ -15,6 +17,7 @@ const HairstyleFinder = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const fileInputRef = useRef(null);
+    const containerRef = useRef(null); // For overlay positioning
 
     // AI Models
     const [detector, setDetector] = useState(null);
@@ -34,6 +37,7 @@ const HairstyleFinder = () => {
             }
         } catch (e) {
             console.error(e);
+            alert("Unable to access camera. Please check permissions.");
         }
     };
 
@@ -43,23 +47,35 @@ const HairstyleFinder = () => {
         const canvas = canvasRef.current;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        // Flip if needed? Video is usually mirrored in CSS but drawn normally on canvas. 
+        // We should draw it normally.
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+
         const img = canvas.toDataURL('image/png');
         setImageSrc(img);
         setMode('preview');
-        analyzeImage(video); // Pass video element which has dimensions
+
+        // Stop stream
+        const stream = video.srcObject;
+        if (stream) stream.getTracks().forEach(t => t.stop());
+
+        // Analyze
+        const imageElement = new Image();
+        imageElement.src = img;
+        imageElement.onload = () => analyzeImage(imageElement);
     };
 
     const handleUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                setImageSrc(e.target.result);
+            reader.onload = (ev) => {
+                setImageSrc(ev.target.result);
                 setMode('preview');
-                // We need to create an image element to analyze it
                 const img = new Image();
-                img.src = e.target.result;
+                img.src = ev.target.result;
                 img.onload = () => analyzeImage(img);
             };
             reader.readAsDataURL(file);
@@ -69,25 +85,37 @@ const HairstyleFinder = () => {
     const analyzeImage = async (imageElement) => {
         if (!detector) return;
         setIsAnalyzing(true);
+        setAnalysis(null);
+        setSelectedStyle(null);
 
         try {
             const faces = await detector.estimateFaces(imageElement);
             if (faces.length > 0) {
-                const keypoints = faces[0].keypoints;
+                const face = faces[0];
+                const keypoints = face.keypoints;
                 const shape = calculateFaceShape(keypoints);
-                const gender = guessGender(keypoints); // Heuristic
+                const gender = guessGender(keypoints);
 
-                // Keep track of face bounds for overlay
-                const box = faces[0].box; // {xMin, yMin, width, height}
+                // Compute Box if missing
+                let box = face.box;
+                if (!box && keypoints) {
+                    const xs = keypoints.map(k => k.x);
+                    const ys = keypoints.map(k => k.y);
+                    box = { xMin: Math.min(...xs), yMin: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+                }
 
                 setAnalysis({
                     shape,
                     gender,
                     box,
-                    keypoints
+                    keypoints,
+                    originalWidth: imageElement.width, // For scaling
+                    originalHeight: imageElement.height
                 });
             } else {
-                alert("No face detected. Please try another photo.");
+                alert("No face detected. Please try a clearer photo.");
+                setImageSrc(null);
+                setMode('upload');
             }
         } catch (err) {
             console.error(err);
@@ -102,158 +130,234 @@ const HairstyleFinder = () => {
         : [];
 
     return (
-        <section className="py-20 bg-pearl min-h-screen relative">
-            <div className="container mx-auto px-6">
+        <section className="py-24 bg-pearl min-h-screen relative font-sans overflow-hidden">
+            {/* Background blobs */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[100px] pointer-events-none" />
+
+            <div className="container mx-auto px-6 relative z-10">
                 <div className="text-center mb-12">
-                    <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-primary mb-4">AI Hair Stylist</h2>
-                    <h3 className="text-4xl md:text-5xl font-serif text-charcoal">Find Your Perfect Cut</h3>
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-2 mb-4 px-4 py-1 rounded-full bg-white/50 border border-primary/20 backdrop-blur-sm"
+                    >
+                        <Sparkles size={14} className="text-primary" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">AI Hair Stylist</span>
+                    </motion.div>
+                    <h3 className="text-5xl md:text-6xl font-script text-charcoal mb-4">Find Your Perfect Cut</h3>
+                    <p className="text-charcoal/60 max-w-lg mx-auto">Upload a photo or use your camera to get personalized hairstyle recommendations based on your face shape.</p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-12 items-start justify-center">
+                <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
 
                     {/* Main Canvas Area */}
-                    <motion.div
-                        layout
-                        className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden relative border-8 border-white"
-                    >
+                    <GlassCard className="w-full lg:w-1/2 min-h-[500px] flex items-center justify-center relative p-2 md:p-4 overflow-hidden shadow-2xl">
                         {!imageSrc && mode !== 'camera' && (
-                            <div className="h-[500px] flex flex-col items-center justify-center bg-gray-50 border-dashed border-2 border-gray-200 m-4 rounded-xl">
-                                <button onClick={startCamera} className="mb-4 bg-charcoal text-white px-6 py-3 rounded-full flex items-center space-x-2 hover:scale-105 transition-transform">
-                                    <Camera size={20} /> <span>Open Camera</span>
-                                </button>
-                                <span className="text-gray-400 text-sm mb-4">- OR -</span>
-                                <button onClick={() => fileInputRef.current.click()} className="text-primary font-bold hover:underline">
-                                    Upload Photo
-                                </button>
+                            <div className="flex flex-col items-center justify-center p-12 text-center w-full h-full border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
+                                <PinkButton onClick={startCamera} icon={Camera} className="mb-6 w-full max-w-[200px]">
+                                    Open Camera
+                                </PinkButton>
+                                <div className="text-xs text-charcoal/40 uppercase tracking-widest mb-6 font-bold flex items-center gap-4 w-full justify-center">
+                                    <span className="h-px bg-gray-300 w-12" /> OR <span className="h-px bg-gray-300 w-12" />
+                                </div>
                                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleUpload} />
+                                <button
+                                    onClick={() => fileInputRef.current.click()}
+                                    className="flex items-center gap-2 text-charcoal/70 hover:text-primary transition-colors font-semibold"
+                                >
+                                    <Upload size={18} /> Upload Photo
+                                </button>
                             </div>
                         )}
 
                         {mode === 'camera' && (
-                            <div className="relative h-[500px] bg-black">
+                            <div className="relative w-full h-[500px] bg-black rounded-2xl overflow-hidden">
                                 <video ref={videoRef} className="w-full h-full object-cover transform -scale-x-100" />
-                                <button onClick={capturePhoto} className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full border-4 border-gray-300 flex items-center justify-center hover:bg-gray-100">
-                                    <div className="w-12 h-12 bg-primary rounded-full z-10"></div>
-                                </button>
+                                <div className="absolute bottom-6 left-0 w-full flex justify-center">
+                                    <button
+                                        onClick={capturePhoto}
+                                        className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center bg-white/20 backdrop-blur-sm hover:scale-110 transition-transform"
+                                    >
+                                        <div className="w-12 h-12 bg-primary rounded-full" />
+                                    </button>
+                                </div>
                             </div>
                         )}
 
                         {imageSrc && (
-                            <div className="relative">
-                                <img src={imageSrc} alt="User" className="w-full h-auto" />
+                            <div className="relative w-full rounded-2xl overflow-hidden" ref={containerRef}>
+                                <img src={imageSrc} alt="User" className="w-full h-auto object-contain max-h-[600px]" />
 
                                 {/* Hairstyle Overlay */}
-                                {selectedStyle && analysis && (
-                                    <div
-                                        className="absolute pointer-events-none"
-                                        style={{
-                                            // Rough positioning logic based on face box
-                                            top: `${analysis.box.yMin - (analysis.box.height * 0.5)}px`,
-                                            left: `${analysis.box.xMin - (analysis.box.width * 0.1)}px`,
-                                            width: `${analysis.box.width * 1.2}px`,
-                                            height: `${analysis.box.height * 1.5}px`,
-                                            // This normally requires precise mapping or a 3D model. 
-                                            // Using a simple image overlay for "2D Try On" proof of concept.
-                                            backgroundImage: `url(${selectedStyle.image})`, // In real app, these are transparent PNGs of hair
-                                            backgroundSize: 'contain',
-                                            backgroundRepeat: 'no-repeat',
-                                            backgroundPosition: 'center top',
-                                            filter: selectedColor ? `sepia(1) hue-rotate(${parseInt(selectedColor.hex.slice(1), 16) % 360}deg) saturate(2)` : 'none', // Simple tint hack
-                                            opacity: 0.9
-                                        }}
-                                    ></div>
-                                )}
+                                <AnimatePresence>
+                                    {selectedStyle && analysis && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 0.95, scale: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="absolute pointer-events-none z-20"
+                                            style={{
+                                                // Dynamic positioning relative to the IMAGE container
+                                                // We must translate 'analysis.box' (which is in original image coords) to displayed image coords.
+                                                // Requires calculating scaling factor.
+                                                // Assuming img fits width:
+                                                top: '0',
+                                                left: '0',
+                                                width: '100%',
+                                                height: '100%',
+                                                // The image we overlay should be positioned using percentage relative to the face box?
+                                                // Actually, simpler to just put a div at the face box location.
+                                            }}
+                                        >
+                                            {(() => {
+                                                // Calculate rendered scaling
+                                                // This is checking the rendered size vs original size
+                                                // Ideally we use a helper, but here we can try a CSS Custom Property approach or inline calculation if we had refs.
+                                                // For now, let's use a simpler trick: Top of div = face top.
+                                                // The box is { xMin, yMin, width, height }
+                                                // We need to render the wig image such that it fits.
+                                                // Let's assume the wig image is a square centered on the face? No.
+
+                                                // Percentage based positioning for responsiveness (assuming image is object-contain)
+                                                // top = (box.yMin / originalHeight) * 100 %
+                                                const topPct = (analysis.box.yMin / analysis.originalHeight) * 100;
+                                                const leftPct = (analysis.box.xMin / analysis.originalWidth) * 100;
+                                                const wPct = (analysis.box.width / analysis.originalWidth) * 100;
+                                                const hPct = (analysis.box.height / analysis.originalHeight) * 100;
+
+                                                // Wig needs to be slightly larger than face width and positioned higher
+                                                const wigWidth = wPct * 2.0;
+                                                const wigLeft = leftPct - (wPct * 0.5);
+                                                const wigTop = topPct - (hPct * 0.6); // Higher up
+                                                const wigHeight = hPct * 2.5;
+
+                                                return (
+                                                    <div
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: `${wigTop}%`,
+                                                            left: `${wigLeft}%`,
+                                                            width: `${wigWidth}%`,
+                                                            height: `${wigHeight}%`,
+                                                            backgroundImage: `url(${selectedStyle.image})`,
+                                                            backgroundSize: 'contain',
+                                                            backgroundRepeat: 'no-repeat',
+                                                            backgroundPosition: 'top center',
+                                                            filter: selectedColor ? `sepia(1) hue-rotate(${parseInt(selectedColor.hex.slice(1), 16) % 360}deg) saturate(1.5)` : 'none'
+                                                        }}
+                                                    />
+                                                );
+                                            })()}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 <button
                                     onClick={() => { setImageSrc(null); setMode('upload'); setAnalysis(null); }}
-                                    className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-red-500 transition-colors"
+                                    className="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors backdrop-blur-md"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
                         )}
+
                         <canvas ref={canvasRef} className="hidden" />
-                    </motion.div>
+                    </GlassCard>
 
                     {/* Controls & Results */}
-                    <div className="w-full max-w-md">
+                    <div className="w-full lg:w-1/3 space-y-6">
                         {isAnalyzing ? (
-                            <div className="bg-white p-8 rounded-2xl shadow-lg flex items-center justify-center space-x-4">
-                                <RefreshCw className="animate-spin text-primary" />
-                                <span className="font-serif text-lg">Analyzing Geometry...</span>
-                            </div>
+                            <GlassCard className="flex flex-col items-center justify-center h-64">
+                                <RefreshCw className="animate-spin text-primary w-10 h-10 mb-4" />
+                                <span className="font-serif text-lg text-charcoal">Analyzing Facial Geometry...</span>
+                                <span className="text-xs text-charcoal/50 mt-2">Mapping 468 landmarks</span>
+                            </GlassCard>
                         ) : analysis ? (
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
                                 className="space-y-6"
                             >
                                 {/* Analysis Card */}
-                                <div className="bg-white p-6 rounded-2xl shadow-md border border-primary/10">
-                                    <h4 className="font-bold text-gray-500 text-xs uppercase tracking-widest mb-4">Face Analysis</h4>
-                                    <div className="flex justify-between items-center">
+                                <GlassCard>
+                                    <h4 className="font-bold text-primary text-[10px] uppercase tracking-widest mb-4">You have a</h4>
+                                    <div className="flex justify-between items-center mb-4">
                                         <div>
-                                            <p className="text-3xl font-serif text-charcoal capitalize">{analysis.shape}</p>
-                                            <p className="text-sm text-primary capitalize">{analysis.gender}</p>
-                                        </div>
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                                            {/* Icon representing shape could go here */}
-                                            <span className="text-2xl">👩</span>
+                                            <p className="text-4xl font-serif text-charcoal capitalize">{analysis.shape}</p>
+                                            <p className="text-sm text-charcoal/60 uppercase tracking-widest mt-1">Face Shape</p>
                                         </div>
                                     </div>
-                                    <div className="mt-4 pt-4 border-t border-gray-100">
-                                        <p className="text-sm text-gray-600">
-                                            For a <strong>{analysis.shape}</strong> face, we recommend styles that
-                                            {analysis.shape === 'round' ? ' lengthen the face and add angles.' :
-                                                analysis.shape === 'square' ? ' soften the jawline.' :
-                                                    analysis.shape === 'oval' ? ' maintain your balanced proportions.' :
-                                                        ' balance your features.'}
-                                        </p>
-                                    </div>
-                                </div>
+                                    <p className="text-sm text-charcoal/80 leading-relaxed border-t border-primary/20 pt-4">
+                                        For a <strong>{analysis.shape}</strong> face, we recommend styles that
+                                        {analysis.shape === 'round' ? ' lengthen the face and add angles to define structure.' :
+                                            analysis.shape === 'square' ? ' soften the jawline and add height at the crown.' :
+                                                analysis.shape === 'oval' ? ' maintain your naturally balanced proportions.' :
+                                                    analysis.shape === 'heart' ? ' balance the forehead width and adding volume at the chin.' :
+                                                        ' balance your unique features.'}
+                                    </p>
+                                </GlassCard>
 
                                 {/* Style Selector */}
                                 <div>
-                                    <h5 className="font-serif text-xl mb-4 text-charcoal">Recommended Styles</h5>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {recommendations.slice(0, 4).map(style => (
+                                    <h5 className="font-serif text-xl mb-4 text-charcoal px-2">Recommended Styles</h5>
+                                    <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto hide-scrollbar">
+                                        {recommendations.length > 0 ? recommendations.map(style => (
                                             <div
                                                 key={style.id}
                                                 onClick={() => setSelectedStyle(style)}
-                                                className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedStyle?.id === style.id ? 'border-primary bg-primary/5' : 'border-transparent bg-white hover:border-gray-200'}`}
+                                                className={`p-3 rounded-xl border transition-all cursor-pointer bg-white group
+                                                    ${selectedStyle?.id === style.id ? 'border-primary ring-1 ring-primary shadow-lg' : 'border-transparent hover:border-gray-200 shadow-sm'}
+                                                `}
                                             >
-                                                <div className="aspect-square bg-gray-200 rounded-lg mb-2 overflow-hidden">
-                                                    {/* In a real app, actual hairstyle thumbnails */}
-                                                    <img src={`https://placehold.co/150x150?text=${style.name.split(' ')[0]}`} alt={style.name} className="w-full h-full object-cover" />
+                                                <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                                                    <img
+                                                        src={`https://placehold.co/150x150/F4E4D7/4A1942?text=${style.name.split(' ')[0]}`}
+                                                        alt={style.name}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
                                                 </div>
-                                                <p className="font-bold text-sm text-charcoal">{style.name}</p>
-                                                <p className="text-xs text-gray-500 capitalize">{style.length}</p>
+                                                <p className="font-bold text-xs text-charcoal">{style.name}</p>
+                                                <p className="text-[10px] text-charcoal/50 capitalize mt-1">{style.length} • {style.texture}</p>
                                             </div>
-                                        ))}
+                                        )) : (
+                                            <p className="col-span-2 text-sm text-gray-400 italic">No specific recommendations found.</p>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Color Picker */}
-                                <div>
-                                    <h5 className="font-serif text-xl mb-4 text-charcoal">Try a Color</h5>
-                                    <div className="flex flex-wrap gap-2">
+                                <GlassCard>
+                                    <h5 className="font-serif text-lg mb-4 text-charcoal">Virtual Color</h5>
+                                    <div className="flex flex-wrap gap-3">
+                                        <button
+                                            onClick={() => setSelectedColor(null)}
+                                            className={`w-8 h-8 rounded-full border border-gray-200 bg-transparent flex items-center justify-center text-[10px] text-gray-500 hover:bg-gray-50
+                                                ${!selectedColor ? 'ring-2 ring-primary border-transparent' : ''}
+                                            `}
+                                        >
+                                            Off
+                                        </button>
                                         {hairColors.map(c => (
                                             <button
                                                 key={c.name}
                                                 onClick={() => setSelectedColor(c)}
-                                                className={`w-8 h-8 rounded-full border-2 ${selectedColor?.name === c.name ? 'border-primary scale-110' : 'border-transparent hover:scale-105'} transition-all shadow-sm`}
+                                                className={`w-8 h-8 rounded-full border border-black/5 shadow-sm transition-all hover:scale-110
+                                                    ${selectedColor?.name === c.name ? 'ring-2 ring-primary ring-offset-2 scale-110' : ''}
+                                                `}
                                                 style={{ backgroundColor: c.hex }}
                                                 title={c.name}
                                             />
                                         ))}
                                     </div>
-                                </div>
+                                </GlassCard>
 
                             </motion.div>
                         ) : (
-                            <div className="bg-white p-8 rounded-2xl shadow-md text-center">
-                                <p className="text-gray-500">Upload a photo to unlock your personalized AI hair consultation.</p>
-                            </div>
+                            <GlassCard className="text-center py-12 border-dashed border-2 border-primary/20 !shadow-none !bg-white/40">
+                                <Sparkles className="w-8 h-8 text-primary/40 mx-auto mb-4" />
+                                <p className="text-charcoal/60 text-sm max-w-xs mx-auto">Upload a photo to unlock your personalized AI hair consultation & shape analysis.</p>
+                            </GlassCard>
                         )}
                     </div>
 

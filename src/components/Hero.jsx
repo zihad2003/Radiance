@@ -52,6 +52,7 @@ const Hero = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{ duration: 0.5, delay: 1 }}
+                            onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}
                             className="px-10 py-4 bg-gradient-to-r from-[#B76E79] to-[#D68C9A] text-white rounded-full text-lg font-semibold tracking-widest shadow-lg hover:shadow-[#B76E79]/40 transition-shadow duration-300 interactive"
                         >
                             VIRTUAL TRY-ON
@@ -62,6 +63,7 @@ const Hero = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{ duration: 0.5, delay: 1.1 }}
+                            onClick={() => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' })}
                             className="px-10 py-4 bg-white text-[#B76E79] border-2 border-[#B76E79] rounded-full text-lg font-semibold tracking-widest shadow-md hover:bg-[#FFF0F5] transition-colors duration-300 interactive"
                         >
                             BOOK NOW
