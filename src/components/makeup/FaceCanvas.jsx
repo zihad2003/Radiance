@@ -11,7 +11,7 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const video = videoRef.current;
 
-        // Sync canvas size if needed (usually handled by CSS, but good for internal resolution)
+        // Sync canvas size
         if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -32,27 +32,29 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
 
     }, [landmarks, activeMakeup, videoRef]);
 
+    // --- RENDER FUNCTIONS ---
+
     const renderLips = (ctx, mesh, style) => {
         if (!mesh) return;
         const indices = FACE_MESH_INDICES.lips;
 
         ctx.save();
 
-        const outerPath = new Path2D();
+        // 1. Create Lip Path
+        const path = new Path2D();
         const upper = getPoints(mesh, indices.upperOuter);
         const lower = getPoints(mesh, indices.lowerOuter);
 
-        if (upper.length > 0 && lower.length > 0) {
-            outerPath.moveTo(upper[0].x, upper[0].y);
-            for (let i = 1; i < upper.length; i++) outerPath.lineTo(upper[i].x, upper[i].y);
-            // LowerOuter indices typically go Right -> Left in some maps, but here we defined them Left -> Right in faceLandmarks (standard mesh order).
-            // To close the loop: Upper ends at RightCorner. Lower Ends at RightCorner.
-            // We need to trace Lower backwards from RightCorner to LeftCorner.
-            for (let i = lower.length - 1; i >= 0; i--) outerPath.lineTo(lower[i].x, lower[i].y);
-            outerPath.closePath();
+        // Outer loop
+        if (upper.length > 0) {
+            path.moveTo(upper[0].x, upper[0].y);
+            for (let i = 1; i < upper.length; i++) path.lineTo(upper[i].x, upper[i].y);
+            // Connect to lower
+            for (let i = lower.length - 1; i >= 0; i--) path.lineTo(lower[i].x, lower[i].y);
+            path.closePath();
         }
 
-        // Inner Hole (Mouth opening)
+        // Inner hole
         const innerPath = new Path2D();
         const inner = getPoints(mesh, indices.inner);
         if (inner.length > 0) {
@@ -61,36 +63,83 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
             innerPath.closePath();
         }
 
-        const combinedPath = new Path2D();
-        combinedPath.addPath(outerPath);
-        combinedPath.addPath(innerPath);
+        // Combined Path (Outer - Inner)
+        const lipShape = new Path2D();
+        lipShape.addPath(path);
+        lipShape.addPath(innerPath);
 
-        // 1. Draw Color
+        // 2. Base Color Layer
         ctx.fillStyle = style.color;
-        ctx.globalAlpha = style.opacity || 0.6;
-        ctx.globalCompositeOperation = style.finish === 'glossy' ? 'overlay' : 'multiply';
+
+        // Adaptive Opacity based on finish
+        let baseOpacity = style.opacity || 0.6;
+        if (style.finish === 'sheer') baseOpacity *= 0.5;
+        if (style.finish === 'matte') baseOpacity = Math.min(baseOpacity + 0.1, 1.0);
+
+        ctx.globalAlpha = baseOpacity;
+
+        // Blend Modes
         if (style.finish === 'matte') ctx.globalCompositeOperation = 'multiply';
+        else if (style.finish === 'glossy') ctx.globalCompositeOperation = 'multiply'; // Base is still dark
+        else if (style.finish === 'shimmer') ctx.globalCompositeOperation = 'overlay';
+        else ctx.globalCompositeOperation = 'multiply';
 
-        // "evenodd" rule creates the hole if wound correctly, or just by geometry intersection
-        ctx.fill(combinedPath, "evenodd");
+        ctx.fill(lipShape, "evenodd");
 
-        // 2. Gloss Highlight
-        if (style.finish === 'glossy') {
-            ctx.globalCompositeOperation = 'soft-light';
-            ctx.fillStyle = '#FFFFFF';
-            ctx.globalAlpha = 0.4;
-            ctx.fill(combinedPath, "evenodd");
+        // 3. Textures & Finishes using Clipping Mask
+        ctx.save();
+        ctx.clip(lipShape, "evenodd"); // Clip all subsequent drawing to lips
 
-            // Add extra shine details?
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.filter = 'blur(2px)';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            // Draw small highlight on lower lip center?
-            // Simplified: just leave the soft-light
+        // GLOSSY HIGHLIGHTS
+        if (style.finish === 'glossy' || style.finish === 'satin') {
+            ctx.globalCompositeOperation = 'screen';
+            ctx.filter = 'blur(4px)';
+            ctx.globalAlpha = style.finish === 'glossy' ? 0.6 : 0.3;
+
+            // Highlight: Vertical gradient approximation (simulating wetness light reflection)
+            const bounds = getBounds(upper.concat(lower));
+            const grad = ctx.createLinearGradient(bounds.minX, bounds.minY, bounds.minX, bounds.maxY);
+            grad.addColorStop(0.3, 'rgba(255,255,255,0)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+            grad.addColorStop(0.7, 'rgba(255,255,255,0)');
+
+            ctx.fillStyle = grad;
+            ctx.fill(lipShape, "evenodd");
             ctx.filter = 'none';
         }
 
-        ctx.restore();
+        // METALLIC / FROST
+        if (style.finish === 'metallic' || style.texture === 'metallic') {
+            ctx.globalCompositeOperation = 'color-dodge';
+            ctx.globalAlpha = 0.4;
+            const bounds = getBounds(upper.concat(lower));
+            const grad = ctx.createRadialGradient(
+                bounds.centerX, bounds.centerY, 1,
+                bounds.centerX, bounds.centerY, bounds.width
+            );
+            grad.addColorStop(0, style.color); // Bright center
+            grad.addColorStop(1, '#000000');
+            ctx.fillStyle = grad;
+            ctx.fill(lipShape, "evenodd");
+        }
+
+        // SHIMMER / GLITTER
+        if (style.finish === 'shimmer' || style.texture === 'shimmer') {
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.5;
+            // Draw random noise
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * ctx.canvas.width;
+                const y = Math.random() * ctx.canvas.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+            }
+        }
+
+        ctx.restore(); // Remove clip
+        ctx.restore(); // Restore context
     };
 
     const renderEyes = (ctx, mesh, style) => {
@@ -98,18 +147,25 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
         const indices = FACE_MESH_INDICES.eyes;
 
         ctx.save();
+        ctx.filter = 'blur(10px)'; // Soft blend mandatory for eyes
         ctx.fillStyle = style.color;
-        ctx.globalAlpha = style.opacity || 0.3;
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.filter = 'blur(8px)'; // Heavy blur for soft eyeshadow blend
+        ctx.globalAlpha = style.opacity || 0.4;
+        ctx.globalCompositeOperation = style.finish === 'shimmer' ? 'overlay' : 'multiply';
 
-        // Left Eye
         drawPoly(ctx, mesh, indices.leftEyeshadow, true);
         ctx.fill();
-
-        // Right Eye
         drawPoly(ctx, mesh, indices.rightEyeshadow, true);
         ctx.fill();
+
+        // Eyeliner (New)
+        if (style.category === 'eyeliner') {
+            ctx.filter = 'blur(1px)';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = style.color;
+            ctx.globalAlpha = 1.0;
+            drawPoly(ctx, mesh, indices.leftEyeshadow, false); // Just stroke top line
+            ctx.stroke();
+        }
 
         ctx.restore();
     };
@@ -121,23 +177,21 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
         ctx.save();
         ctx.globalCompositeOperation = 'multiply';
         ctx.globalAlpha = style.opacity || 0.3;
-        // Blush needs to be very soft
-        ctx.filter = 'blur(20px)';
+        ctx.filter = 'blur(25px)'; // Heavy blur for natural look
 
-        // Left Blush
         drawGradientBlush(ctx, mesh, indices.left, style.color);
-        // Right Blush
         drawGradientBlush(ctx, mesh, indices.right, style.color);
 
         ctx.restore();
     };
+
+    // --- HELPERS ---
 
     const drawGradientBlush = (ctx, mesh, cheekDef, color) => {
         const center = mesh[cheekDef.center];
         if (!center) return;
 
         const perim = mesh[cheekDef.perimeter[0]];
-        // Approx radius
         const radius = Math.sqrt(Math.pow(center.x - perim.x, 2) + Math.pow(center.y - perim.y, 2)) * 1.5;
 
         ctx.beginPath();
@@ -156,12 +210,22 @@ const FaceCanvas = ({ activeMakeup, landmarks, videoRef }) => {
         if (close) ctx.closePath();
     };
 
-    return (
-        <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
-        />
-    );
+    const getBounds = (points) => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        return {
+            minX, minY, maxX, maxY,
+            width: maxX - minX,
+            height: maxY - minY,
+            centerX: (minX + maxX) / 2,
+            centerY: (minY + maxY) / 2
+        };
+    };
 };
 
 export default FaceCanvas;

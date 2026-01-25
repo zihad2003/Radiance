@@ -98,34 +98,66 @@ src/
 
 ### 🆕 Files to Create
 -   `src/data/makeupBrands.js`: Huge JSON object with nested Brand -> Category -> Product.
--   `src/components/makeup/MakeupStudio.jsx`: The main layout container for the Try-On feature.
--   `src/utils/faceLandmarks.js`: Math helpers to extract specific polygons (Lips, LeftEye, RightEye, Cheeks) from the 468 points.
--   `src/components/3d/BeautyItems.jsx`: Procedural generation of Lipstick, Compact, Brush using Three.js Primitives.
+# IMPLEMENATION PLAN - RADIANCE BEAUTY SALON UPGRADE
 
-### 📝 Files to Modify
--   `src/components/Hero.jsx`: **Major Rewrite**. Remove `LiquidOrb`. Import `BeautyScene`. Update text and layout to align with "Girly" aesthetic.
--   `src/components/VirtualTryOn.jsx`: **Refactor**. Move logic to `hooks/useMakeupRender.js`. This file becomes just the view layer.
--   `src/components/HairstyleAI.jsx`: **Upgrade**. Replace mock `setTimeout` analysis with real TensorFlow execution.
--   `src/index.css`: Update root variables for new palette (`--color-rose`, `--color-champagne`, `--color-plum`).
+## **Phase 1: Virtual Makeup Preview System (Critical Priority)**
 
-### 🗑️ Files to Remove
--   *None essentially*, but content within `Hero.jsx` and `VirtualTryOn.jsx` will be replaced entirely.
+### **Step 1: Makeup Catalog Upgrade**
+- [ ] **Data Structure Enhancement**: Update `makeupBrands.js` to include detailed metadata (ingredients, skin type, accurate hex codes, extensive finish properties).
+- [ ] **Category Expansion**: Implement 6 full categories: Lipstick, Eyeshadow, Blush, Foundation, Eyeliner, Mascara.
+- [ ] **Product Population**: Populate 100+ SKUs across international (MAC, Maybelline, Fenty) and local (Lakmé, Affaire) brands.
+
+### **Step 2: Advanced Makeup Rendering Engine**
+- [ ] **Face Mesh Refinement**: Optimize `FaceCanvas.jsx` to use all 468 MediaPipe landmarks for precise zoning.
+- [ ] **Finish Algorithms**:
+    - **Matte**: Multiply blend mode, high opacity.
+    - **Glossy**: Screen/Overlay blend mode, specular highlighting.
+    - **Sheer**: Low opacity, texture preservation.
+    - **Shimmer/Metallic**: Particle simulation or noise texture overlays.
+- [ ] **Complex Blending**: Implement skin-tone adaptive color correction.
+
+### **Step 3: Save & Export System**
+- [ ] **Look Capture**: Implement JSON state saving for "My Looks".
+- [ ] **Screenshot Generation**: Use high-res canvas capture for downloading looks.
+- [ ] **IndexedDB Integration**: Persist saved looks locally.
+- [ ] **Share Functionality**: Generate WhatsApp/Social shareable previews.
+
+### **Step 4: Preset Looks**
+- [ ] **Curate Presets**: Define 15+ looks (Wedding, Office, Party, etc.).
+- [ ] **Preset UI**: Create a "Quick Look" selector in the studio.
 
 ---
 
-## 5. Testing Strategy
+## **Phase 2: SEO & Performance (High Priority)**
 
-### Browser Testing Agent Scenarios
-1.  **Camera Permission**: Verify handling of "Allow/Deny" permissions gracefully.
-2.  **Model Loading**: Ensure loading spinners appear while TF.js models initialize (1-3 seconds).
-3.  **Brand Switch**: Verify clicking "Lakme" loads the correct red shade palette.
-4.  **Performance**: Monitor FPS stats. If `< 24fps` on low-end, auto-disable High-Res Mesh.
-5.  **Resize**: Ensure Face Canvas overlay aligns perfectly on window resize.
+### **Step 5: Technical SEO**
+- [ ] **Meta Tags**: Implement dynamic meta tags for every page.
+- [ ] **Schema Markup**: Add JSON-LD for "BeautySalon", "Product", and "Service".
+- [ ] **Sitemap & Robots**: Generate `sitemap.xml` and `robots.txt`.
 
-### Validation Benchmarks
--   **Lighting**: Makeup must look realistic in "Daylight" mode (multiply blend mode).
--   **Detection**: Gender detection must be consistent (~80% confidence).
--   **Responsiveness**: 3D Scene must not block scrolling on mobile.
+### **Step 6: Core Web Vitals**
+- [ ] **Code Splitting**: Implement `React.lazy` and `Suspense` for 3D/AI components.
+- [ ] **Asset Optimization**: Convert images to WebP, implement lazy loading.
+- [ ] **Model Management**: Optimize TensorFlow/MediaPipe loading (WASM backend).
 
 ---
-**Status**: Implementation Complete. All phases (AI Core, Hairstyle, 3D Aesthetics) have been successfully integrated and polished. Ready for production build and user testing.
+
+## **Phase 3: User Experience & Features (Medium Priority)**
+
+### **Step 7: Hairstyle Virtual Try-On**
+- [ ] **Shape Detection**: Implement face shape analysis algorithms.
+- [ ] **Hair Overlay System**: precise 2D/3D wig placement.
+- [ ] **Style Library**: Add 50+ hairstyles with color/length customization.
+
+### **Step 8: Booking & Integration**
+- [ ] **WhatsApp Booking**: Generate pre-filled booking strings based on selected services.
+- [ ] **Gamification**: Implement "Spin the Wheel" for discounts.
+
+---
+
+## **Phase 4: Analytics & Polish**
+- [ ] **Analytics**: Integrate GA4 and Heatmaps.
+- [ ] **PWA**: Enable offline support and "Add to Home Screen".
+- [ ] **Final Testing**: Cross-browser validation and mobile responsiveness check.
+
+**Status**: Phase 1 Initiated.

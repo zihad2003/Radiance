@@ -61,7 +61,15 @@ const SmartBooking = () => {
                 }]);
                 // Simulate WhatsApp Redirect
                 setTimeout(() => {
-                    const text = `Hi Radiance! I want to confirm my booking for ${bookingState.service} at ${bookingState.time}. My name is ${bookingState.name || 'valued client'}.`;
+                    const text = `Hello Radiance Salon! 👋
+
+I'd like to book an appointment:
+
+📅 Preferred Time: ${bookingState.time || '[Time]'}
+✨ Service: ${bookingState.service || 'Consultation'}
+👤 Name: ${bookingState.name || 'Valued Client'}
+
+Please confirm availability. Thank you!`;
                     window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(text)}`, '_blank');
                 }, 1500);
             }
