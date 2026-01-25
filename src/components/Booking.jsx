@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
-import SmartBooking from './SmartBooking';
+import BookingWizard from './booking/BookingWizard';
 
 const Booking = ({ initialService }) => {
     return (
@@ -44,12 +44,12 @@ const Booking = ({ initialService }) => {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                         >
-                            <SmartBooking initialService={initialService} />
+                            <BookingWizard initialService={initialService} />
                         </motion.div>
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
     );
 };
 
