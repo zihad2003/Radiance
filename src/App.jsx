@@ -1,4 +1,5 @@
 import { useState, Suspense, lazy } from 'react';
+import SmoothScroll from './components/ui/SmoothScroll';
 import CustomCursor from './components/CustomCursor';
 import Gamification from './components/Gamification';
 import Navbar from './components/Navbar';
@@ -24,26 +25,28 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
-      <CustomCursor />
-      <Gamification />
-      <Navbar />
+    <SmoothScroll>
+      <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
+        <CustomCursor />
+        <Gamification />
+        <Navbar />
 
-      <main>
-        <Hero />
-        <Services onBook={handleBookService} />
-        <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
-          <HairstyleAI />
-          <VirtualTryOn />
-        </Suspense>
-        <Gallery />
-        <Pricing />
-        <Testimonials />
-        <Booking initialService={selectedService} />
-        <Team />
-        <ContactFooter />
-      </main>
-    </div>
+        <main>
+          <Hero />
+          <Services onBook={handleBookService} />
+          <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
+            <HairstyleAI />
+            <VirtualTryOn />
+          </Suspense>
+          <Gallery />
+          <Pricing />
+          <Testimonials />
+          <Booking initialService={selectedService} />
+          <Team />
+          <ContactFooter />
+        </main>
+      </div>
+    </SmoothScroll>
   );
 }
 
