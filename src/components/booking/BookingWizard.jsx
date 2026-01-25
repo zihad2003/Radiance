@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { services, formattedPrice } from '../../data/services';
 import { stylists } from '../../data/stylists';
-import { Check, ChevronRight, ChevronLeft, Calendar as CalendarIcon, Clock, User, Scissors, Star, ShieldCheck, MapPin } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Calendar as CalendarIcon, Clock, User, Scissors, Star, ShieldCheck, MapPin, Banknote as BanknoteIcon } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import PaymentGateway from '../payment/PaymentGateway'; // Import Gateway
 
 // Steps
 const steps = [
@@ -12,11 +13,13 @@ const steps = [
     { id: 2, title: 'Date & Time', icon: CalendarIcon },
     { id: 3, title: 'Stylist', icon: User },
     { id: 4, title: 'Details', icon: MapPin },
-    { id: 5, title: 'Confirm', icon: Check }
+    { id: 5, title: 'Confirm', icon: Check },
+    { id: 6, title: 'Payment', icon: BanknoteIcon }
 ];
 
 const BookingWizard = ({ initialService }) => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [bookingRef, setBookingRef] = useState(null); // Store confirmed booking info
     const [selection, setSelection] = useState({
         services: initialService ? services.filter(s => s.name === initialService) : [],
         date: new Date(),
@@ -28,7 +31,7 @@ const BookingWizard = ({ initialService }) => {
     const totalCost = selection.services.reduce((acc, s) => acc + s.price, 0) + (selection.details.homeService ? 2000 : 0);
     const totalDuration = selection.services.reduce((acc, s) => acc + s.duration, 0); // minutes
 
-    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
+    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 6));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     const handleServiceToggle = (service) => {
@@ -40,13 +43,20 @@ const BookingWizard = ({ initialService }) => {
     };
 
     const handleConfirm = () => {
-        const text = `*New Booking Request*
+        // Instead of opening WhatsApp immediately, move to payment
+        nextStep();
+    };
+
+    const onPaymentSuccess = (paymentResult) => {
+        const text = `*New Booking Request - PAID*
 -------------------
+*Booking ID:* ${paymentResult.paymentID || 'N/A'}
 *Services:* ${selection.services.map(s => s.name).join(', ')}
 *Date:* ${selection.date.toDateString()}
 *Time:* ${selection.time}
 *Stylist:* ${selection.stylist?.name || 'Any'}
-*Total:* ${formattedPrice(totalCost)}
+*Total Paid:* ${formattedPrice(totalCost)}
+*Method:* ${paymentResult.method || 'Online'}
 
 *Client Details:*
 Name: ${selection.details.name}
@@ -55,6 +65,8 @@ Address: ${selection.details.address || 'N/A'}
 Notes: ${selection.details.notes}
         `;
         window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(text)}`, '_blank');
+        alert("Booking Confirmed & Paid!");
+        // Reset or redirect logic here
     };
 
     return (
@@ -138,6 +150,15 @@ Notes: ${selection.details.notes}
                                 onConfirm={handleConfirm}
                             />
                         )}
+                        {currentStep === 6 && (
+                            <div className="flex flex-col items-center justify-center h-full">
+                                <PaymentGateway
+                                    totalAmount={totalCost}
+                                    onSuccess={onPaymentSuccess}
+                                    onError={(err) => alert("Payment Failed")}
+                                />
+                            </div>
+                        )}
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -152,7 +173,7 @@ Notes: ${selection.details.notes}
                     )}
                 </div>
                 <div className="flex gap-4">
-                    {currentStep > 1 && (
+                    {currentStep > 1 && currentStep < 6 && (
                         <button
                             onClick={prevStep}
                             className="px-6 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors font-medium"
@@ -168,14 +189,14 @@ Notes: ${selection.details.notes}
                         >
                             Next <ChevronRight size={16} className="ml-2" />
                         </button>
-                    ) : (
+                    ) : currentStep === 5 ? (
                         <button
                             onClick={handleConfirm}
                             className="px-8 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors shadow-lg flex items-center animate-pulse"
                         >
-                            Confirm Booking <Check size={16} className="ml-2" />
+                            Proceed to Payment <ChevronRight size={16} className="ml-2" />
                         </button>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>
