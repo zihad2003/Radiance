@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ZoomIn } from 'lucide-react';
 
 const galleryImages = [
-    { id: 1, src: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop", title: "Bridal Glow", height: "h-96" },
-    { id: 2, src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1000&auto=format&fit=crop", title: "Natural Radiance", height: "h-64" },
-    { id: 3, src: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=1000&auto=format&fit=crop", title: "Evening Glam", height: "h-80" },
-    { id: 4, src: "https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=1000&auto=format&fit=crop", title: "Hair Styling", height: "h-72" },
-    { id: 5, src: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=1000&auto=format&fit=crop", title: "Skincare Magic", height: "h-64" },
-    { id: 6, src: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?q=80&w=1000&auto=format&fit=crop", title: "Nail Artistry", height: "h-80" },
-    { id: 7, src: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&auto=format&fit=crop", title: "Facial Treatment", height: "h-96" },
-    { id: 8, src: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1000&auto=format&fit=crop", title: "Transformation", height: "h-72" },
+    { id: 1, src: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop", title: "Biye Special (Bridal)", height: "h-96" },
+    { id: 2, src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1000&auto=format&fit=crop", title: "Snigdho Look", height: "h-64" },
+    { id: 3, src: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=1000&auto=format&fit=crop", title: "Gaye Holud Vibrant", height: "h-80" },
+    { id: 4, src: "https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=1000&auto=format&fit=crop", title: "Party Hair Styling", height: "h-72" },
+    { id: 5, src: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=1000&auto=format&fit=crop", title: "Glow & Skincare", height: "h-64" },
+    { id: 6, src: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?q=80&w=1000&auto=format&fit=crop", title: "Mehendi & Nail Art", height: "h-80" },
+    { id: 7, src: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&auto=format&fit=crop", title: "Facial Rejuvenation", height: "h-96" },
+    { id: 8, src: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1000&auto=format&fit=crop", title: "Complete Makeover", height: "h-72" },
 ];
 
 const Gallery = () => {

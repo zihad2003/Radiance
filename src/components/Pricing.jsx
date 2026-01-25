@@ -5,21 +5,21 @@ import { Check, Star } from 'lucide-react';
 const plans = [
     {
         name: "Basic Glow",
-        price: 99,
+        price: "5,000",
         features: ["Haircut & Blowdry", "Classic Manicure", "Eyebrow Threading", "Refreshment Drink"],
         popular: false,
         delay: 0
     },
     {
         name: "Elite Radiance",
-        price: 199,
+        price: "12,000",
         features: ["Premium Hair Color", "Spa Gel Pedicure", "Basic Facial", "Glass of Champagne", "Take-home Sample Kit"],
         popular: true,
         delay: 0.2
     },
     {
         name: "Ultimate Luxury",
-        price: 299,
+        price: "25,000",
         features: ["Full Body Massage", "Premium Facial", "Complete Makeover", "Exclusive Lounge Access", "Full Size Products"],
         popular: false,
         delay: 0.4
@@ -35,8 +35,8 @@ const PricingCard = ({ plan }) => {
             transition={{ delay: plan.delay, duration: 0.6 }}
             whileHover={{ y: -10, scale: 1.02 }}
             className={`relative p-8 rounded-3xl backdrop-blur-md border transition-all duration-300 flex flex-col ${plan.popular
-                    ? 'bg-white/10 border-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.2)] z-10'
-                    : 'bg-white/5 border-white/20 shadow-xl'
+                ? 'bg-white/10 border-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.2)] z-10'
+                : 'bg-white/5 border-white/20 shadow-xl'
                 }`}
         >
             {plan.popular && (
@@ -49,7 +49,7 @@ const PricingCard = ({ plan }) => {
                 {plan.name}
             </h3>
             <div className="mb-6 flex items-baseline">
-                <span className="text-4xl font-bold text-charcoal">${plan.price}</span>
+                <span className="text-4xl font-bold text-charcoal">৳{plan.price}</span>
                 <span className="text-charcoal/60 ml-2">/visit</span>
             </div>
 
@@ -65,8 +65,8 @@ const PricingCard = ({ plan }) => {
             </ul>
 
             <button className={`w-full py-4 rounded-xl font-semibold tracking-wide transition-all duration-300 interactive ${plan.popular
-                    ? 'bg-gradient-to-r from-gold to-yellow-600 text-white shadow-lg hover:shadow-gold/50'
-                    : 'bg-white text-charcoal border border-charcoal/10 hover:bg-charcoal hover:text-white'
+                ? 'bg-gradient-to-r from-gold to-yellow-600 text-white shadow-lg hover:shadow-gold/50'
+                : 'bg-white text-charcoal border border-charcoal/10 hover:bg-charcoal hover:text-white'
                 }`}>
                 Choose Plan
             </button>

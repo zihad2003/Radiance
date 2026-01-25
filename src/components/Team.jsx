@@ -5,34 +5,34 @@ import { Instagram, Twitter, Linkedin } from 'lucide-react';
 const teamMembers = [
     {
         id: 1,
-        name: "Elena V.",
+        name: "Sadia Islam",
         role: "Master Stylist",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1000&auto=format&fit=crop",
-        specialties: ["Color Correction", "Precision Cuts"],
+        image: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?q=80&w=1000&auto=format&fit=crop", // Reusing an image
+        specialties: ["Bridal Makeover", "Hair Rebonding"],
         color: "from-pink-400 to-rose-400"
     },
     {
         id: 2,
-        name: "Marco D.",
-        role: "Art Director",
-        image: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=1000&auto=format&fit=crop",
-        specialties: ["Editorial Styling", "Bridal"],
+        name: "Rahim Khan",
+        role: "Creative Director",
+        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop", // Male portrait
+        specialties: ["Celebrity Styling", "Colorist"],
         color: "from-purple-400 to-indigo-400"
     },
     {
         id: 3,
-        name: "Sarah J.",
-        role: "Esthetician",
+        name: "Nusrat Jahan",
+        role: "Lead Esthetician",
         image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
-        specialties: ["Laser Therapy", "Holistic Facials"],
+        specialties: ["HydraFacial", "Laser Treatment"],
         color: "from-teal-400 to-cyan-400"
     },
     {
         id: 4,
-        name: "David K.",
-        role: "Nail Artist",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
-        specialties: ["3D Art", "Gel Extensions"],
+        name: "Rumana Ahmed",
+        role: "Henna & Nail Artist",
+        image: "https://images.unsplash.com/photo-1605406575497-015ab0d21b9b?q=80&w=1000&auto=format&fit=crop", // Female portrait
+        specialties: ["Bridal Mehendi", "Acrylic Nails"],
         color: "from-orange-400 to-amber-400"
     }
 ];

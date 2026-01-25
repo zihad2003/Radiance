@@ -6,7 +6,7 @@ const services = [
     {
         id: 1,
         title: "Hair Styling & Color",
-        price: "$80+",
+        price: "৳4,000+",
         icon: Scissors,
         color: "from-pink-500 to-rose-500",
         description: "Expert cuts, coloring, and styling tailored to your unique look."
@@ -14,7 +14,7 @@ const services = [
     {
         id: 2,
         title: "Makeup & Bridal",
-        price: "$150+",
+        price: "৳8,000+",
         icon: Sparkles,
         color: "from-purple-500 to-indigo-500",
         description: "Radiant looks for your special day or any occasion."
@@ -22,7 +22,7 @@ const services = [
     {
         id: 3,
         title: "Skin Treatments",
-        price: "$90+",
+        price: "৳4,500+",
         icon: Droplets,
         color: "from-blue-400 to-cyan-500",
         description: "Rejuvenating facials and treatments for glowing skin."
@@ -30,7 +30,7 @@ const services = [
     {
         id: 4,
         title: "Nail Art",
-        price: "$40+",
+        price: "৳2,000+",
         icon: Palette,
         color: "from-teal-400 to-emerald-500",
         description: "Creative designs and premium care for your hands and feet."
@@ -38,7 +38,7 @@ const services = [
     {
         id: 5,
         title: "Threading & Waxing",
-        price: "$15+",
+        price: "৳800+",
         icon: Zap,
         color: "from-orange-400 to-amber-500",
         description: "Precise hair removal for smooth, silky skin."
@@ -46,7 +46,7 @@ const services = [
     {
         id: 6,
         title: "Spa & Massage",
-        price: "$120+",
+        price: "৳6,000+",
         icon: Flower2,
         color: "from-rose-400 to-pink-600",
         description: "Relaxing massages and body therapies to unwind."

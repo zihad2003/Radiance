@@ -1,35 +1,24 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, Sparkles, Text3D, Center } from '@react-three/drei';
+import { Environment, Float, Sparkles, MeshDistortMaterial, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 
-const FloatingLogo = () => {
-    const meshRef = useRef();
-
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.2;
-            meshRef.current.rotation.x = Math.sin(state.clock.getElapsedTime() * 0.5) * 0.1;
-        }
-    });
-
+const LiquidOrb = () => {
     return (
-        <Float floatIntensity={2} rotationIntensity={1}>
-            <mesh ref={meshRef}>
-                <torusKnotGeometry args={[2.5, 0.8, 120, 20]} />
-                <meshPhysicalMaterial
+        <Float floatIntensity={2} rotationIntensity={2} speed={1.5}>
+            <Sphere args={[1, 100, 200]} scale={2.4}>
+                <MeshDistortMaterial
                     color="#B76E79"
-                    emissive="#FF6B9D"
-                    emissiveIntensity={0.2}
-                    roughness={0}
-                    metalness={1}
+                    attach="material"
+                    distort={0.4}
+                    speed={2}
+                    roughness={0.1}
+                    metalness={0.9}
                     clearcoat={1}
-                    clearcoatRoughness={0}
-                    reflectivity={1}
-                    iridescence={1}
+                    clearcoatRoughness={0.1}
                 />
-            </mesh>
+            </Sphere>
         </Float>
     );
 };
@@ -43,21 +32,21 @@ const Hero = () => {
         <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-pearl">
             {/* 3D Background */}
             <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
-                    <Environment preset="sunset" />
-                    <ambientLight intensity={0.5} />
-                    <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-                    <pointLight position={[-10, -10, -10]} intensity={1} />
+                <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+                    <Environment preset="city" />
+                    <ambientLight intensity={0.6} />
+                    <spotLight position={[10, 10, 10]} angle={0.2} penumbra={1} intensity={1.5} />
+                    <pointLight position={[-10, -10, -10]} intensity={1} color="#FF6B9D" />
 
-                    <FloatingLogo />
+                    <LiquidOrb />
 
                     <Sparkles
-                        count={100}
-                        scale={12}
-                        size={4}
-                        speed={0.4}
-                        opacity={0.5}
-                        color="#FF6B9D"
+                        count={150}
+                        scale={15}
+                        size={5}
+                        speed={0.5}
+                        opacity={0.6}
+                        color="#D4AF37" // Gold sparkles
                     />
                 </Canvas>
             </div>
@@ -67,23 +56,27 @@ const Hero = () => {
                 className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center pointer-events-none"
                 style={{ y }}
             >
-                <div className="pointer-events-auto p-12 glass rounded-2xl max-w-4xl mx-4">
+                <div className="pointer-events-auto p-12 glass rounded-2xl max-w-5xl mx-4 shadow-2xl border-white/40">
                     <motion.h1
                         initial={{ opacity: 0, y: 50, filter: "blur(10px)" }}
                         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         transition={{ duration: 1, delay: 0.5 }}
-                        className="text-6xl md:text-8xl font-serif font-bold mb-4 text-charcoal bg-clip-text text-transparent bg-gradient-to-r from-charcoal to-primary"
+                        className="text-6xl md:text-8xl font-serif font-bold mb-6 text-charcoal leading-tight"
                     >
-                        Transform. Radiate. Shine.
+                        Redefining Beauty <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                            in Dhaka.
+                        </span>
                     </motion.h1>
 
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.8 }}
-                        className="text-xl md:text-2xl text-charcoal/80 mb-8 font-light tracking-wide"
+                        className="text-xl md:text-2xl text-charcoal/80 mb-10 font-light tracking-wide max-w-2xl mx-auto"
                     >
-                        Experience the future of beauty in a sanctuary designed for you.
+                        Experience world-class styling, AI-powered consultations, and premium care.
+                        Sanctuary for the modern woman.
                     </motion.p>
 
                     <motion.button
@@ -92,9 +85,9 @@ const Hero = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         transition={{ duration: 0.5, delay: 1 }}
-                        className="px-10 py-5 bg-gradient-to-r from-primary to-accent text-white rounded-full text-lg font-semibold tracking-wider shadow-lg hover:shadow-primary/50 interactive"
+                        className="px-12 py-5 bg-charcoal text-white rounded-full text-lg font-semibold tracking-widest shadow-xl hover:bg-primary transition-colors duration-300 interactive"
                     >
-                        Explore Services
+                        BOOK APPOINTMENT
                     </motion.button>
                 </div>
             </motion.div>

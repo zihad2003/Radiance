@@ -1,6 +1,45 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, X, Sparkles, RefreshCw } from 'lucide-react';
+import { Camera, X, Sparkles, RefreshCw, Loader2 } from 'lucide-react';
+import Webcam from 'react-webcam';
+import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection';
+import '@mediapipe/face_mesh';
+
+
+
+
+const filters = {
+    natural: {
+        color: null,
+        opacity: 0,
+        mode: 'source-over',
+        name: 'Natural'
+    },
+    gaye_holud: {
+        color: '#FFD700', // Gold
+        opacity: 0.3,
+        mode: 'overlay',
+        name: 'Gaye Holud'
+    },
+    biye_crimson: {
+        color: '#8A0303', // Deep Red
+        opacity: 0.7,
+        mode: 'multiply',
+        name: 'Biye Crimson'
+    },
+    bou_pink: {
+        color: '#E91E63', // Rani Pink
+        opacity: 0.6,
+        mode: 'multiply',
+        name: 'Bou Pink'
+    },
+    dhaka_party: {
+        color: '#4a0404', // Dark
+        opacity: 0.8,
+        mode: 'multiply',
+        name: 'Dhaka Party'
+    }
+};
 
 const BeforeAfterSlider = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -72,10 +111,145 @@ const BeforeAfterSlider = () => {
 
 const ARModal = ({ isOpen, onClose }) => {
     const [selectedFilter, setSelectedFilter] = useState('natural');
-    const videoRef = useRef(null);
+    const webcamRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [model, setModel] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [cameraError, setCameraError] = useState(null);
 
-    // In a real app, we would access the camera here. 
-    // For demo, we'll placeholder it.
+
+
+    // Load Model
+    useEffect(() => {
+        const loadModel = async () => {
+            try {
+                // Load the faceLandmarksDetection model assets.
+                const model = await faceLandmarksDetection.createDetector(
+                    faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
+                    {
+                        runtime: 'mediapipe',
+                        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+                        refineLandmarks: true, // For better lip tracking
+                    }
+                );
+                setModel(model);
+                setIsLoading(false);
+            } catch (err) {
+                console.error("Failed to load model:", err);
+                setIsLoading(false); // Stop loading anyway
+            }
+        };
+
+        if (isOpen) {
+            loadModel();
+        } else {
+            setModel(null);
+            setIsLoading(true);
+        }
+    }, [isOpen]);
+
+    // Detection Loop
+    useEffect(() => {
+        let animationFrameId;
+
+        const detect = async () => {
+            if (
+                webcamRef.current &&
+                webcamRef.current.video &&
+                webcamRef.current.video.readyState === 4 &&
+                model
+            ) {
+                const video = webcamRef.current.video;
+                const videoWidth = video.videoWidth;
+                const videoHeight = video.videoHeight;
+
+                // Match canvas to video dimensions
+                if (canvasRef.current) {
+                    canvasRef.current.width = videoWidth;
+                    canvasRef.current.height = videoHeight;
+
+                    const ctx = canvasRef.current.getContext('2d');
+
+                    try {
+                        // Detect faces
+                        const predictions = await model.estimateFaces(video);
+                        if (predictions.length > 0) {
+                            drawMakeup(predictions[0], ctx, selectedFilter);
+                        } else {
+                            ctx.clearRect(0, 0, videoWidth, videoHeight);
+                        }
+                    } catch (e) {
+                        console.error("Detection error", e);
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(detect);
+        };
+
+        if (model && !isLoading && isOpen) {
+            detect();
+        }
+
+        return () => {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        };
+    }, [model, isLoading, selectedFilter, isOpen]);
+
+    const drawMakeup = (prediction, ctx, filterName) => {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        const filter = filters[filterName];
+        if (!filter || !filter.color) return;
+
+        const keypoints = prediction.keypoints;
+
+        // Upper Lip Path
+        ctx.beginPath();
+        // Outer Upper
+        const upperOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291];
+        // Inner Upper (reversed logic for drawing back)
+        const upperInnerReversed = [308, 415, 310, 311, 312, 13, 82, 81, 80, 191, 78];
+
+        // Start at 61
+        ctx.moveTo(keypoints[61].x, keypoints[61].y);
+        upperOuter.slice(1).forEach(id => ctx.lineTo(keypoints[id].x, keypoints[id].y));
+
+        // Trace back along inner lip
+        upperInnerReversed.forEach(id => ctx.lineTo(keypoints[id].x, keypoints[id].y));
+        ctx.closePath();
+
+        ctx.fillStyle = filter.color;
+        ctx.save();
+        ctx.globalAlpha = filter.opacity;
+        ctx.globalCompositeOperation = filter.mode;
+        // Blur context for softness
+        ctx.filter = 'blur(2px)';
+        ctx.fill();
+        ctx.restore();
+
+        // Lower Lip Path
+        ctx.beginPath();
+        // Outer Lower
+        const lowerOuter = [61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291];
+        // Inner Lower (reversed logic for drawing back)
+        const lowerInnerReversed = [308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78];
+
+        ctx.moveTo(keypoints[61].x, keypoints[61].y);
+        lowerOuter.slice(1).forEach(id => ctx.lineTo(keypoints[id].x, keypoints[id].y));
+
+        // Trace back along inner lip
+        lowerInnerReversed.forEach(id => ctx.lineTo(keypoints[id].x, keypoints[id].y));
+        ctx.closePath();
+
+        ctx.fillStyle = filter.color;
+        ctx.save();
+        ctx.globalAlpha = filter.opacity;
+        ctx.globalCompositeOperation = filter.mode;
+        ctx.filter = 'blur(2px)';
+        ctx.fill();
+        ctx.restore();
+    };
+
 
     if (!isOpen) return null;
 
@@ -93,59 +267,72 @@ const ARModal = ({ isOpen, onClose }) => {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-4xl bg-charcoal rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+                className="relative w-full max-w-4xl bg-charcoal rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col items-center"
             >
-                <div className="relative aspect-video bg-gray-900 flex items-center justify-center overflow-hidden">
-                    {/* Simulated Camera Feed */}
-                    <img
-                        src="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?q=80&w=2070&auto=format&fit=crop"
-                        className="w-full h-full object-cover opacity-80"
-                        alt="Camera Feed"
-                    />
-                    <div className="absolute inset-0 pointer-events-none">
-                        {/* Face Tracking Overlay Simulation */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-80 border-2 border-white/30 rounded-[50%] animate-pulse" />
-                        <div className="absolute top-4 right-4 flex space-x-2">
-                            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                            <span className="text-xs text-white uppercase tracking-widest">Live</span>
+                <div className="relative aspect-video bg-gray-900 w-full overflow-hidden">
+                    {/* Webcam */}
+                    {!cameraError ? (
+                        <Webcam
+                            ref={webcamRef}
+                            className="absolute inset-0 w-full h-full object-cover mirror-x"
+                            mirrored={true}
+                            onUserMediaError={() => setCameraError("Cannot access camera")}
+                            videoConstraints={{
+                                facingMode: "user"
+                            }}
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                            <p>{cameraError}</p>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Filter applied overlay */}
-                    <div
-                        className="absolute inset-0 mix-blend-overlay transition-colors duration-500"
-                        style={{
-                            backgroundColor:
-                                selectedFilter === 'rose' ? '#B76E79' :
-                                    selectedFilter === 'gold' ? '#D4AF37' :
-                                        selectedFilter === 'vamp' ? '#4a0404' : 'transparent',
-                            opacity: 0.3
-                        }}
+                    {/* Canvas Overlay for Makeup */}
+                    <canvas
+                        ref={canvasRef}
+                        className="absolute inset-0 w-full h-full object-cover mirror-x pointer-events-none"
+                        style={{ transform: 'scaleX(-1)' }} // Canvas needs manual flipping if not handled by Webcam prop (Webcam prop only flips video element)
                     />
+
+                    {/* Check if loading */}
+                    {isLoading && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
+                            <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                            <p className="text-white font-serif tracking-wider">Loading AI Model...</p>
+                        </div>
+                    )}
+
+                    <div className="absolute top-4 right-4 flex space-x-2 z-10">
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                        <span className="text-xs text-white uppercase tracking-widest shadow-sm">Live</span>
+                    </div>
                 </div>
 
                 {/* Controls */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 to-transparent">
+                <div className="w-full p-8 bg-gradient-to-t from-black/90 to-charcoal border-t border-white/5">
                     <h3 className="text-white text-center mb-6 font-serif text-xl">Select a Look</h3>
-                    <div className="flex justify-center space-x-6 overflow-x-auto pb-4">
-                        {['natural', 'rose', 'gold', 'vamp'].map((filter) => (
+                    <div className="flex justify-center space-x-6 overflow-x-auto pb-4 custom-scrollbar">
+                        {Object.keys(filters).map((filterKey) => (
                             <button
-                                key={filter}
-                                onClick={() => setSelectedFilter(filter)}
+                                key={filterKey}
+                                onClick={() => setSelectedFilter(filterKey)}
                                 className={`
-                            w-16 h-16 rounded-full border-2 overflow-hidden transition-all duration-300 transform hover:scale-110
-                            ${selectedFilter === filter ? 'border-primary ring-4 ring-primary/30 scale-110' : 'border-white/50'}
+                            w-16 h-16 rounded-full border-2 overflow-hidden transition-all duration-300 transform hover:scale-110 flex-shrink-0
+                            ${selectedFilter === filterKey ? 'border-primary ring-4 ring-primary/30 scale-110' : 'border-white/50'}
                         `}
                             >
                                 <div
-                                    className="w-full h-full"
+                                    className="w-full h-full flex items-center justify-center"
                                     style={{
                                         backgroundColor:
-                                            filter === 'natural' ? '#F4E4D7' :
-                                                filter === 'rose' ? '#B76E79' :
-                                                    filter === 'gold' ? '#D4AF37' : '#4a0404'
+                                            filterKey === 'natural' ? '#F4E4D7' :
+                                                filterKey === 'gaye_holud' ? '#FFD700' :
+                                                    filterKey === 'biye_crimson' ? '#8A0303' :
+                                                        filterKey === 'bou_pink' ? '#E91E63' : '#4a0404'
                                     }}
-                                />
+                                >
+                                    {filterKey === 'natural' && <span className="text-charcoal text-[10px] font-bold">RESET</span>}
+                                </div>
                             </button>
                         ))}
                     </div>
@@ -153,7 +340,7 @@ const ARModal = ({ isOpen, onClose }) => {
 
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white transition-colors"
+                    className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white transition-colors z-20"
                 >
                     <X size={24} />
                 </button>
@@ -194,9 +381,9 @@ const VirtualTryOn = () => {
 
                             <div className="mt-12 grid grid-cols-3 gap-4">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="aspect-square rounded-2xl bg-secondary/30 overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all">
+                                    <div key={i} className="aspect-square rounded-2xl bg-secondary/30 overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => setIsArOpen(true)}>
                                         <img
-                                            src={`https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`}
+                                            src={`https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=200&auto=format&fit=crop`}
                                             alt="Look preview"
                                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                                         />

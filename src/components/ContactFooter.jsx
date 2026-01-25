@@ -22,12 +22,12 @@ const ContactFooter = () => {
                                 <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                                     <MapPin className="text-primary mb-4" size={24} />
                                     <h4 className="font-serif text-lg mb-2">Address</h4>
-                                    <p className="text-charcoal/70 text-sm">123 Radiance Blvd, <br />Beverly Hills, CA 90210</p>
+                                    <p className="text-charcoal/70 text-sm">House 15, Road 103, <br />Gulshan 2, Dhaka 1212</p>
                                 </div>
                                 <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                                     <Phone className="text-primary mb-4" size={24} />
                                     <h4 className="font-serif text-lg mb-2">Phone</h4>
-                                    <p className="text-charcoal/70 text-sm">+1 (555) 123-4567<br />+1 (555) 987-6543</p>
+                                    <p className="text-charcoal/70 text-sm">+880 1711-234567<br />+880 1819-876543</p>
                                 </div>
                                 <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                                     <Mail className="text-primary mb-4" size={24} />
@@ -43,7 +43,7 @@ const ContactFooter = () => {
 
                             <div className="h-[300px] w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white">
                                 <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26456.14915664971!2d-118.41017834460833!3d34.073620299999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bc04d6d147cf%3A0x2948c77ea1452a83!2sBeverly%20Hills%2C%20CA!5e0!3m2!1sen!2sus!4v1689234567890!5m2!1sen!2sus"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.0874457713433!2d90.41144131543187!3d23.794895884567484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c70c534063df%3A0x7d25e01bd6a6669!2sGulshan%202%20Circle%2C%20Dhaka%201212!5e0!3m2!1sen!2sbd!4v1644837543210!5m2!1sen!2sbd"
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}
