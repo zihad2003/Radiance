@@ -1,0 +1,181 @@
+import { motion } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin, Send, ArrowRight } from 'lucide-react';
+
+const ContactFooter = () => {
+    return (
+        <>
+            {/* Contact Section */}
+            <section id="contact" className="py-24 bg-pearl relative">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col lg:flex-row gap-16">
+                        {/* Map & Info */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="lg:w-1/2"
+                        >
+                            <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-primary mb-4">Visit Us</h2>
+                            <h3 className="text-4xl md:text-5xl font-serif text-charcoal mb-8">Sanctuary Location</h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                    <MapPin className="text-primary mb-4" size={24} />
+                                    <h4 className="font-serif text-lg mb-2">Address</h4>
+                                    <p className="text-charcoal/70 text-sm">123 Radiance Blvd, <br />Beverly Hills, CA 90210</p>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                    <Phone className="text-primary mb-4" size={24} />
+                                    <h4 className="font-serif text-lg mb-2">Phone</h4>
+                                    <p className="text-charcoal/70 text-sm">+1 (555) 123-4567<br />+1 (555) 987-6543</p>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                    <Mail className="text-primary mb-4" size={24} />
+                                    <h4 className="font-serif text-lg mb-2">Email</h4>
+                                    <p className="text-charcoal/70 text-sm">concierge@radiance.com<br />press@radiance.com</p>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                    <Clock className="text-primary mb-4" size={24} />
+                                    <h4 className="font-serif text-lg mb-2">Hours</h4>
+                                    <p className="text-charcoal/70 text-sm">Mon-Fri: 9am - 8pm<br />Sat: 10am - 6pm</p>
+                                </div>
+                            </div>
+
+                            <div className="h-[300px] w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26456.14915664971!2d-118.41017834460833!3d34.073620299999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bc04d6d147cf%3A0x2948c77ea1452a83!2sBeverly%20Hills%2C%20CA!5e0!3m2!1sen!2sus!4v1689234567890!5m2!1sen!2sus"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen=""
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    className="grayscale hover:grayscale-0 transition-all duration-700"
+                                ></iframe>
+                            </div>
+                        </motion.div>
+
+                        {/* Form */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="lg:w-1/2"
+                        >
+                            <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl">
+                                <h3 className="text-3xl font-serif mb-6">Send a Message</h3>
+                                <form className="space-y-6">
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">First Name</label>
+                                            <input type="text" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="Jane" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Last Name</label>
+                                            <input type="text" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="Doe" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Email Address</label>
+                                        <input type="email" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="jane@example.com" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Subject</label>
+                                        <select className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20">
+                                            <option>General Inquiry</option>
+                                            <option>Feedback</option>
+                                            <option>Partnership</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Message</label>
+                                        <textarea rows="4" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="How can we help you?"></textarea>
+                                    </div>
+                                    <button className="w-full bg-charcoal text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-primary transition-colors duration-300 shadow-lg interactive flex items-center justify-center">
+                                        Send Message <Send className="ml-2 w-4 h-4" />
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-charcoal text-white pt-20 pb-10 rounded-t-[3rem] mt-[-2rem] relative z-20">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                        {/* Column 1: Brand */}
+                        <div className="space-y-6">
+                            <h3 className="text-2xl font-serif font-bold tracking-widest text-white">
+                                RADIANCE<span className="text-gold">.</span>
+                            </h3>
+                            <p className="text-white/60 leading-relaxed max-w-xs">
+                                Redefining beauty through innovation and luxury. Step into the future of self-care.
+                            </p>
+                            <div className="flex space-x-4">
+                                {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
+                                    <a key={i} href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-charcoal transition-all duration-300 group">
+                                        <Icon size={18} className="group-hover:rotate-12 transition-transform" />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Column 2: Quick Links */}
+                        <div>
+                            <h4 className="font-serif text-lg mb-6 text-gold">Explore</h4>
+                            <ul className="space-y-4">
+                                {['Services', 'Portfolio', 'Virtual Try-On', 'Our Team', 'Pricing'].map((item) => (
+                                    <li key={item}>
+                                        <a href="#" className="text-white/70 hover:text-white transition-colors flex items-center group">
+                                            <span className="w-0 group-hover:w-2 h-0.5 bg-gold mr-0 group-hover:mr-2 transition-all duration-300"></span>
+                                            {item}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Column 3: Utility */}
+                        <div>
+                            <h4 className="font-serif text-lg mb-6 text-gold">Legal</h4>
+                            <ul className="space-y-4">
+                                {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Careers', 'Sitemap'].map((item) => (
+                                    <li key={item}>
+                                        <a href="#" className="text-white/70 hover:text-white transition-colors">
+                                            {item}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Column 4: Newsletter */}
+                        <div>
+                            <h4 className="font-serif text-lg mb-6 text-gold">Stay Updated</h4>
+                            <p className="text-white/60 mb-4 text-sm">Join our exclusive list for beauty tips and VIP offers.</p>
+                            <form className="relative">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="w-full bg-white/10 border border-white/20 rounded-full py-3 px-4 focus:outline-none focus:border-gold transition-colors text-white placeholder:text-white/40"
+                                />
+                                <button className="absolute right-1 top-1 bg-gold text-charcoal w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                                    <ArrowRight size={18} />
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-white/40">
+                        <p>&copy; {new Date().getFullYear()} Radiance Salon. All rights reserved.</p>
+                        <p className="mt-2 md:mt-0">Designed with ❤️ for the Future.</p>
+                    </div>
+                </div>
+            </footer>
+        </>
+    );
+};
+
+export default ContactFooter;
