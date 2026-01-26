@@ -11,7 +11,7 @@ import Gallery from './components/Gallery';
 import Shop from './components/Shop';
 import Pricing from './components/Pricing';
 import Testimonials from './components/Testimonials';
-import Booking from './components/Booking';
+import BookingWizard from './components/BookingWizard';
 import Team from './components/Team';
 import ContactFooter from './components/ContactFooter';
 import ExcellencePillars from './components/ExcellencePillars';
@@ -25,6 +25,7 @@ function App() {
   const [selectedService, setSelectedService] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     const handler = () => setShowAdmin(true);
@@ -34,8 +35,7 @@ function App() {
 
   const handleBookService = (serviceName) => {
     setSelectedService(serviceName);
-    // Scroll to booking section
-    document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' });
+    setShowBooking(true);
   };
 
   return (
@@ -75,15 +75,19 @@ function App() {
               <Testimonials />
             </FadeIn>
             <FadeIn>
-              <Booking initialService={selectedService} />
-            </FadeIn>
-            <FadeIn>
               <Team />
             </FadeIn>
             <ContactFooter />
           </main>
         </div>
       </SmoothScroll>
+
+      {/* Booking Wizard Modal */}
+      <BookingWizard
+        isOpen={showBooking}
+        onClose={() => setShowBooking(false)}
+        initialService={selectedService}
+      />
 
       {/* Admin Modal Overlay */}
       <AnimatePresence>
