@@ -1,10 +1,16 @@
-import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection';
-import * as tf from '@tensorflow/tfjs';
-
 let detector = null;
+let faceLandmarksDetection = null;
 
 export const initFaceDetection = async () => {
     if (detector) return detector;
+
+    console.log("Loading Face Mesh Model Dependencies...");
+
+    // Dynamic import to keep main bundle light
+    if (!faceLandmarksDetection) {
+        faceLandmarksDetection = await import('@tensorflow-models/face-landmarks-detection');
+        await import('@tensorflow/tfjs'); // Ensure backend is ready
+    }
 
     const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     const detectorConfig = {
@@ -13,7 +19,7 @@ export const initFaceDetection = async () => {
         maxFaces: 1
     };
 
-    console.log("Loading Face Mesh Model...");
+    console.log("Initializing Face Mesh Detector...");
     detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
     console.log("Face Mesh Model Loaded");
     return detector;
