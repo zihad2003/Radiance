@@ -160,6 +160,9 @@ const Pricing = () => {
     const [activeTab, setActiveTab] = React.useState("Signature");
     const filteredPlans = plans.filter(p => p.category === activeTab);
 
+    // Get unique categories
+    const categories = ["Signature", "Bridal", "Spa", "Seasonal", "Group", "Pre-Bridal", "Wellness", "Express", "Student"];
+
     return (
         <section className="py-24 bg-gradient-to-b from-pearl to-white relative overflow-hidden">
             {/* Background Shapes */}
@@ -175,11 +178,11 @@ const Pricing = () => {
 
                     {/* Category Tabs */}
                     <div className="flex flex-wrap justify-center gap-4 mb-4">
-                        {["Signature", "Bridal", "Spa", "Seasonal"].map(tab => (
+                        {categories.map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === tab
+                                className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === tab
                                     ? 'bg-charcoal text-white shadow-lg scale-105'
                                     : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-charcoal'
                                     }`}
