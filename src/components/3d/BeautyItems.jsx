@@ -4,8 +4,9 @@ import { LayerMaterial, Depth, Fresnel, Noise } from 'lamina';
 import * as THREE from 'three';
 
 export const Lipstick = (props) => {
+    const { color = "#D61C4E", ...rest } = props;
     return (
-        <group {...props}>
+        <group {...rest}>
             {/* Base */}
             <Cylinder args={[0.15, 0.15, 0.8, 32]} position={[0, -0.4, 0]}>
                 <meshStandardMaterial color="#111" metalness={0.8} roughness={0.2} envMapIntensity={1.5} />
@@ -21,10 +22,10 @@ export const Lipstick = (props) => {
             {/* The Stick */}
             <group position={[0, 0.45, 0]} rotation={[0.5, 0, 0]}>
                 <Cylinder args={[0.11, 0.11, 0.4, 32]} position={[0, 0, 0]}>
-                    <meshStandardMaterial color="#D61C4E" roughness={0.2} metalness={0.1} />
+                    <meshStandardMaterial color={color} roughness={0.2} metalness={0.1} />
                 </Cylinder>
                 <Sphere args={[0.11, 32, 16]} position={[0, 0.2, 0]} scale={[1, 0.4, 1]}>
-                    <meshStandardMaterial color="#D61C4E" roughness={0.2} metalness={0.1} />
+                    <meshStandardMaterial color={color} roughness={0.2} metalness={0.1} />
                 </Sphere>
             </group>
         </group>

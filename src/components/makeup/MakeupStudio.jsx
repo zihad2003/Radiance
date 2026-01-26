@@ -10,6 +10,9 @@ import { saveLook } from '../../utils/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from '../ui/GlassCard';
+import { Canvas } from '@react-three/fiber';
+import { Float, Environment } from '@react-three/drei';
+import { Lipstick, Compact, Palette } from '../3d/BeautyItems';
 
 const MakeupStudio = () => {
     const videoRef = useRef(null);
@@ -467,6 +470,28 @@ const MakeupStudio = () => {
                                         </div>
                                         <div className="text-primary font-bold">{activeProduct.price} BDT</div>
                                     </div>
+
+                                    {/* 3D Product Preview */}
+                                    <div className="w-full h-32 bg-white rounded-xl mb-4 border border-gray-100 overflow-hidden relative">
+                                        <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
+                                            <ambientLight intensity={0.5} />
+                                            <spotLight position={[10, 10, 10]} intensity={1} />
+                                            <Environment preset="city" />
+                                            <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
+                                                {activeCategory === 'lips' ? (
+                                                    <Lipstick color={activeProduct.hex} scale={2} rotation={[0.5, 0.5, 0]} />
+                                                ) : activeCategory === 'cheeks' || activeCategory === 'face' ? (
+                                                    <Compact color={activeProduct.hex} scale={1.8} rotation={[0.5, -0.2, 0]} />
+                                                ) : (
+                                                    <Palette scale={1.2} rotation={[0.5, 0, 0]} />
+                                                )}
+                                            </Float>
+                                        </Canvas>
+                                        <div className="absolute bottom-2 right-2 text-[8px] text-gray-400 font-mono tracking-widest uppercase">
+                                            3D Preview
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-4">
                                         <div className="space-y-1">
                                             <div className="flex justify-between text-xs text-gray-500">
