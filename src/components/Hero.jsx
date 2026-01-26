@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
 import BeautyScene from './3d/BeautyScene';
 
 const Hero = () => {
@@ -11,10 +10,14 @@ const Hero = () => {
     return (
         <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-[#FFF9F5]">
             {/* 3D Background */}
-            <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: [0, 0, 8], fov: 45 }} shadows>
-                    <BeautyScene />
-                </Canvas>
+            <div className="absolute inset-0 z-0 parallax-hero">
+                <img
+                    src="/assets/hero/bridal_hero.png"
+                    alt="Radiance Luxury Bridal"
+                    className="w-full h-full object-cover opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-pearl via-pearl/40 to-transparent" />
+                <BeautyScene />
             </div>
 
             {/* Overlay Content */}
@@ -32,7 +35,6 @@ const Hero = () => {
                         <h1 className="text-7xl md:text-9xl font-script text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B76E79] drop-shadow-sm p-4">
                             Radiance
                         </h1>
-                        {/* Crown Icon or Decorative element could go here */}
                     </motion.div>
 
                     <motion.p
@@ -48,12 +50,24 @@ const Hero = () => {
                     <div className="flex justify-center gap-6">
                         <motion.button
                             initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            animate={{
+                                opacity: 1,
+                                scale: 1,
+                                boxShadow: [
+                                    "0px 0px 0px 0px rgba(183, 110, 121, 0)",
+                                    "0px 0px 20px 5px rgba(183, 110, 121, 0.4)",
+                                    "0px 0px 0px 0px rgba(183, 110, 121, 0)"
+                                ]
+                            }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.5, delay: 1 }}
+                            transition={{
+                                duration: 2,
+                                delay: 1,
+                                boxShadow: { repeat: Infinity, duration: 2, ease: "easeInOut" }
+                            }}
                             onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="px-10 py-4 bg-gradient-to-r from-[#B76E79] to-[#D68C9A] text-white rounded-full text-lg font-semibold tracking-widest shadow-lg hover:shadow-[#B76E79]/40 transition-shadow duration-300 interactive"
+                            className="px-10 py-4 bg-gradient-to-r from-[#B76E79] to-[#D68C9A] text-white rounded-full text-lg font-semibold tracking-widest shadow-lg interactive"
                         >
                             VIRTUAL TRY-ON
                         </motion.button>

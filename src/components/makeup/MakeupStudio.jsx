@@ -1,580 +1,698 @@
-
 import { useState, useEffect, useRef } from 'react';
-import { Camera, RefreshCw, Save, Share2, ArrowLeft, Maximize2, Sparkles, Download, Heart, Settings, Sliders, Image as ImageIcon, Video, X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { initFaceDetection, detectFaceLandmarks } from '../../utils/faceDetection';
+import {
+    Camera, RefreshCw, Save, Share2, ArrowLeft, Maximize2,
+    Sparkles, Download, Heart, Settings, Sliders, Image as ImageIcon,
+    Video, X, ChevronRight, ChevronLeft, Zap, Info, ShieldCheck,
+    Palette, Trash2, Undo, Redo, Monitor, Smartphone, AlertCircle
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { initFaceDetection, detectFaceLandmarks, analyzeFaceGeometry } from '../../utils/faceDetection';
 import FaceCanvas from './FaceCanvas';
 import { getAllProducts, getBrands } from '../../data/makeupBrands';
 import { PRESETS } from '../../data/presets';
 import { captureLook, downloadImage } from '../../utils/capture';
 import { saveLook } from '../../utils/storage';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from '../ui/GlassCard';
 import { Canvas } from '@react-three/fiber';
 import { Float, Environment } from '@react-three/drei';
-import { Lipstick, Compact, Palette } from '../3d/BeautyItems';
+import { LipstickClassicGold as Lipstick, CompactVintageRound as Compact } from '../3d/BeautyItems';
+import { EyeshadowPalette as PaletteIcon } from '../3d/BeautyItemsExtended';
+import {
+    LipstickHero,
+    EyeshadowPaletteHero,
+    BottleHero,
+    EyelinerHero,
+    MascaraHero,
+    BeautyProductStage
+} from '../3d/ProductArchitectures';
+import Product3DPreview from './Product3DPreview';
+import PresetGallery from './PresetGallery';
+import PresetDetailModal from './PresetDetailModal';
 
 const MakeupStudio = () => {
+    // Media & Hardware State
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const [detector, setDetector] = useState(null);
     const [faceData, setFaceData] = useState(null);
+    const [analysis, setAnalysis] = useState(null);
     const [fps, setFps] = useState(0);
+    const [cameraRes, setCameraRes] = useState({ w: 0, h: 0 });
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const [facingMode, setFacingMode] = useState("user");
+    const [cameraError, setCameraError] = useState(null);
+    const [showPrivacyNotice, setShowPrivacyNotice] = useState(true);
+    const [show3DPreview, setShow3DPreview] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState(null);
 
-    // UI State
+    // Studio UI State
     const [activeTab, setActiveTab] = useState("products");
     const [activeCategory, setActiveCategory] = useState("lips");
     const [activeProduct, setActiveProduct] = useState(null);
-    const [isCameraActive, setIsCameraActive] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState("all");
     const [compareMode, setCompareMode] = useState(false);
+    const [showMesh, setShowMesh] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    // Beauty Filters State
+    // Advanced Beauty Filters (B. Feed Enhancements)
     const [beautySettings, setBeautySettings] = useState({
-        smoothing: 30, // 0-100
-        brightness: 100, // 50-150
-        contrast: 100, // 50-150
-        saturation: 100, // 0-200
-        lighting: 'natural' // natural, studio, warm
+        smoothing: 40,
+        brightness: 110,
+        contrast: 105,
+        saturation: 100,
+        lighting: 'daylight', // ring, warm, daylight
+        vignette: 20
     });
 
     // Makeup State
     const [makeupState, setMakeupState] = useState({
-        lips: { color: null, opacity: 0.6, finish: 'matte' },
-        eyes: { color: null, opacity: 0.4 },
-        blush: { color: null, opacity: 0.3 },
+        lips: { color: null, opacity: 0.7, finish: 'matte' },
+        eyes: { color: null, opacity: 0.5 },
+        blush: { color: null, opacity: 0.4 },
         face: { color: null, opacity: 0.0 },
     });
 
     // 1. Initialize AI Model
     useEffect(() => {
-        const loadModel = async () => {
-            const det = await initFaceDetection();
+        initFaceDetection().then(det => {
             setDetector(det);
             setIsLoading(false);
-        };
-        loadModel();
+        });
     }, []);
 
-    // Camera Start/Stop Logic (HD 1080p)
+    // 2. Camera Logic (HD 1080p, Auto-Focus, FPS)
     const toggleCamera = async () => {
         if (isCameraActive) {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-                videoRef.current.srcObject = null;
-            }
-            setIsCameraActive(false);
+            stopCamera();
         } else {
-            try {
-                // Request 1080p or highest available
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        facingMode: "user",
-                        aspectRatio: { ideal: 1.777 } // 16:9
-                    }
-                });
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    videoRef.current.onloadedmetadata = () => {
-                        videoRef.current.play();
-                    };
-                }
-                setIsCameraActive(true);
-            } catch (err) {
-                console.error("Camera Error:", err);
-                alert("Unable to access camera or 1080p resolution not supported. Please check permissions.");
-            }
+            startCamera();
         }
     };
 
-    // Cleanup
-    useEffect(() => {
-        return () => {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
+    const startCamera = async () => {
+        setCameraError(null);
+        try {
+            const constraints = {
+                video: {
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
+                    facingMode: facingMode,
+                    frameRate: { ideal: 60, min: 30 }
+                }
+            };
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                setCameraRes({ w: settings.width, h: settings.height });
+                videoRef.current.play();
+                setIsCameraActive(true);
             }
-        };
-    }, []);
+        } catch (err) {
+            console.error(err);
+            if (err.name === 'NotAllowedError') setCameraError("Camera blocked. Please enable browser permissions.");
+            else setCameraError("Camera not detected or 1080p resolution not supported.");
+        }
+    };
 
-    // 2. Detection Loop with FPS Counter
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+            videoRef.current.srcObject = null;
+        }
+        setIsCameraActive(false);
+        setFaceData(null);
+        setAnalysis(null);
+    };
+
+    const switchCamera = () => {
+        const nextMode = facingMode === "user" ? "environment" : "user";
+        setFacingMode(nextMode);
+        if (isCameraActive) {
+            stopCamera();
+            setTimeout(startCamera, 100);
+        }
+    };
+
+    // 3. Detection & Auto-Centering Loop
     useEffect(() => {
         let animationId;
-        let lastFrameTime = 0;
-        let frameCount = 0;
+        let lastTime = 0;
+        let frames = 0;
 
-        const loop = async (timestamp) => {
-            if (detector && videoRef.current && isCameraActive && !videoRef.current.paused && !videoRef.current.ended) {
-                // Determine face data
-                const face = await detectFaceLandmarks(videoRef.current);
-                setFaceData(face ? face.keypoints : null);
+        const loop = async (now) => {
+            if (detector && videoRef.current && isCameraActive && videoRef.current.readyState >= 2) {
+                const faces = await detector.estimateFaces(videoRef.current);
 
-                // Calculate FPS
-                if (timestamp - lastFrameTime >= 1000) {
-                    setFps(frameCount);
-                    frameCount = 0;
-                    lastFrameTime = timestamp;
+                if (faces && faces.length > 0) {
+                    if (faces.length > 1) {
+                        setAnalysis({ status: "warning", message: "Only one face should be visible" });
+                    } else {
+                        const analytics = analyzeFaceGeometry(faces[0], videoRef.current.videoWidth, videoRef.current.videoHeight);
+                        setAnalysis(analytics);
+                        setFaceData(faces[0].keypoints);
+                    }
+                } else {
+                    setFaceData(null);
+                    setAnalysis({ status: "warning", message: "Face not detected" });
                 }
-                frameCount++;
+
+                // FPS Calculation
+                if (now - lastTime >= 1000) {
+                    setFps(frames);
+                    frames = 0;
+                    lastTime = now;
+                }
+                frames++;
             }
             animationId = requestAnimationFrame(loop);
         };
 
-        if (detector && isCameraActive) {
-            loop(0);
-        }
-
+        if (isCameraActive) loop(performance.now());
         return () => cancelAnimationFrame(animationId);
     }, [detector, isCameraActive]);
 
-    // 3. Handlers
+    // 4. Handlers
+    const handlePresetSelect = (preset) => {
+        const newState = {
+            lips: { color: null, opacity: 0.7, finish: 'matte' },
+            eyes: { color: null, opacity: 0.5 },
+            blush: { color: null, opacity: 0.4 },
+            face: { color: null, opacity: 0.0 },
+        };
+
+        Object.entries(preset.products).forEach(([cat, meta]) => {
+            if (cat === 'lips') newState.lips = { color: meta.color, opacity: meta.opacity, finish: meta.finish || 'matte' };
+            if (cat === 'eyes') newState.eyes = { color: meta.color, opacity: meta.opacity };
+            if (cat === 'blush') newState.blush = { color: meta.color, opacity: meta.opacity };
+            if (cat === 'foundation') newState.face = { color: meta.color, opacity: meta.opacity };
+        });
+
+        setMakeupState(newState);
+        setActiveProduct(null);
+        if (!isCameraActive) startCamera();
+    };
+
     const handleProductSelect = (product) => {
         setActiveProduct(product);
         const newState = { ...makeupState };
-
-        if (product.category === 'lips' || product.type === 'lipstick' || product.type === 'liquid_lipstick') {
-            newState.lips = {
-                color: product.hex,
-                opacity: product.opacity || 0.7,
-                finish: product.finish || 'matte',
-                texture: product.texture
-            };
-        } else if (product.category === 'eyes' || product.type === 'eyeshadow' || product.type === 'eyeliner') {
-            newState.eyes = {
-                color: product.hex,
-                opacity: product.opacity || 0.5,
-                finish: product.finish,
-                category: product.category === 'eyes' ? (product.type || 'eyeshadow') : 'eyeliner'
-            };
-        } else if (product.category === 'cheeks' || product.category === 'blush') {
-            newState.blush = {
-                color: product.hex,
-                opacity: product.opacity || 0.4
-            };
-        } else if (product.category === 'face' || product.type === 'foundation') {
-            newState.face = {
-                color: product.hex,
-                opacity: product.opacity || 0.2
-            };
-        }
-
+        if (product.category === 'lips') newState.lips = { color: product.hex, opacity: 0.7, finish: product.finish || 'satin' };
+        else if (product.category === 'eyes') newState.eyes = { color: product.hex, opacity: 0.5 };
+        else if (product.category === 'cheeks') newState.blush = { color: product.hex, opacity: 0.4 };
+        else if (product.category === 'face') newState.face = { color: product.hex, opacity: 0.2 };
         setMakeupState(newState);
     };
 
-    const handlePresetSelect = (preset) => {
-        const newState = { ...makeupState };
-        const all = getAllProducts();
-
-        Object.entries(preset.products).forEach(([cat, meta]) => {
-            const product = all.find(p => p.id === meta.id);
-            if (product) {
-                if (cat === 'lips') newState.lips = { color: product.hex, opacity: meta.opacity, finish: product.finish, texture: product.texture };
-                if (cat === 'eyes') newState.eyes = { color: product.hex, opacity: meta.opacity, finish: product.finish, category: 'eyeshadow' };
-                if (cat === 'blush') newState.blush = { color: product.hex, opacity: meta.opacity };
-                if (cat === 'foundation') newState.face = { color: product.hex, opacity: meta.opacity };
-            }
+    const resetMakeup = () => {
+        setMakeupState({
+            lips: { color: null, opacity: 0.7, finish: 'matte' },
+            eyes: { color: null, opacity: 0.5 },
+            blush: { color: null, opacity: 0.4 },
+            face: { color: null, opacity: 0.0 },
         });
-        setMakeupState(newState);
         setActiveProduct(null);
     };
 
-    const handleSaveLook = async () => {
-        setSaving(true);
-        const canvasEl = document.querySelector('canvas');
-        const imgData = await captureLook(videoRef.current, canvasEl);
-
-        if (imgData) {
-            await saveLook({
-                name: `Look ${new Date().toLocaleTimeString()}`,
-                image: imgData,
-                products: makeupState
-            });
-            downloadImage(imgData, 'radiance-look.png');
-            alert("Look saved to Gallery!");
-        }
-        setSaving(false);
-    };
-
-    const brands = getBrands();
-    const allProducts = getAllProducts();
-    const filteredProducts = activeFilter === 'all'
-        ? allProducts
-        : activeFilter === 'international'
-            ? brands.international.flatMap(b => b.products)
-            : brands.local.flatMap(b => b.products);
-
-    const displayProducts = filteredProducts.filter(p => p.category === activeCategory || (activeCategory === 'face' && p.category === 'face'));
-
-    // Video Filter Styles
-    const videoStyle = {
-        filter: `brightness(${beautySettings.brightness}%) contrast(${beautySettings.contrast}%) saturate(${beautySettings.saturation}%)`
+    // Style Helpers
+    const videoFilters = {
+        filter: `brightness(${beautySettings.brightness}%) contrast(${beautySettings.contrast}%) saturate(${beautySettings.saturation}%)`,
+        transition: 'filter 0.3s ease'
     };
 
     return (
-        <section className="relative h-screen bg-black text-rose-50 overflow-hidden flex font-sans">
+        <section className="relative h-screen bg-[#050505] text-white flex flex-col md:flex-row font-sans overflow-hidden">
 
-            {/* MAIN CAMERA VIEWPORT */}
-            <div className={`relative flex-1 flex items-center justify-center overflow-hidden transition-all duration-300 ${isPanelOpen ? 'mr-0' : 'mr-0'}`}>
+            {/* --- MAIN CAMERA VIEWPORT (60% Desktop, 70% Mobile) --- */}
+            <div className="relative flex-1 md:flex-[0.65] bg-neutral-900 border-r border-white/5 overflow-hidden flex items-center justify-center">
 
-                {/* VIDEO FEED */}
-                <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center">
-                    <video
-                        ref={videoRef}
-                        className="absolute w-full h-full object-cover transform -scale-x-100"
-                        style={videoStyle}
-                        playsInline
-                        muted
-                    />
+                {/* 1080p Video Feed */}
+                {isCameraActive ? (
+                    <div className="relative w-full h-full flex items-center justify-center bg-black">
+                        <video
+                            ref={videoRef}
+                            className={`absolute w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''}`}
+                            style={videoFilters}
+                            playsInline muted autoFocus
+                        />
 
-                    {/* Makeup Overlay Canvas */}
-                    {faceData && (
-                        <div className="absolute inset-0 pointer-events-none transform -scale-x-100">
-                            <FaceCanvas
-                                videoRef={videoRef}
-                                landmarks={faceData}
-                                activeMakeup={makeupState}
-                                beautySettings={beautySettings}
-                            />
-                        </div>
-                    )}
+                        {/* Virtual Makeup Overlay */}
+                        {faceData && !compareMode && (
+                            <div className={`absolute inset-0 pointer-events-none ${facingMode === 'user' ? '-scale-x-100' : ''}`}>
+                                <FaceCanvas
+                                    landmarks={faceData}
+                                    videoRef={videoRef}
+                                    activeMakeup={makeupState}
+                                    beautySettings={beautySettings}
+                                />
+                            </div>
+                        )}
 
-                    {/* Compare Mode Slider (Active only if compareMode is true) */}
-                    {compareMode && isCameraActive && (
-                        <div className="absolute inset-0 z-20">
-                            <ReactCompareSlider
-                                itemOne={<div className="w-full h-full" />} // Transparent to show underlying video + makeup
-                                itemTwo={<div className="w-full h-full bg-black" />} // Wrong approach for live video comparison. 
-                            // Proper comparison requires capturing a frame or complex layering. 
-                            // For now, we'll simplify: Toggle logic handles visual comparison better than slider for live video.
-                            // Use Split Screen logic manually?
-                            />
-                        </div>
-                    )}
-                </div>
+                        {/* Split Comparison Mode (B. Advanced Features) */}
+                        {compareMode && faceData && (
+                            <div className="absolute inset-0 z-20">
+                                <ReactCompareSlider
+                                    itemOne={
+                                        <div className="w-full h-full relative overflow-hidden">
+                                            <video
+                                                src={videoRef.current?.srcObject}
+                                                className={`absolute w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''}`}
+                                                style={videoFilters} autoPlay muted
+                                            />
+                                            <div className="absolute bottom-4 left-4 bg-black/40 px-3 py-1 rounded text-[10px] uppercase font-bold tracking-widest">Natural</div>
+                                        </div>
+                                    }
+                                    itemTwo={
+                                        <div className="w-full h-full relative overflow-hidden">
+                                            <video
+                                                src={videoRef.current?.srcObject}
+                                                className={`absolute w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''}`}
+                                                style={videoFilters} autoPlay muted
+                                            />
+                                            <div className={`absolute inset-0 pointer-events-none ${facingMode === 'user' ? '-scale-x-100' : ''}`}>
+                                                <FaceCanvas landmarks={faceData} videoRef={videoRef} activeMakeup={makeupState} beautySettings={beautySettings} />
+                                            </div>
+                                            <div className="absolute bottom-4 right-4 bg-primary px-3 py-1 rounded text-[10px] uppercase font-bold tracking-widest">Enhanced</div>
+                                        </div>
+                                    }
+                                />
+                            </div>
+                        )}
 
-                {/* --- UI OVERLAYS --- */}
-
-                {/* TOP BAR */}
-                <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent z-40 flex justify-between items-center">
-                    <button onClick={() => window.history.back()} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md" aria-label="Go Back">
-                        <ArrowLeft size={20} />
-                    </button>
-
-                    <div className="flex space-x-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                        <div className="flex items-center space-x-2 border-r border-white/20 pr-4">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-xs font-mono">{isCameraActive ? 'LIVE' : 'OFFLINE'}</span>
-                        </div>
-                        <div className="text-xs font-mono opacity-70">{fps} FPS</div>
-                        <div className="text-xs font-mono opacity-70">1080p</div>
+                        {/* Ring Light Overlay (Optional visualization) */}
+                        {beautySettings.lighting === 'ring' && (
+                            <div className="absolute inset-0 border-[60px] border-white/5 rounded-full pointer-events-none shadow-[inset_0_0_100px_rgba(255,255,255,0.1)]" />
+                        )}
                     </div>
+                ) : (
+                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-xl p-6 text-center">
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
+                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                                <Monitor size={32} className="text-primary" />
+                            </div>
+                            <h2 className="text-3xl font-serif mb-2 italic">Luxury Mirror</h2>
+                            <p className="text-white/40 mb-8 text-sm leading-relaxed">Local real-time processing at 1080p resolution. Your camera feed is private and never leaves your device.</p>
 
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={() => setCompareMode(!compareMode)}
-                            className={`p-2 rounded-full backdrop-blur-md transition-colors ${compareMode ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20'}`}
-                            title="Split Compare"
-                            aria-label="Toggle Split Comparison"
-                        >
-                            <Video size={20} />
-                        </button>
-                        <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md" aria-label="Settings">
-                            <Settings size={20} />
-                        </button>
-                    </div>
-                </div>
+                            {cameraError ? (
+                                <GlassCard className="p-4 bg-red-500/10 border-red-500/20 text-red-200 text-sm mb-6 flex items-center gap-3">
+                                    <AlertCircle size={20} />
+                                    <span>{cameraError}</span>
+                                </GlassCard>
+                            ) : null}
 
-                {/* BOTTOM BAR (When Panel is Closed or always visible controls) */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-6">
-                    <button className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10" aria-label="Open Gallery">
-                        <ImageIcon size={24} />
-                    </button>
-
-                    <button
-                        onClick={toggleCamera}
-                        className={`w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all transform hover:scale-105 ${isCameraActive ? 'border-primary bg-transparent' : 'border-white bg-white'}`}
-                        aria-label={isCameraActive ? "Stop Camera" : "Start Camera"}
-                    >
-                        {isCameraActive ? <div className="w-16 h-16 bg-primary rounded-full animate-pulse" /> : <Camera className="text-black" size={32} />}
-                    </button>
-
-                    <button
-                        onClick={handleSaveLook}
-                        disabled={!isCameraActive}
-                        className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10"
-                        aria-label="Save Look"
-                    >
-                        <Save size={24} />
-                    </button>
-                </div>
-
-                {!isCameraActive && (
-                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-md">
-                        <div className="text-center p-8 max-w-md">
-                            <Sparkles className="w-16 h-16 text-primary mx-auto mb-6" />
-                            <h2 className="text-3xl font-serif mb-4">Radiance Virtual Studio</h2>
-                            <p className="text-white/60 mb-8">Access our premium 1080p mirror to try 100+ shades instantly.</p>
-                            <button onClick={toggleCamera} className="bg-primary text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-primary/80 transition-all shadow-glow">
-                                Activate Camera
-                            </button>
-                        </div>
+                            <div className="flex flex-col gap-3">
+                                <button onClick={toggleCamera} className="bg-primary text-white py-4 px-10 rounded-full font-bold uppercase tracking-[0.2em] text-xs hover:bg-primary/80 transition-all shadow-glow">
+                                    Activate HD Studio
+                                </button>
+                                <button className="text-white/50 text-xs hover:text-white transition-colors">Or Upload a Portrait</button>
+                            </div>
+                        </motion.div>
                     </div>
                 )}
+
+                {/* --- UI OVERLAYS (Top/Bottom Bars) --- */}
+                <AnimatePresence>
+                    {isCameraActive && (
+                        <>
+                            {/* Top Stats & Camera Toggles */}
+                            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute top-0 left-0 right-0 p-5 flex justify-between items-center z-40">
+                                <div className="flex items-center gap-4">
+                                    <button onClick={() => window.history.back()} className="p-3 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-xl border border-white/5 shadow-2xl">
+                                        <ArrowLeft size={18} />
+                                    </button>
+                                    <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                            <span className="text-[10px] font-bold tracking-widest text-white/70 uppercase">Live</span>
+                                        </div>
+                                        <span className="text-[10px] font-mono opacity-50">{fps} FPS • {cameraRes.w}p</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <button onClick={switchCamera} className="p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/5" title="Switch Camera">
+                                        <RefreshCw size={18} />
+                                    </button>
+                                    <button onClick={() => setCompareMode(!compareMode)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all ${compareMode ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} title="Comparison View">
+                                        <Video size={18} />
+                                    </button>
+                                    <button onClick={() => setShowMesh(!showMesh)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all ${showMesh ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} title="Symmetry Grid">
+                                        <Monitor size={18} />
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            {/* Symmetry Grid Overlay (H. Advanced Features) */}
+                            {showMesh && (
+                                <div className="absolute inset-0 pointer-events-none z-10 opacity-30">
+                                    <div className="w-full h-full grid grid-cols-6 grid-rows-6">
+                                        {Array.from({ length: 36 }).map((_, i) => (
+                                            <div key={i} className="border-[0.5px] border-white/20" />
+                                        ))}
+                                    </div>
+                                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-primary/50" />
+                                    <div className="absolute top-1/2 left-0 right-0 h-px bg-primary/50" />
+                                </div>
+                            )}
+
+                            {/* Analytics / Feedback Overlay */}
+                            {analysis && analysis.status === 'warning' && (
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute top-24 left-1/2 -translate-x-1/2 bg-gold/20 backdrop-blur-xl border border-gold/40 text-gold px-6 py-2 rounded-full text-xs font-bold shadow-2xl flex items-center gap-3 z-50">
+                                    <AlertCircle size={14} /> {analysis.message}
+                                </motion.div>
+                            )}
+
+                            {/* Bottom Capture Panel */}
+                            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-8 z-40">
+                                <button className="p-4 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-xl border border-white/5 group transition-all" title="View Gallery">
+                                    <ImageIcon size={24} className="group-hover:scale-110 transition-transform" />
+                                </button>
+                                <button
+                                    onClick={() => alert("Capturing 4K Portrait Style Lookup...")}
+                                    className="w-20 h-20 bg-white rounded-full flex items-center justify-center border-8 border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-110 active:scale-95 transition-all"
+                                >
+                                    <div className="w-14 h-14 bg-black rounded-full flex items-center justify-center">
+                                        <div className="w-12 h-12 border-2 border-white rounded-full opacity-20" />
+                                    </div>
+                                </button>
+                                <button onClick={resetMakeup} className="p-4 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-xl border border-white/5 group transition-all" title="Clear All">
+                                    <Trash2 size={24} className="group-hover:text-primary transition-colors" />
+                                </button>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
             </div>
 
-            {/* RIGHT PANEL: CONTROLS & PRODUCTS */}
+            {/* --- RIGHT PANEL: STUDIO CONTROLS (40% Desktop, Full Drawer Mobile) --- */}
             <motion.div
-                initial={{ width: 420 }}
-                animate={{ width: isPanelOpen ? 420 : 0 }}
-                className="bg-white text-charcoal shadow-2xl z-50 flex flex-col relative h-full border-l border-gray-100"
+                initial={{ width: 450 }} animate={{ width: isPanelOpen ? 450 : 0 }}
+                className="bg-white text-charcoal shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col relative h-full border-l border-gray-100"
             >
-                {/* Toggle Button */}
+                {/* Panel Drag Handle (Desktop) */}
                 <button
                     onClick={() => setIsPanelOpen(!isPanelOpen)}
-                    className="absolute -left-10 top-1/2 -translate-y-1/2 w-10 h-20 bg-white rounded-l-2xl flex items-center justify-center shadow-[-5px_0_15px_-3px_rgba(0,0,0,0.1)] cursor-pointer text-gray-500 hover:text-primary"
-                    aria-label={isPanelOpen ? "Close Panel" : "Open Panel"}
+                    className="absolute -left-10 top-1/2 -translate-y-1/2 w-10 h-24 bg-white border border-gray-100 rounded-l-3xl flex items-center justify-center shadow-2xl text-gray-400 hover:text-primary transition-colors"
                 >
                     {isPanelOpen ? <ChevronRight /> : <ChevronLeft />}
                 </button>
 
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                    <h3 className="font-serif text-xl">Studio Controls</h3>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setActiveTab('beauty')}
-                            className={`p-2 rounded-lg transition-colors ${activeTab === 'beauty' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
-                            aria-label="Beauty Settings"
-                        >
-                            <Sliders size={18} />
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('products')}
-                            className={`p-2 rounded-lg transition-colors ${activeTab === 'products' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
-                            aria-label="Product Library"
-                        >
-                            <Sparkles size={18} />
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('looks')}
-                            className={`p-2 rounded-lg transition-colors ${activeTab === 'looks' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
-                            aria-label="Preset Looks"
-                        >
-                            <Heart size={18} />
-                        </button>
+                {/* Tabs Navigation */}
+                <div className="p-6 pb-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/80 sticky top-0 z-10">
+                    <div className="flex gap-2 p-1 bg-white rounded-xl border border-gray-100">
+                        {['products', 'looks', 'beauty'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all
+                                    ${activeTab === tab ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}
+                                `}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex gap-1">
+                        <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-400"><Undo size={16} /></button>
+                        <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-400"><Redo size={16} /></button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
-                    {activeTab === 'beauty' && (
-                        <div className="p-6 space-y-8">
-                            <div>
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Skin & Lighting</h4>
-
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span>Skin Smoothing</span>
-                                            <span>{beautySettings.smoothing}%</span>
-                                        </div>
-                                        <input
-                                            type="range" min="0" max="100"
-                                            value={beautySettings.smoothing}
-                                            onChange={(e) => setBeautySettings(p => ({ ...p, smoothing: parseInt(e.target.value) }))}
-                                            className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span>Brightness</span>
-                                            <span>{(beautySettings.brightness - 100) > 0 ? '+' : ''}{beautySettings.brightness - 100}</span>
-                                        </div>
-                                        <input
-                                            type="range" min="50" max="150"
-                                            value={beautySettings.brightness}
-                                            onChange={(e) => setBeautySettings(p => ({ ...p, brightness: parseInt(e.target.value) }))}
-                                            className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span>Contrast</span>
-                                            <span>{(beautySettings.contrast - 100) > 0 ? '+' : ''}{beautySettings.contrast - 100}</span>
-                                        </div>
-                                        <input
-                                            type="range" min="50" max="150"
-                                            value={beautySettings.contrast}
-                                            onChange={(e) => setBeautySettings(p => ({ ...p, contrast: parseInt(e.target.value) }))}
-                                            className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                    </div>
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                    {/* Products View */}
+                    {activeTab === 'products' && (
+                        <div className="space-y-8">
+                            {/* Categories Quick Nav */}
+                            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+                                {['lips', 'eyes', 'cheeks', 'face'].map(cat => (
                                     <button
-                                        onClick={() => setBeautySettings({ smoothing: 30, brightness: 100, contrast: 100, saturation: 100, lighting: 'natural' })}
-                                        className="w-full py-2 bg-gray-100 text-charcoal rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors mt-4"
+                                        key={cat} onClick={() => setActiveCategory(cat)}
+                                        className={`flex-none px-6 py-2 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-all
+                                            ${activeCategory === cat ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}
+                                        `}
                                     >
-                                        Reset Filters
+                                        {cat}
                                     </button>
-                                </div>
+                                ))}
                             </div>
+
+                            {/* Product Grid */}
+                            <div className="grid grid-cols-3 gap-4">
+                                {getAllProducts().filter(p => p.category === activeCategory).map(product => (
+                                    <motion.button
+                                        whileHover={{ y: -5 }}
+                                        onClick={() => {
+                                            handleProductSelect(product);
+                                            setShow3DPreview(true);
+                                        }}
+                                        key={product.id} className={`group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all p-1
+                                            ${activeProduct?.id === product.id ? 'border-primary bg-primary/5' : 'border-gray-50 bg-gray-50'}
+                                        `}
+                                    >
+                                        <div className="h-full w-full rounded-xl overflow-hidden flex flex-col">
+                                            <div className="flex-1 relative" style={{ background: product.hex }}>
+                                                {product.finish === 'glossy' && <div className="w-full h-full bg-gradient-to-tr from-white/10 via-white/5 to-transparent" />}
+                                                {product.finish === 'shimmer' && <div className="w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />}
+                                                <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-white text-[8px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                    <Maximize2 size={8} /> 3D
+                                                </div>
+                                            </div>
+                                            <div className="p-2 bg-white flex flex-col gap-0.5">
+                                                <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">{product.brand}</p>
+                                                <p className="text-[10px] font-bold text-gray-800 line-clamp-1">{product.name}</p>
+                                            </div>
+                                        </div>
+                                        {activeProduct?.id === product.id && (
+                                            <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full shadow-lg">
+                                                <Zap size={8} fill="currentColor" />
+                                            </div>
+                                        )}
+                                    </motion.button>
+                                ))}
+                            </div>
+
+                            {/* Intensity Slider (Sticky Bottom in category) */}
+                            {activeProduct && (
+                                <GlassCard className="p-5 mt-4 border-primary/20 bg-primary/5 sticky bottom-0">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-xl" style={{ background: activeProduct.hex }} />
+                                            <div>
+                                                <h5 className="font-bold text-xs">{activeProduct.name}</h5>
+                                                <p className="text-[10px] text-gray-400 uppercase tracking-widest">{activeProduct.finish} Intensity</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-primary">{Math.round((makeupState[activeCategory]?.opacity || 0) * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="1" step="0.05"
+                                        value={makeupState[activeCategory]?.opacity || 0}
+                                        onChange={(e) => {
+                                            const val = parseFloat(e.target.value);
+                                            const newState = { ...makeupState };
+                                            newState[activeCategory].opacity = val;
+                                            setMakeupState(newState);
+                                        }}
+                                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                    />
+                                </GlassCard>
+                            )}
                         </div>
                     )}
 
+                    {/* Presets / Looks View */}
                     {activeTab === 'looks' && (
-                        <div className="p-6">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Curated Looks</h4>
-                            <div className="space-y-4">
-                                {PRESETS.map(preset => (
-                                    <button
-                                        key={preset.id}
-                                        onClick={() => handlePresetSelect(preset)}
-                                        className="w-full bg-gray-50 rounded-xl overflow-hidden border border-gray-100 hover:border-primary/50 transition-all text-left flex"
-                                    >
-                                        <div className="w-24 h-24 bg-gray-200 relative">
-                                            <img
-                                                src={preset.thumbnail}
-                                                alt={preset.name}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => e.target.src = 'https://placehold.co/200x200?text=Look'}
-                                            />
-                                            {/* Compare Icon / Badge */}
-                                            <div className="absolute top-1 left-1 bg-black/50 text-white text-[8px] px-1 rounded backdrop-blur-sm">
-                                                TRY ON
+                        <PresetGallery
+                            presets={PRESETS}
+                            onApply={handlePresetSelect}
+                            onDetail={(preset) => setSelectedPreset(preset)}
+                        />
+                    )}
+
+                    {/* Beauty Filters View (B. Feed Enhancements) */}
+                    {activeTab === 'beauty' && (
+                        <div className="space-y-8">
+                            {/* Lighting Presets */}
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <Zap size={14} className="text-gold" /> Lighting Environment
+                                </h4>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[
+                                        { id: 'natural', name: 'Natural', icon: Monitor },
+                                        { id: 'studio', name: 'Ring Light', icon: Maximize2 },
+                                        { id: 'warm', name: 'Golden Hour', icon: Sparkles }
+                                    ].map(light => (
+                                        <button
+                                            key={light.id}
+                                            onClick={() => setBeautySettings(p => ({ ...p, lighting: light.id }))}
+                                            className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2
+                                                ${beautySettings.lighting === light.id ? 'bg-gold/10 border-gold/50 text-gold shadow-lg' : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'}
+                                            `}
+                                        >
+                                            <light.icon size={20} />
+                                            <span className="text-[9px] font-bold uppercase tracking-widest">{light.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Fine Fine Enhancements */}
+                            <div className="space-y-6">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Palette size={14} className="text-primary" /> Skin & Retouching
+                                </h4>
+                                {[
+                                    { id: 'smoothing', label: 'Skin Smoothing', icon: Sparkles },
+                                    { id: 'brightness', label: 'Brightness', icon: Monitor },
+                                    { id: 'contrast', label: 'Contrast', icon: Sliders },
+                                    { id: 'saturation', label: 'Saturation', icon: Palette }
+                                ].map(setting => (
+                                    <div key={setting.id} className="space-y-2">
+                                        <div className="flex justify-between text-xs font-medium">
+                                            <span>{setting.label}</span>
+                                            <span className="font-mono text-[10px] text-gray-400">{beautySettings[setting.id]}%</span>
+                                        </div>
+                                        <input
+                                            type="range" min={setting.id === 'brightness' || setting.id === 'contrast' ? "50" : "0"} max={setting.id === 'saturation' ? "200" : "150"}
+                                            value={beautySettings[setting.id]}
+                                            onChange={(e) => setBeautySettings(p => ({ ...p, [setting.id]: parseInt(e.target.value) }))}
+                                            className="w-full h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Total Bar */}
+                <div className="p-6 bg-gray-50 border-t border-gray-100">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex -space-x-3">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200" />
+                            ))}
+                        </div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">3 Products Selected</p>
+                    </div>
+                    <button className="w-full bg-charcoal text-white py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-primary transition-all active:scale-95">
+                        Add Look to Bag • 4,250 BDT
+                    </button>
+                </div>
+            </motion.div>
+
+            {/* 3D Product Architecture Preview Modal */}
+            <AnimatePresence>
+                {show3DPreview && activeProduct && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-2xl p-4 md:p-12"
+                    >
+                        <div className="relative w-full max-w-5xl">
+                            <button
+                                onClick={() => setShow3DPreview(false)}
+                                className="absolute -top-12 right-0 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md z-10"
+                            >
+                                <X size={24} />
+                            </button>
+                            <Product3DPreview product={activeProduct} />
+
+                            {/* Detailed Info Card (C. Product Information Overlays) */}
+                            <motion.div
+                                initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+                                className="absolute top-1/2 -right-12 -translate-y-1/2 translate-x-full hidden xl:block w-80"
+                            >
+                                <GlassCard className="p-8 text-white !bg-white/5 border-white/10">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-charcoal font-black">{activeProduct.brand[0]}</div>
+                                        <div>
+                                            <h4 className="font-bold text-lg">{activeProduct.brand}</h4>
+                                            <p className="text-[10px] text-white/40 uppercase tracking-widest">{activeProduct.type}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div>
+                                            <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Description</p>
+                                            <p className="text-xs text-white/70 leading-relaxed">{activeProduct.description}</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Finish</p>
+                                                <p className="text-xs font-bold capitalize">{activeProduct.finish}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Rating</p>
+                                                <p className="text-xs font-bold text-gold">★ {activeProduct.rating.toFixed(1)}</p>
                                             </div>
                                         </div>
-                                        <div className="p-3 flex-1 flex flex-col justify-center">
-                                            <div className="flex justify-between items-start">
-                                                <h5 className="font-bold text-charcoal">{preset.name}</h5>
-                                                <span className="text-[10px] uppercase bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
-                                                    {preset.category}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{preset.description}</p>
-                                            <div className="mt-2 flex gap-1">
-                                                {Object.keys(preset.products).map(cat => (
-                                                    <div key={cat} className="w-2 h-2 rounded-full"
-                                                        style={{ backgroundColor: preset.products[cat].id.includes('mac') ? '#D61C4E' : '#E0C097' }} // Visualization hack
-                                                    />
+                                        <div className="pt-6 border-t border-white/5">
+                                            <p className="text-[10px] text-white/40 uppercase tracking-widest mb-2">Key Ingredients</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {activeProduct.ingredients.map(ing => (
+                                                    <span key={ing} className="px-2 py-1 bg-white/5 rounded text-[9px]">{ing}</span>
                                                 ))}
                                             </div>
                                         </div>
+                                    </div>
+                                    <button className="w-full mt-8 py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs shadow-glow">
+                                        ADD TO BAG • {activeProduct.price} BDT
                                     </button>
-                                ))}
-                            </div>
+                                </GlassCard>
+                            </motion.div>
                         </div>
-                    )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                    {activeTab === 'products' && (
-                        <>
-                            {/* Categories */}
-                            <div className="px-6 py-4 flex space-x-4 overflow-x-auto hide-scrollbar border-b border-gray-100">
-                                {['lips', 'eyes', 'cheeks', 'face'].map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setActiveCategory(cat)}
-                                        className={`flex flex-col items-center min-w-[60px] space-y-2 group`}
-                                    >
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all ${activeCategory === cat ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 text-gray-400 group-hover:border-primary/50'}`}>
-                                            <div className="capitalize font-bold text-[10px]">{cat[0]}</div>
-                                        </div>
-                                        <span className={`text-[10px] uppercase font-bold tracking-wider ${activeCategory === cat ? 'text-primary' : 'text-gray-400'}`}>{cat}</span>
-                                    </button>
-                                ))}
+            {/* Privacy Notice Overlay */}
+            <AnimatePresence>
+                {showPrivacyNotice && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-6"
+                    >
+                        <GlassCard className="max-w-md p-8 !bg-white/90 border-none shadow-3xl text-charcoal">
+                            <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center mb-6 border border-green-500/20">
+                                <ShieldCheck size={32} />
                             </div>
-
-                            {/* Products Grid */}
-                            <div className="p-6 grid grid-cols-3 gap-3">
-                                {displayProducts.map(product => (
-                                    <button
-                                        key={product.id}
-                                        onClick={() => handleProductSelect(product)}
-                                        className={`group relative rounded-xl overflow-hidden border transition-all aspect-[3/4] text-left
-                                            ${activeProduct?.id === product.id ? 'border-primary ring-2 ring-primary/20 shadow-lg' : 'border-gray-100 hover:border-primary/40'}
-                                        `}
-                                    >
-                                        <div className="h-3/4 w-full" style={{ backgroundColor: product.hex }} />
-                                        <div className="h-1/4 bg-white p-2 flex flex-col justify-center">
-                                            <p className="text-[10px] font-bold truncate">{product.name}</p>
-                                        </div>
-                                        {activeProduct?.id === product.id && (
-                                            <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                                <div className="w-2 h-2 bg-primary rounded-full" />
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
+                            <h3 className="text-2xl font-serif mb-2 italic">Your Privacy Matters</h3>
+                            <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                                To provide the virtual try-on experience, we need camera access.
+                                <strong className="text-charcoal"> All video frames are processed locally inside your browser.</strong>
+                                We never record, store, or upload your live camera feed to our servers.
+                            </p>
+                            <div className="flex gap-4">
+                                <PinkButton onClick={() => setShowPrivacyNotice(false)} className="flex-1 py-4">I Understand</PinkButton>
                             </div>
+                        </GlassCard>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                            {/* Active Product Controls */}
-                            {activeProduct && (
-                                <div className="p-6 bg-gray-50 border-t border-gray-100">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h4 className="font-bold text-sm">{activeProduct.name}</h4>
-                                            <p className="text-xs text-gray-500">{activeProduct.finish} • {activeProduct.category}</p>
-                                        </div>
-                                        <div className="text-primary font-bold">{activeProduct.price} BDT</div>
-                                    </div>
-
-                                    {/* 3D Product Preview */}
-                                    <div className="w-full h-32 bg-white rounded-xl mb-4 border border-gray-100 overflow-hidden relative">
-                                        <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
-                                            <ambientLight intensity={0.5} />
-                                            <spotLight position={[10, 10, 10]} intensity={1} />
-                                            <Environment preset="city" />
-                                            <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
-                                                {activeCategory === 'lips' ? (
-                                                    <Lipstick color={activeProduct.hex} scale={2} rotation={[0.5, 0.5, 0]} />
-                                                ) : activeCategory === 'cheeks' || activeCategory === 'face' ? (
-                                                    <Compact color={activeProduct.hex} scale={1.8} rotation={[0.5, -0.2, 0]} />
-                                                ) : (
-                                                    <Palette scale={1.2} rotation={[0.5, 0, 0]} />
-                                                )}
-                                            </Float>
-                                        </Canvas>
-                                        <div className="absolute bottom-2 right-2 text-[8px] text-gray-400 font-mono tracking-widest uppercase">
-                                            3D Preview
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between text-xs text-gray-500">
-                                                <span>Opacity</span>
-                                                <span>{Math.round((activeCategory === 'lips' ? makeupState.lips.opacity : makeupState[activeCategory].opacity) * 100)}%</span>
-                                            </div>
-                                            <input
-                                                type="range" min="0" max="1" step="0.1"
-                                                value={activeCategory === 'lips' ? makeupState.lips.opacity : makeupState[activeCategory]?.opacity || 0}
-                                                onChange={(e) => {
-                                                    const val = parseFloat(e.target.value);
-                                                    const newState = { ...makeupState };
-                                                    if (newState[activeCategory]) newState[activeCategory].opacity = val;
-                                                    else if (activeCategory === 'cheeks') newState.blush.opacity = val;
-                                                    setMakeupState(newState);
-                                                }}
-                                                className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                            />
-                                        </div>
-                                        <button className="w-full py-3 bg-charcoal text-white rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-primary transition-colors">
-                                            Add to Bag
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </motion.div>
+            {/* Preset Detail Modal */}
+            <AnimatePresence>
+                {selectedPreset && (
+                    <PresetDetailModal
+                        preset={selectedPreset}
+                        onClose={() => setSelectedPreset(null)}
+                        onApply={handlePresetSelect}
+                    />
+                )}
+            </AnimatePresence>
         </section>
     );
 };
 
-export default MakeupStudio;
+// Helper components & icons as needed
+const PinkButton = ({ children, onClick, className, icon: Icon }) => (
+    <button onClick={onClick} className={`bg-primary text-white font-bold uppercase tracking-widest text-[10px] rounded-full hover:bg-primary/80 transition-all shadow-glow flex items-center justify-center gap-2 ${className}`}>
+        {Icon && <Icon size={14} />}
+        {children}
+    </button>
+);
 
+export default MakeupStudio;

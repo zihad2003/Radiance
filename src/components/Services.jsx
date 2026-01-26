@@ -175,7 +175,7 @@ const Services = ({ onBook }) => {
 
             {/* Horizontal Scroll Container */}
             <div className="overflow-x-auto pb-12 pt-8 hide-scrollbar cursor-grab active:cursor-grabbing px-6">
-                <div className="flex space-x-8 w-max px-6">
+                <div className="flex space-x-8 w-max px-6 stagger-reveal">
                     {services.map((service) => (
                         <ServiceCard key={service.id} service={service} onBook={onBook} />
                     ))}

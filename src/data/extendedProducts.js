@@ -2,7 +2,7 @@
 // This file extends the base makeupBrands.js with additional products
 
 const createProduct = (index, brand, name, category, type, shadeName, hex, finish, priceBDT, description, extras = {}) => ({
-    id: `${brand.toLowerCase().replace(/\s+/g, '_')}_${category}_${index}`,
+    id: `ext_${brand.toLowerCase().replace(/\s+/g, '_')}_${category}_${index}`,
     name: `${name} - ${shadeName}`,
     brand: brand,
     category: category,

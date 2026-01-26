@@ -7,7 +7,7 @@ const teamMembers = [
         id: 1,
         name: "Sadia Islam",
         role: "Master Stylist",
-        image: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?q=80&w=1000&auto=format&fit=crop", // Reusing an image
+        image: "/assets/team/sadia.png",
         specialties: ["Bridal Makeover", "Hair Rebonding"],
         color: "from-pink-400 to-rose-400"
     },
@@ -15,7 +15,7 @@ const teamMembers = [
         id: 2,
         name: "Rahim Khan",
         role: "Creative Director",
-        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop", // Male portrait
+        image: "/assets/team/rahim.png",
         specialties: ["Celebrity Styling", "Colorist"],
         color: "from-purple-400 to-indigo-400"
     },
@@ -23,7 +23,7 @@ const teamMembers = [
         id: 3,
         name: "Nusrat Jahan",
         role: "Lead Esthetician",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
+        image: "/assets/team/nusrat.png",
         specialties: ["HydraFacial", "Laser Treatment"],
         color: "from-teal-400 to-cyan-400"
     },
@@ -31,7 +31,7 @@ const teamMembers = [
         id: 4,
         name: "Rumana Ahmed",
         role: "Henna & Nail Artist",
-        image: "https://images.unsplash.com/photo-1605406575497-015ab0d21b9b?q=80&w=1000&auto=format&fit=crop", // Female portrait
+        image: "/assets/team/rumana.png",
         specialties: ["Bridal Mehendi", "Acrylic Nails"],
         color: "from-orange-400 to-amber-400"
     }
@@ -104,7 +104,7 @@ const Team = () => {
             </div>
 
             {/* Inline style for 3D flip since Tailwind defaults might not cover perspective utilities fully without config */}
-            <style jsx>{`
+            <style>{`
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }

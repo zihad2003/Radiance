@@ -76,7 +76,7 @@ const ReflectiveFloor = () => {
             <planeGeometry args={[50, 50]} />
             <MeshReflectorMaterial
                 blur={[300, 100]}
-                resolution={2048}
+                resolution={1024}
                 mixBlur={1}
                 mixStrength={40}
                 roughness={1}
@@ -100,8 +100,8 @@ const StudioLighting = () => {
                 position={[5, 8, 5]}
                 intensity={1.5}
                 castShadow
-                shadow-mapSize-width={4096}
-                shadow-mapSize-height={4096}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
                 shadow-camera-far={50}
                 shadow-camera-left={-10}
                 shadow-camera-right={10}
@@ -138,18 +138,23 @@ const ProductComposition = ({ mousePosition }) => {
     const groupRef = useRef();
 
     useFrame((state) => {
-        if (groupRef.current && mousePosition) {
-            // Subtle parallax effect
+        const scrollY = window.scrollY;
+        if (groupRef.current) {
+            // Scroll-linked rotation
             groupRef.current.rotation.y = THREE.MathUtils.lerp(
                 groupRef.current.rotation.y,
-                mousePosition.x * 0.1,
+                (mousePosition ? mousePosition.x * 0.1 : 0) + scrollY * 0.001,
                 0.05
             );
             groupRef.current.rotation.x = THREE.MathUtils.lerp(
                 groupRef.current.rotation.x,
-                -mousePosition.y * 0.05,
+                (mousePosition ? -mousePosition.y * 0.05 : 0) + scrollY * 0.0005,
                 0.05
             );
+
+            // Subtle floating scale effect based on scroll
+            const scale = 1 + Math.sin(scrollY * 0.002) * 0.05;
+            groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, scale, 0.05));
         }
     });
 

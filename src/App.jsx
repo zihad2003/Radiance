@@ -4,17 +4,22 @@ import { RewardsProvider } from './context/RewardsContext';
 import CustomCursor from './components/CustomCursor';
 import Gamification from './components/Gamification';
 import FadeIn from './components/ui/FadeIn';
+import ScrollProgress from './components/ui/ScrollProgress';
+import BackToTop from './components/ui/BackToTop';
 import Navbar from './components/Navbar';
+import ChatBot from './components/ChatBot';
+import ConvexMigrator from './components/ConvexMigrator';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Gallery from './components/Gallery';
+import TransformationCompare from './components/TransformationCompare';
 import Shop from './components/Shop';
 import Pricing from './components/Pricing';
-import Testimonials from './components/Testimonials';
+import BeautyStories from './components/BeautyStories';
 import BookingWizard from './components/BookingWizard';
 import Team from './components/Team';
 import ContactFooter from './components/ContactFooter';
-import ExcellencePillars from './components/ExcellencePillars';
+import ExcellenceSection from './components/ExcellenceSection';
 import { AdminLogin, Dashboard } from './components/admin/Dashboard'; // Import Admin
 import { AnimatePresence } from 'framer-motion';
 
@@ -44,6 +49,10 @@ function App() {
         <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
           <CustomCursor />
           <Gamification />
+          <ScrollProgress />
+          <BackToTop />
+          <ChatBot />
+          <ConvexMigrator />
           <Navbar />
 
           <main>
@@ -52,7 +61,7 @@ function App() {
               <Services onBook={handleBookService} />
             </FadeIn>
             <FadeIn delay={0.2}>
-              <ExcellencePillars />
+              <ExcellenceSection />
             </FadeIn>
             <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
               <FadeIn>
@@ -66,13 +75,16 @@ function App() {
               <Gallery />
             </FadeIn>
             <FadeIn>
+              <TransformationCompare />
+            </FadeIn>
+            <FadeIn>
               <Shop />
             </FadeIn>
             <FadeIn>
               <Pricing />
             </FadeIn>
             <FadeIn>
-              <Testimonials />
+              <BeautyStories />
             </FadeIn>
             <FadeIn>
               <Team />

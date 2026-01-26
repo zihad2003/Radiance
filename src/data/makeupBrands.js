@@ -1,3 +1,4 @@
+import { extendedProducts, extendedBrands } from './extendedProducts';
 // Comprehensive Makeup Database for Radiance Beauty Salon
 // Contains 100+ SKUs across 6 categories with advanced metadata
 
@@ -20,17 +21,18 @@ const createProduct = (index, brand, name, category, type, shadeName, hex, finis
     texture: extras.texture || "cream",
     rating: 4.5 + Math.random() * 0.5,
     reviews: Math.floor(Math.random() * 500) + 50,
-    inStock: true
+    inStock: true,
+    architecture: extras.architecture || null
 });
 
 // --- BRAND DATA ---
 
 const macProducts = [
     // Lipsticks (Reds)
-    createProduct(1, "MAC", "Retro Matte Lipstick", "lips", "lipstick", "Ruby Woo", "#990000", "matte", 2400, "The iconic vivid blue-red.", { opacity: 0.9 }),
-    createProduct(2, "MAC", "Matte Lipstick", "lips", "lipstick", "Russian Red", "#AB0E17", "matte", 2400, "Intense bluish-red.", { opacity: 0.9 }),
-    createProduct(3, "MAC", "Matte Lipstick", "lips", "lipstick", "Lady Danger", "#E32619", "matte", 2400, "Vivid bright coral-red.", { opacity: 0.9 }),
-    createProduct(4, "MAC", "Amplified Lipstick", "lips", "lipstick", "Dubonnet", "#791D23", "satin", 2400, "Deepened claret.", { opacity: 0.9 }),
+    createProduct(1, "MAC", "Retro Matte Lipstick", "lips", "lipstick", "Ruby Woo", "#990000", "matte", 2400, "The iconic vivid blue-red.", { opacity: 0.9, architecture: { bulletShape: "slanted", caseDesign: "metallic" } }),
+    createProduct(2, "MAC", "Matte Lipstick", "lips", "lipstick", "Russian Red", "#AB0E17", "matte", 2400, "Intense bluish-red.", { opacity: 0.9, architecture: { bulletShape: "rounded", caseDesign: "matte" } }),
+    createProduct(3, "MAC", "Matte Lipstick", "lips", "lipstick", "Lady Danger", "#E32619", "matte", 2400, "Vivid bright coral-red.", { opacity: 0.9, architecture: { bulletShape: "slanted", caseDesign: "matte" } }),
+    createProduct(4, "MAC", "Amplified Lipstick", "lips", "lipstick", "Dubonnet", "#791D23", "satin", 2400, "Deepened claret.", { opacity: 0.9, architecture: { bulletShape: "rounded", caseDesign: "metallic" } }),
 
     // Lipsticks (Nudes/Pinks)
     createProduct(5, "MAC", "Matte Lipstick", "lips", "lipstick", "Velvet Teddy", "#A87262", "matte", 2400, "Deep-tone beige.", { opacity: 0.85 }),
@@ -58,8 +60,8 @@ const maybellineProducts = [
     createProduct(3, "Maybelline", "SuperStay Matte Ink", "lips", "liquid_lipstick", "Seductress", "#A67F71", "matte", 1200, "Perfect nude.", { opacity: 1.0 }),
 
     // Mascara
-    createProduct(4, "Maybelline", "Lash Sensational", "eyes", "mascara", "Very Black", "#000000", "matte", 950, "Full fan effect volume.", { opacity: 0.9 }),
-    createProduct(5, "Maybelline", "Colossal Waterproof", "eyes", "mascara", "Glam Black", "#111111", "matte", 850, "9x volume, no clumps.", { opacity: 0.9 }),
+    createProduct(4, "Maybelline", "Lash Sensational", "eyes", "mascara", "Very Black", "#000000", "matte", 950, "Full fan effect volume.", { opacity: 0.9, architecture: { wandType: "curved" } }),
+    createProduct(5, "Maybelline", "Colossal Waterproof", "eyes", "mascara", "Glam Black", "#111111", "matte", 850, "9x volume, no clumps.", { opacity: 0.9, architecture: { wandType: "straight" } }),
 
     // Eyeliner
     createProduct(6, "Maybelline", "Colossal Kajal", "eyes", "eyeliner", "Black", "#000000", "matte", 350, "12H smudge-proof.", { opacity: 1.0 }),
@@ -90,10 +92,10 @@ const fentyProducts = [
 
 const hudaProducts = [
     // Eyeshadow Palettes broken down into singles for try-on
-    createProduct(1, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Maneater", "#800020", "matte", 1500, "Rich mulberry.", { opacity: 0.9 }),
-    createProduct(2, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Rose Gold", "#B76E79", "metallic", 1500, "Foiled rose gold.", { opacity: 0.8, texture: "metallic" }),
-    createProduct(3, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Cocoa", "#5D4037", "matte", 1500, "Warm brown.", { opacity: 0.85 }),
-    createProduct(4, "Huda Beauty", "Power Bullet", "lips", "lipstick", "Third Date", "#994E4E", "matte", 2800, "Warm rosewood.", { opacity: 1.0 }),
+    createProduct(1, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Maneater", "#800020", "matte", 1500, "Rich mulberry.", { opacity: 0.9, architecture: { swatchCount: 1, type: "individual" } }),
+    createProduct(2, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Rose Gold", "#B76E79", "metallic", 1500, "Foiled rose gold.", { opacity: 0.8, texture: "metallic", architecture: { swatchCount: 1, type: "individual" } }),
+    createProduct(3, "Huda Beauty", "Rose Gold", "eyes", "eyeshadow", "Cocoa", "#5D4037", "matte", 1500, "Warm brown.", { opacity: 0.85, architecture: { swatchCount: 1, type: "individual" } }),
+    createProduct(4, "Huda Beauty", "Power Bullet", "lips", "lipstick", "Third Date", "#994E4E", "matte", 2800, "Warm rosewood.", { opacity: 1.0, architecture: { bulletShape: "square", caseDesign: "matte" } }),
 ];
 
 // --- LOCAL BRANDS ---
@@ -125,7 +127,7 @@ const nirvanaProducts = [
 ];
 
 
-import { extendedProducts, extendedBrands } from './extendedProducts';
+
 
 // --- EXPORT ---
 
@@ -148,8 +150,7 @@ export const localBrands = [
 export const getAllProducts = () => {
     return [
         ...internationalBrands.flatMap(b => b.products),
-        ...localBrands.flatMap(b => b.products),
-        ...extendedProducts
+        ...localBrands.flatMap(b => b.products)
     ];
 };
 

@@ -1,513 +1,429 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, Smartphone, Building2, Truck, CheckCircle2, XCircle, Clock, ArrowLeft } from 'lucide-react';
+import {
+    CreditCard, Smartphone, Building2, Truck, CheckCircle2,
+    XCircle, Clock, ArrowLeft, ArrowRight, MapPin,
+    ShieldCheck, Tag, Info, ShoppingBag, Store,
+    SmartphoneNfc, Receipt, Download, ExternalLink
+} from 'lucide-react';
+import { useShopStore } from '../../store/useShopStore';
+import { validatePromoCode } from '../../data/promoCodes';
+import Counter from '../ui/Counter';
 
-const PaymentGateway = ({ cart, total, onClose, onSuccess }) => {
-    const [step, setStep] = useState('method'); // method, details, processing, success, failed
-    const [selectedMethod, setSelectedMethod] = useState(null);
-    const [formData, setFormData] = useState({
-        // Personal Info
-        name: '',
-        email: '',
+const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuccess }) => {
+    const { cart: storeCart, getCartTotal, clearCart } = useShopStore();
+    const cart = externalCart || storeCart;
+    const [step, setStep] = useState(1);
+
+    // --- CHECKOUT STATE ---
+    const [promoCode, setPromoCode] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState(null);
+    const [promoError, setPromoError] = useState('');
+
+    const [deliveryInfo, setDeliveryInfo] = useState({
+        fullName: '',
         phone: '',
+        email: '',
         address: '',
-        city: '',
-        postalCode: '',
-
-        // Payment specific
-        bkashNumber: '',
-        nagadNumber: '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCVV: '',
-        cardName: '',
-        bankName: '',
-        accountNumber: '',
-        transactionId: ''
+        area: '',
+        city: 'Dhaka',
+        landmark: '',
+        saveAddress: true
     });
 
-    const paymentMethods = [
-        {
-            id: 'bkash',
-            name: 'bKash',
-            icon: '📱',
-            color: 'from-pink-500 to-pink-600',
-            description: 'Pay with bKash mobile wallet',
-            fee: 0,
-            popular: true
-        },
-        {
-            id: 'nagad',
-            name: 'Nagad',
-            icon: '💳',
-            color: 'from-orange-500 to-red-600',
-            description: 'Pay with Nagad mobile wallet',
-            fee: 0,
-            popular: true
-        },
-        {
-            id: 'card',
-            name: 'Credit/Debit Card',
-            icon: '💳',
-            color: 'from-blue-500 to-blue-600',
-            description: 'Visa, Mastercard, Amex (SSL Commerz)',
-            fee: total * 0.02, // 2% processing fee
-            popular: false
-        },
-        {
-            id: 'bank',
-            name: 'Bank Transfer',
-            icon: '🏦',
-            color: 'from-green-500 to-green-600',
-            description: 'Direct bank transfer',
-            fee: 0,
-            popular: false
-        },
-        {
-            id: 'cod',
-            name: 'Cash on Delivery',
-            icon: '💵',
-            color: 'from-gray-600 to-gray-700',
-            description: 'Pay when you receive',
-            fee: 50, // Flat delivery fee
-            popular: false
-        }
-    ];
+    const [shippingMethod, setShippingMethod] = useState('standard');
+    const [paymentMethod, setPaymentMethod] = useState(null);
+    const [orderId] = useState(`RBS${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`);
 
-    const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    // --- CALCULATIONS ---
+    const subtotal = getCartTotal();
+
+    const shippingFee = useMemo(() => {
+        if (activePromo?.type === 'shipping') return 0;
+        if (shippingMethod === 'pickup') return 0;
+        if (shippingMethod === 'same-day') return 250;
+        if (shippingMethod === 'express') return 150;
+        return subtotal > 2000 ? 0 : 60; // Standard Dhaka
+    }, [shippingMethod, subtotal]);
+
+    const discountAmount = useMemo(() => {
+        if (!appliedPromo) return 0;
+        if (appliedPromo.type === 'percentage') return subtotal * appliedPromo.discount;
+        if (appliedPromo.type === 'fixed') return appliedPromo.discount;
+        return 0;
+    }, [appliedPromo, subtotal]);
+
+    const activePromo = appliedPromo;
+    const codFee = paymentMethod === 'cod' ? 50 : 0;
+    const finalTotal = subtotal - discountAmount + shippingFee + codFee;
+
+    // --- HANDLERS ---
+    const handleApplyPromo = () => {
+        const result = validatePromoCode(promoCode, subtotal);
+        if (result.valid) {
+            setAppliedPromo(result);
+            setPromoError('');
+        } else {
+            setPromoError(result.message);
+            setAppliedPromo(null);
+        }
     };
 
-    const validateForm = () => {
-        // Basic validation
-        if (!formData.name || !formData.email || !formData.phone || !formData.address) {
-            alert('Please fill in all required fields');
-            return false;
-        }
+    const nextStep = () => setStep(s => s + 1);
+    const prevStep = () => setStep(s => s - 1);
 
-        // Method-specific validation
-        if (selectedMethod === 'bkash' && !formData.bkashNumber) {
-            alert('Please enter your bKash number');
-            return false;
-        }
-        if (selectedMethod === 'nagad' && !formData.nagadNumber) {
-            alert('Please enter your Nagad number');
-            return false;
-        }
-        if (selectedMethod === 'card') {
-            if (!formData.cardNumber || !formData.cardExpiry || !formData.cardCVV || !formData.cardName) {
-                alert('Please fill in all card details');
-                return false;
-            }
-        }
-        if (selectedMethod === 'bank' && !formData.accountNumber) {
-            alert('Please enter your account number');
-            return false;
-        }
-
-        return true;
-    };
-
-    const processPayment = async () => {
-        if (!validateForm()) return;
-
-        setStep('processing');
-
-        // Simulate payment processing
+    const handleFinalizeOrder = () => {
+        setStep(5); // Processing
         setTimeout(() => {
-            // Simulate 90% success rate
-            const success = Math.random() > 0.1;
-
-            if (success) {
-                const orderId = `RAD${Date.now()}`;
-                setStep('success');
-
-                // Call success callback with order details
-                if (onSuccess) {
-                    onSuccess({
-                        orderId,
-                        method: selectedMethod,
-                        total: total + (paymentMethods.find(m => m.id === selectedMethod)?.fee || 0),
-                        items: cart,
-                        customer: {
-                            name: formData.name,
-                            email: formData.email,
-                            phone: formData.phone,
-                            address: formData.address
-                        },
-                        timestamp: new Date().toISOString()
-                    });
-                }
-            } else {
-                setStep('failed');
-            }
+            const orderData = {
+                orderId,
+                total: finalTotal,
+                items: cart,
+                delivery: deliveryInfo,
+                method: paymentMethod,
+                timestamp: new Date().toISOString()
+            };
+            if (onSuccess) onSuccess(orderData);
+            setStep(6); // Success
+            // In a real app, send to API here
         }, 3000);
     };
 
-    const selectedMethodData = paymentMethods.find(m => m.id === selectedMethod);
-    const finalTotal = total + (selectedMethodData?.fee || 0);
-
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-[250] bg-pearl/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8 overflow-hidden">
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="bg-white w-full max-w-6xl h-full max-h-[900px] rounded-[4rem] shadow-4xl flex flex-col md:flex-row overflow-hidden border border-white/40"
             >
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10">
-                    <div>
-                        <h2 className="text-2xl font-serif text-charcoal">Secure Checkout</h2>
-                        <p className="text-sm text-gray-500">Complete your purchase safely</p>
+                {/* Close Button */}
+                <button onClick={onClose} className="absolute top-10 right-10 z-[260] p-4 bg-gray-50 hover:bg-gray-100 rounded-full transition-all">
+                    <XCircle size={24} className="text-gray-300 hover:text-charcoal" />
+                </button>
+
+                {/* Left Side: Step Content */}
+                <div className="flex-1 p-8 md:p-16 flex flex-col overflow-y-auto custom-scrollbar">
+                    {/* Progress Track */}
+                    <div className="flex items-center gap-4 mb-12 overflow-x-auto hide-scrollbar pb-2">
+                        {[1, 2, 3, 4].map(i => (
+                            <React.Fragment key={i}>
+                                <div className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${step === i ? 'bg-charcoal text-white shadow-xl scale-105' : step > i ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-300'}`}>
+                                    {step > i ? <CheckCircle2 size={14} /> : <span className="text-[10px] font-black">{i}</span>}
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                        {i === 1 ? 'Review' : i === 2 ? 'Delivery' : i === 3 ? 'Shipping' : 'Payment'}
+                                    </span>
+                                </div>
+                                {i < 4 && <div className="h-px w-8 bg-gray-100" />}
+                            </React.Fragment>
+                        ))}
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
-                    >
-                        <XCircle size={20} />
-                    </button>
-                </div>
 
-                <div className="p-6">
                     <AnimatePresence mode="wait">
-                        {/* Step 1: Payment Method Selection */}
-                        {step === 'method' && (
-                            <motion.div
-                                key="method"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                            >
-                                <h3 className="text-xl font-bold mb-6">Select Payment Method</h3>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                                    {paymentMethods.map(method => (
-                                        <button
-                                            key={method.id}
-                                            onClick={() => setSelectedMethod(method.id)}
-                                            className={`relative p-6 rounded-2xl border-2 transition-all text-left ${selectedMethod === method.id
-                                                    ? 'border-primary bg-primary/5 shadow-lg'
-                                                    : 'border-gray-200 hover:border-gray-300'
-                                                }`}
-                                        >
-                                            {method.popular && (
-                                                <span className="absolute top-3 right-3 px-2 py-1 bg-gold text-white text-xs rounded-full font-bold">
-                                                    Popular
-                                                </span>
-                                            )}
-
-                                            <div className="flex items-start gap-4">
-                                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${method.color} flex items-center justify-center text-2xl`}>
-                                                    {method.icon}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-charcoal mb-1">{method.name}</h4>
-                                                    <p className="text-sm text-gray-600 mb-2">{method.description}</p>
-                                                    {method.fee > 0 && (
-                                                        <p className="text-xs text-gray-500">
-                                                            {method.id === 'card' ? `+${(method.fee / total * 100).toFixed(1)}% fee` : `+৳${method.fee} fee`}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={() => selectedMethod && setStep('details')}
-                                    disabled={!selectedMethod}
-                                    className="w-full py-4 bg-charcoal text-white rounded-xl font-bold hover:bg-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                >
-                                    Continue to Payment Details
-                                </button>
-                            </motion.div>
-                        )}
-
-                        {/* Step 2: Payment Details */}
-                        {step === 'details' && (
-                            <motion.div
-                                key="details"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                            >
-                                <button
-                                    onClick={() => setStep('method')}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-charcoal mb-6"
-                                >
-                                    <ArrowLeft size={20} />
-                                    Back to payment methods
-                                </button>
-
-                                <h3 className="text-xl font-bold mb-6">Payment & Delivery Details</h3>
-
-                                <div className="space-y-6">
-                                    {/* Personal Information */}
-                                    <div>
-                                        <h4 className="font-bold mb-4">Personal Information</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                placeholder="Full Name *"
-                                                value={formData.name}
-                                                onChange={handleInputChange}
-                                                className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                required
-                                            />
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                placeholder="Email Address *"
-                                                value={formData.email}
-                                                onChange={handleInputChange}
-                                                className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                required
-                                            />
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                placeholder="Phone Number *"
-                                                value={formData.phone}
-                                                onChange={handleInputChange}
-                                                className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                required
-                                            />
-                                            <input
-                                                type="text"
-                                                name="city"
-                                                placeholder="City"
-                                                value={formData.city}
-                                                onChange={handleInputChange}
-                                                className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                            />
-                                        </div>
-                                        <textarea
-                                            name="address"
-                                            placeholder="Delivery Address *"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                            rows="3"
-                                            className="w-full mt-4 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                            required
-                                        />
-                                    </div>
-
-                                    {/* Payment Method Specific Fields */}
-                                    {selectedMethod === 'bkash' && (
-                                        <div>
-                                            <h4 className="font-bold mb-4">bKash Payment</h4>
-                                            <input
-                                                type="tel"
-                                                name="bkashNumber"
-                                                placeholder="bKash Number (01XXXXXXXXX)"
-                                                value={formData.bkashNumber}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                            />
-                                            <p className="text-sm text-gray-600 mt-2">
-                                                Send ৳{finalTotal} to <strong>01712-345678</strong> and enter your bKash number
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {selectedMethod === 'nagad' && (
-                                        <div>
-                                            <h4 className="font-bold mb-4">Nagad Payment</h4>
-                                            <input
-                                                type="tel"
-                                                name="nagadNumber"
-                                                placeholder="Nagad Number (01XXXXXXXXX)"
-                                                value={formData.nagadNumber}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                            />
-                                            <p className="text-sm text-gray-600 mt-2">
-                                                Send ৳{finalTotal} to <strong>01812-345678</strong> and enter your Nagad number
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {selectedMethod === 'card' && (
-                                        <div>
-                                            <h4 className="font-bold mb-4">Card Details (SSL Commerz)</h4>
-                                            <div className="space-y-4">
-                                                <input
-                                                    type="text"
-                                                    name="cardName"
-                                                    placeholder="Cardholder Name"
-                                                    value={formData.cardName}
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    name="cardNumber"
-                                                    placeholder="Card Number"
-                                                    value={formData.cardNumber}
-                                                    onChange={handleInputChange}
-                                                    maxLength="16"
-                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                />
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <input
-                                                        type="text"
-                                                        name="cardExpiry"
-                                                        placeholder="MM/YY"
-                                                        value={formData.cardExpiry}
-                                                        onChange={handleInputChange}
-                                                        maxLength="5"
-                                                        className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        name="cardCVV"
-                                                        placeholder="CVV"
-                                                        value={formData.cardCVV}
-                                                        onChange={handleInputChange}
-                                                        maxLength="3"
-                                                        className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {selectedMethod === 'bank' && (
-                                        <div>
-                                            <h4 className="font-bold mb-4">Bank Transfer Details</h4>
-                                            <div className="bg-gray-50 p-4 rounded-xl mb-4">
-                                                <p className="text-sm text-gray-700 mb-2"><strong>Bank:</strong> Dutch-Bangla Bank</p>
-                                                <p className="text-sm text-gray-700 mb-2"><strong>Account Name:</strong> Radiance Beauty Salon</p>
-                                                <p className="text-sm text-gray-700 mb-2"><strong>Account Number:</strong> 1234567890</p>
-                                                <p className="text-sm text-gray-700"><strong>Branch:</strong> Gulshan, Dhaka</p>
-                                            </div>
-                                            <input
-                                                type="text"
-                                                name="transactionId"
-                                                placeholder="Transaction ID / Reference Number"
-                                                value={formData.transactionId}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {selectedMethod === 'cod' && (
-                                        <div className="bg-amber-50 p-4 rounded-xl">
-                                            <p className="text-sm text-gray-700">
-                                                <strong>Cash on Delivery:</strong> Pay ৳{finalTotal} when you receive your order.
-                                                A delivery fee of ৳50 applies.
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Order Summary */}
-                                    <div className="bg-gray-50 p-6 rounded-xl">
-                                        <h4 className="font-bold mb-4">Order Summary</h4>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span>Subtotal ({cart.length} items)</span>
-                                                <span>৳{total.toFixed(2)}</span>
-                                            </div>
-                                            {selectedMethodData?.fee > 0 && (
-                                                <div className="flex justify-between text-sm">
-                                                    <span>Processing Fee</span>
-                                                    <span>৳{selectedMethodData.fee.toFixed(2)}</span>
-                                                </div>
-                                            )}
-                                            <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
-                                                <span>Total</span>
-                                                <span>৳{finalTotal.toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={processPayment}
-                                    className="w-full mt-6 py-4 bg-charcoal text-white rounded-xl font-bold hover:bg-primary transition-colors"
-                                >
-                                    Complete Payment - ৳{finalTotal.toFixed(2)}
-                                </button>
-                            </motion.div>
-                        )}
-
-                        {/* Step 3: Processing */}
-                        {step === 'processing' && (
-                            <motion.div
-                                key="processing"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center py-12"
-                            >
-                                <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-                                <h3 className="text-2xl font-bold mb-2">Processing Payment...</h3>
-                                <p className="text-gray-600">Please wait while we confirm your payment</p>
-                            </motion.div>
-                        )}
-
-                        {/* Step 4: Success */}
-                        {step === 'success' && (
-                            <motion.div
-                                key="success"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="text-center py-12"
-                            >
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <CheckCircle2 size={48} className="text-green-600" />
-                                </div>
-                                <h3 className="text-3xl font-bold mb-2">Payment Successful!</h3>
-                                <p className="text-gray-600 mb-8">Your order has been confirmed</p>
-                                <div className="bg-gray-50 p-6 rounded-xl max-w-md mx-auto mb-6">
-                                    <p className="text-sm text-gray-600 mb-2">Order ID</p>
-                                    <p className="text-2xl font-mono font-bold">RAD{Date.now()}</p>
-                                </div>
-                                <button
-                                    onClick={onClose}
-                                    className="px-8 py-3 bg-charcoal text-white rounded-xl font-bold hover:bg-primary transition-colors"
-                                >
-                                    Continue Shopping
-                                </button>
-                            </motion.div>
-                        )}
-
-                        {/* Step 5: Failed */}
-                        {step === 'failed' && (
-                            <motion.div
-                                key="failed"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="text-center py-12"
-                            >
-                                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <XCircle size={48} className="text-red-600" />
-                                </div>
-                                <h3 className="text-3xl font-bold mb-2">Payment Failed</h3>
-                                <p className="text-gray-600 mb-8">There was an issue processing your payment</p>
-                                <div className="flex gap-4 justify-center">
-                                    <button
-                                        onClick={() => setStep('details')}
-                                        className="px-8 py-3 bg-charcoal text-white rounded-xl font-bold hover:bg-primary transition-colors"
-                                    >
-                                        Try Again
-                                    </button>
-                                    <button
-                                        onClick={onClose}
-                                        className="px-8 py-3 bg-gray-200 text-charcoal rounded-xl font-bold hover:bg-gray-300 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
+                        {step === 1 && <StepReview cart={cart} next={nextStep} subtotal={subtotal} promoCode={promoCode} setPromoCode={setPromoCode} applyPromo={handleApplyPromo} appliedPromo={appliedPromo} promoError={promoError} />}
+                        {step === 2 && <StepDelivery data={deliveryInfo} setData={setDeliveryInfo} next={nextStep} back={prevStep} />}
+                        {step === 3 && <StepShipping method={shippingMethod} setMethod={setShippingMethod} next={nextStep} back={prevStep} total={subtotal} />}
+                        {step === 4 && <StepPayment method={paymentMethod} setMethod={setPaymentMethod} next={handleFinalizeOrder} back={prevStep} total={finalTotal} />}
+                        {step === 5 && <StepProcessing />}
+                        {step === 6 && <StepSuccess orderId={orderId} onClose={onClose} clearCart={clearCart} />}
                     </AnimatePresence>
                 </div>
+
+                {/* Right Side: Order Summary (Sticky on Desktop) */}
+                {step < 6 && (
+                    <div className="w-full md:w-[400px] bg-gray-50 p-8 md:p-12 flex flex-col border-l border-gray-100">
+                        <h3 className="text-xl font-serif italic mb-8">Order Summary</h3>
+
+                        <div className="flex-1 space-y-4 mb-8 overflow-y-auto hide-scrollbar">
+                            {cart.map((item, i) => (
+                                <div key={i} className="flex gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0">
+                                        <img src={item.images?.[0]} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-bold text-charcoal leading-tight line-clamp-1">{item.name}</p>
+                                        <p className="text-[9px] text-gray-400 uppercase tracking-widest">{item.brand} x{item.quantity}</p>
+                                    </div>
+                                    <span className="text-[10px] font-black">৳{(item.price * item.quantity).toLocaleString()}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-4 pt-6 border-t border-gray-200">
+                            <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                <span>Subtotal</span>
+                                <span>৳{subtotal.toLocaleString()}</span>
+                            </div>
+                            {discountAmount > 0 && (
+                                <div className="flex justify-between text-[10px] font-bold text-green-600 uppercase tracking-widest">
+                                    <span>Discount ({appliedPromo.label})</span>
+                                    <span>-৳{discountAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                <span>Shipping ({shippingMethod})</span>
+                                <span>{shippingFee === 0 ? 'FREE' : `৳${shippingFee}`}</span>
+                            </div>
+                            {codFee > 0 && (
+                                <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <span>COD Handling</span>
+                                    <span>৳{codFee}</span>
+                                </div>
+                            )}
+                            <div className="pt-4 border-t border-gray-200 flex justify-between items-end">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Investment</div>
+                                <div className="text-3xl font-black text-charcoal">৳<Counter from={0} to={finalTotal} duration={1} /></div>
+                            </div>
+
+                            <div className="mt-8 p-4 bg-white rounded-2xl border border-gray-200 flex items-center gap-3">
+                                <ShieldCheck className="text-green-500" size={18} />
+                                <div className="text-[9px] leading-tight">
+                                    <p className="font-black uppercase tracking-widest text-charcoal">Secure Checkout</p>
+                                    <p className="text-gray-400">PCI DSS Compliant & 256-bit Encrypted</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </motion.div>
         </div>
     );
 };
 
-export default PaymentGateway;
+// --- STEPS ---
+
+const StepReview = ({ cart, next, promoCode, setPromoCode, applyPromo, appliedPromo, promoError }) => (
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+        <h2 className="text-4xl font-serif italic mb-2">Review Your Bag</h2>
+        <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">One last look before the beauty arrives</p>
+
+        <div className="space-y-6 mb-12">
+            <div className="flex items-center gap-4 p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                <Tag className="text-primary" />
+                <div className="flex-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-charcoal">Apply Promo Code</p>
+                    <div className="flex gap-4 mt-2">
+                        <input
+                            type="text"
+                            value={promoCode}
+                            placeholder="Enter Code (e.g. SAVE20)"
+                            onChange={(e) => setPromoCode(e.target.value)}
+                            className="bg-white px-4 py-2 border border-gray-200 rounded-xl outline-none focus:border-primary text-xs font-bold"
+                        />
+                        <button onClick={applyPromo} className="px-6 py-2 bg-charcoal text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all">Apply</button>
+                    </div>
+                    {appliedPromo && <p className="text-[9px] text-green-600 mt-2 font-black uppercase">Success: {appliedPromo.label} Applied!</p>}
+                    {promoError && <p className="text-[9px] text-red-500 mt-2 font-black uppercase">{promoError}</p>}
+                </div>
+            </div>
+        </div>
+
+        <button onClick={next} className="w-full py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-primary transition-all shadow-xl flex items-center justify-center gap-4">
+            Proceed to Delivery <ArrowRight size={18} />
+        </button>
+    </motion.div>
+);
+
+const StepDelivery = ({ data, setData, next, back }) => (
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+        <h2 className="text-4xl font-serif italic mb-2">Delivery Details</h2>
+        <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">Where shall we send your radiance?</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Recipient Name</label>
+                <input
+                    type="text" placeholder="Full legal name"
+                    value={data.fullName} onChange={(e) => setData({ ...data, fullName: e.target.value })}
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                />
+            </div>
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Phone Number</label>
+                <input
+                    type="tel" placeholder="01XXXXXXXXX"
+                    value={data.phone} onChange={(e) => setData({ ...data, phone: e.target.value })}
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                />
+            </div>
+            <div className="md:col-span-2 space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Detailed Address</label>
+                <textarea
+                    placeholder="House, Flat, Road, Area..."
+                    value={data.address} onChange={(e) => setData({ ...data, address: e.target.value })}
+                    rows="3" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                />
+            </div>
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Area / Neighborhood</label>
+                <input
+                    type="text" placeholder="e.g. Gulshan 1"
+                    value={data.area} onChange={(e) => setData({ ...data, area: e.target.value })}
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                />
+            </div>
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Landmark (Optional)</label>
+                <input
+                    type="text" placeholder="Beside ABC Tower"
+                    value={data.landmark} onChange={(e) => setData({ ...data, landmark: e.target.value })}
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                />
+            </div>
+        </div>
+
+        <div className="flex gap-4">
+            <button onClick={back} className="flex-1 py-5 border border-gray-100 text-charcoal rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-50 transition-all flex items-center justify-center gap-4">
+                <ArrowLeft size={18} /> Back
+            </button>
+            <button onClick={next} className="flex-[2] py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-primary transition-all shadow-xl flex items-center justify-center gap-4">
+                Continue to Shipping <ArrowRight size={18} />
+            </button>
+        </div>
+    </motion.div>
+);
+
+const StepShipping = ({ method, setMethod, next, back, total }) => {
+    const shippingOptions = [
+        { id: 'standard', name: 'Standard Delivery', time: '3-5 Business Days', price: total > 2000 ? 0 : 60, icon: Truck },
+        { id: 'express', name: 'Express Delivery', time: '1-2 Business Days', price: 150, icon: Clock },
+        { id: 'same-day', name: 'Same Day (Dhaka)', time: 'Before 12 PM Order', price: 250, icon: SmartphoneNfc },
+        { id: 'pickup', name: 'Salon Pickup', time: 'Ready in 2 Hours', price: 0, icon: Store },
+    ];
+
+    return (
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <h2 className="text-4xl font-serif italic mb-2">Shipping Method</h2>
+            <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">How fast should your products arrive?</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                {shippingOptions.map(opt => (
+                    <button
+                        key={opt.id}
+                        onClick={() => setMethod(opt.id)}
+                        className={`p-6 rounded-3xl border-2 transition-all flex items-center gap-6 text-left ${method === opt.id ? 'border-primary bg-primary/5' : 'border-gray-50 hover:border-gray-100'}`}
+                    >
+                        <div className={`p-4 rounded-2xl ${method === opt.id ? 'bg-primary text-white' : 'bg-gray-50 text-gray-400'}`}>
+                            <opt.icon size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-sm font-black uppercase tracking-widest text-charcoal">{opt.name}</h4>
+                            <p className="text-[10px] text-gray-400 mt-1">{opt.time}</p>
+                        </div>
+                        <span className="text-sm font-black text-primary">{opt.price === 0 ? 'FREE' : `৳${opt.price}`}</span>
+                    </button>
+                ))}
+            </div>
+
+            <div className="flex gap-4">
+                <button onClick={back} className="flex-1 py-5 border border-gray-100 text-charcoal rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-50 transition-all flex items-center justify-center gap-4">
+                    <ArrowLeft size={18} /> Back
+                </button>
+                <button onClick={next} className="flex-[2] py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-primary transition-all shadow-xl flex items-center justify-center gap-4">
+                    Final Step: Payment <ArrowRight size={18} />
+                </button>
+            </div>
+        </motion.div>
+    );
+};
+
+const StepPayment = ({ method, setMethod, next, back, total }) => {
+    const paymentOptions = [
+        { id: 'bkash', name: 'bKash Wallet', icon: '📱', color: 'from-pink-500 to-pink-600', popular: true },
+        { id: 'nagad', name: 'Nagad Wallet', icon: '💳', color: 'from-orange-500 to-red-600' },
+        { id: 'card', name: 'Credit/Debit Card', icon: '💳', color: 'from-blue-500 to-blue-600' },
+        { id: 'bank', name: 'Bank Transfer', icon: '🏦', color: 'from-green-500 to-green-600' },
+        { id: 'cod', name: 'Cash on Delivery', icon: '💵', color: 'from-gray-600 to-gray-700', fee: 50 },
+        { id: 'salon', name: 'Pay at Salon', icon: '🏪', color: 'from-gold to-yellow-600' },
+    ];
+
+    return (
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <h2 className="text-4xl font-serif italic mb-2">Secure Payment</h2>
+            <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">Authorized transaction gateway</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+                {paymentOptions.map(opt => (
+                    <button
+                        key={opt.id}
+                        onClick={() => setMethod(opt.id)}
+                        className={`p-6 rounded-3xl border-2 transition-all flex flex-col gap-4 text-left relative ${method === opt.id ? 'border-primary bg-primary/5' : 'border-gray-50 hover:border-gray-100'}`}
+                    >
+                        {opt.popular && <span className="absolute -top-2 -right-2 bg-gold text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Instant</span>}
+                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${opt.color} flex items-center justify-center text-xl shadow-lg`}>
+                            {opt.icon}
+                        </div>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-charcoal">{opt.name}</h4>
+                        {opt.fee && <span className="text-[8px] text-primary font-bold uppercase tracking-widest">+৳{opt.fee} Handling</span>}
+                    </button>
+                ))}
+            </div>
+
+            <div className="flex gap-4">
+                <button onClick={back} className="flex-1 py-5 border border-gray-100 text-charcoal rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-50 transition-all flex items-center justify-center gap-4">
+                    <ArrowLeft size={18} /> Back
+                </button>
+                <button onClick={next} disabled={!method} className="flex-[2] py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-primary transition-all shadow-xl flex items-center justify-center gap-4 disabled:bg-gray-300 disabled:shadow-none">
+                    Complete Investment ৳{total.toLocaleString()} <ArrowRight size={18} />
+                </button>
+            </div>
+        </motion.div>
+    );
+};
+
+const StepProcessing = () => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="relative w-40 h-40 mb-12">
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 border-4 border-primary/10 border-t-primary rounded-full shadow-glow"
+            />
+            <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute inset-4 bg-charcoal rounded-full flex items-center justify-center"
+            >
+                <Smartphone size={40} className="text-primary" />
+            </motion.div>
+        </div>
+        <h2 className="text-3xl font-serif italic mb-4">Securing Transaction...</h2>
+        <p className="text-gray-400 text-xs tracking-widest uppercase max-w-sm leading-relaxed">
+            Please do not refresh. We are verifying your details with the Radiance Secure Protocol.
+        </p>
+    </motion.div>
+);
+
+const StepSuccess = ({ orderId, onClose, clearCart }) => (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center h-full">
+        <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-inner">
+            <CheckCircle2 size={48} />
+        </div>
+        <span className="text-primary font-bold tracking-[0.5em] uppercase text-[10px] mb-4">Mission Accomplished</span>
+        <h2 className="text-4xl md:text-5xl font-serif italic mb-6">Radiance Secured.</h2>
+        <p className="text-gray-500 text-sm max-w-md mx-auto mb-10 leading-relaxed font-light">
+            Your transformation essentials are being prepared. You will receive a confirmation SMS and Email shortly.
+        </p>
+
+        <div className="bg-gray-50 p-8 rounded-[3rem] border border-gray-100 mb-12 w-full max-w-sm">
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Order Identification</p>
+            <p className="text-2xl font-black text-charcoal mb-6">#{orderId}</p>
+            <div className="grid grid-cols-2 gap-4">
+                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
+                    <Download size={16} /> Invoice
+                </button>
+                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
+                    <ExternalLink size={16} /> Track
+                </button>
+            </div>
+        </div>
+
+        <button
+            onClick={() => { clearCart(); onClose(); }}
+            className="px-12 py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] hover:bg-primary transition-all shadow-xl"
+        >
+            Explore More Luxury
+        </button>
+    </motion.div>
+);
+
+export default CheckoutFlow;

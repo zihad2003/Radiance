@@ -7,6 +7,7 @@ import * as THREE from 'three';
 // ========== LIPSTICK VARIATIONS (4 types) ==========
 
 export const LipstickClassicGold = (props) => {
+    const { color = "#DC143C", ...rest } = props;
     const groupRef = useRef();
 
     useFrame((state) => {
@@ -17,7 +18,7 @@ export const LipstickClassicGold = (props) => {
     });
 
     return (
-        <group ref={groupRef} {...props}>
+        <group ref={groupRef} {...rest}>
             {/* Base - Metallic Gold */}
             <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
@@ -47,29 +48,32 @@ export const LipstickClassicGold = (props) => {
             <group position={[0, 0.55, 0]}>
                 <Cylinder args={[0.13, 0.13, 0.5, 64]} position={[0, 0, 0]}>
                     <meshStandardMaterial
-                        color="#DC143C"
+                        color={color}
                         roughness={0.15}
                         metalness={0.05}
-                        emissive="#8B0000"
+                        emissive={color}
                         emissiveIntensity={0.1}
                     />
                 </Cylinder>
                 {/* Ridges */}
                 {[0, 0.1, 0.2].map((y, i) => (
                     <Torus key={i} args={[0.13, 0.005, 8, 64]} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                        <meshStandardMaterial color="#B22222" roughness={0.2} />
+                        <meshStandardMaterial color={color} roughness={0.2} metalness={0.2} />
                     </Torus>
                 ))}
                 {/* Rounded Tip */}
                 <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
-                    <meshStandardMaterial color="#DC143C" roughness={0.1} metalness={0.05} />
+                    <meshStandardMaterial color={color} roughness={0.1} metalness={0.05} />
                 </Sphere>
             </group>
         </group>
     );
 };
 
+export const Lipstick = LipstickClassicGold;
+
 export const LipstickRoseGold = (props) => {
+    const { color = "#FFB6C1", ...rest } = props;
     const groupRef = useRef();
 
     useFrame((state) => {
@@ -80,7 +84,7 @@ export const LipstickRoseGold = (props) => {
     });
 
     return (
-        <group ref={groupRef} {...props}>
+        <group ref={groupRef} {...rest}>
             <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#B76E79"
@@ -98,13 +102,13 @@ export const LipstickRoseGold = (props) => {
             <group position={[0, 0.55, 0]}>
                 <Cylinder args={[0.13, 0.13, 0.5, 64]}>
                     <meshStandardMaterial
-                        color="#FFB6C1"
+                        color={color}
                         roughness={0.8}
                         metalness={0.0}
                     />
                 </Cylinder>
                 <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
-                    <meshStandardMaterial color="#FFB6C1" roughness={0.8} />
+                    <meshStandardMaterial color={color} roughness={0.8} />
                 </Sphere>
             </group>
         </group>
@@ -112,6 +116,7 @@ export const LipstickRoseGold = (props) => {
 };
 
 export const LipstickBlackDesigner = (props) => {
+    const { color = "#D2B48C", ...rest } = props;
     const groupRef = useRef();
 
     useFrame((state) => {
@@ -122,7 +127,7 @@ export const LipstickBlackDesigner = (props) => {
     });
 
     return (
-        <group ref={groupRef} {...props}>
+        <group ref={groupRef} {...rest}>
             <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#0a0a0a"
@@ -140,15 +145,15 @@ export const LipstickBlackDesigner = (props) => {
             <group position={[0, 0.55, 0]}>
                 <Cylinder args={[0.13, 0.13, 0.5, 64]}>
                     <meshStandardMaterial
-                        color="#D2B48C"
+                        color={color}
                         roughness={0.05}
                         metalness={0.1}
-                        emissive="#8B7355"
+                        emissive={color}
                         emissiveIntensity={0.05}
                     />
                 </Cylinder>
                 <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
-                    <meshStandardMaterial color="#D2B48C" roughness={0.05} metalness={0.1} />
+                    <meshStandardMaterial color={color} roughness={0.05} metalness={0.1} />
                 </Sphere>
             </group>
         </group>
@@ -156,6 +161,7 @@ export const LipstickBlackDesigner = (props) => {
 };
 
 export const LipstickJeweled = (props) => {
+    const { color = "#8B008B", ...rest } = props;
     const groupRef = useRef();
 
     useFrame((state) => {
@@ -166,7 +172,7 @@ export const LipstickJeweled = (props) => {
     });
 
     return (
-        <group ref={groupRef} {...props}>
+        <group ref={groupRef} {...rest}>
             <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#4B0082"
@@ -200,15 +206,15 @@ export const LipstickJeweled = (props) => {
             <group position={[0, 0.55, 0]}>
                 <Cylinder args={[0.13, 0.13, 0.5, 64]}>
                     <meshStandardMaterial
-                        color="#8B008B"
+                        color={color}
                         roughness={0.3}
                         metalness={0.4}
-                        emissive="#4B0082"
+                        emissive={color}
                         emissiveIntensity={0.2}
                     />
                 </Cylinder>
                 <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
-                    <meshStandardMaterial color="#8B008B" roughness={0.3} metalness={0.4} />
+                    <meshStandardMaterial color={color} roughness={0.3} metalness={0.4} />
                 </Sphere>
             </group>
         </group>
@@ -276,6 +282,9 @@ export const CompactVintageRound = (props) => {
         </group>
     );
 };
+
+export const Compact = CompactVintageRound;
+export { EyeshadowPalette as Palette } from './BeautyItemsExtended';
 
 export const CompactModernSquare = (props) => {
     const groupRef = useRef();

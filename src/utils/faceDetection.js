@@ -4,24 +4,19 @@ let faceLandmarksDetection = null;
 export const initFaceDetection = async () => {
     if (detector) return detector;
 
-    console.log("Loading Face Mesh Model Dependencies...");
-
-    // Dynamic import to keep main bundle light
     if (!faceLandmarksDetection) {
         faceLandmarksDetection = await import('@tensorflow-models/face-landmarks-detection');
-        await import('@tensorflow/tfjs'); // Ensure backend is ready
+        await import('@tensorflow/tfjs');
     }
 
     const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     const detectorConfig = {
         runtime: 'tfjs',
-        refineLandmarks: true, // Crucial for lips and eyes precision
-        maxFaces: 1
+        refineLandmarks: true,
+        maxFaces: 2 // Allow detecting 2 to warn user
     };
 
-    console.log("Initializing Face Mesh Detector...");
     detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
-    console.log("Face Mesh Model Loaded");
     return detector;
 };
 
@@ -30,11 +25,12 @@ export const detectFaceLandmarks = async (videoElement) => {
 
     try {
         const faces = await detector.estimateFaces(videoElement, {
-            flipHorizontal: false // We usually flip the video via CSS, so keep raw coords or flip if logic requires
+            flipHorizontal: false
         });
 
         if (faces.length > 0) {
-            return faces[0];
+            // Return all faces so component can check for "Only one face" rule
+            return faces;
         }
     } catch (error) {
         console.error("Detection Error:", error);
@@ -42,43 +38,66 @@ export const detectFaceLandmarks = async (videoElement) => {
     return null;
 };
 
-// Simple heuristic for face shape
+/**
+ * Centering & Quality Analytics for Camera View
+ */
+export const analyzeFaceGeometry = (face, videoWidth, videoHeight) => {
+    if (!face || !face.keypoints) return null;
+
+    const kp = face.keypoints;
+    const center = kp[5]; // Nose tip
+    const leftCheek = kp[234];
+    const rightCheek = kp[454];
+    const top = kp[10];
+    const bottom = kp[152];
+
+    const faceWidth = Math.abs(rightCheek.x - leftCheek.x);
+    const faceHeight = Math.abs(bottom.y - top.y);
+
+    // Centering score (0-1, 1 is center)
+    const centerX = videoWidth / 2;
+    const centerY = videoHeight / 2;
+    const distFromCenter = Math.sqrt(Math.pow(center.x - centerX, 2) + Math.pow(center.y - centerY, 2));
+    const maxDist = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+    const centeringScore = 1 - (distFromCenter / (maxDist * 0.5));
+
+    // Coverage Score (Target ~70% of height)
+    const heightCoverage = faceHeight / videoHeight;
+
+    let status = "good";
+    let message = "";
+
+    if (heightCoverage < 0.3) {
+        status = "warning";
+        message = "Please move closer to the camera";
+    } else if (heightCoverage > 0.9) {
+        status = "warning";
+        message = "Please move further away";
+    } else if (centeringScore < 0.6) {
+        status = "warning";
+        message = "Please center your face in the frame";
+    }
+
+    return {
+        status,
+        message,
+        center,
+        coverage: heightCoverage,
+        score: centeringScore
+    };
+};
+
 export const calculateFaceShape = (keypoints) => {
     if (!keypoints) return "oval";
-
-    // MediaPipe Keypoint indices (approximate)
-    // 10: Top of forehead
-    // 152: Bottom of chin
-    // 234: Left cheekbone
-    // 454: Right cheekbone
-    // 162: Left jaw corner (approx)
-    // 389: Right jaw corner (approx)
-
-    const points = (indices) => indices.map(i => keypoints[i]);
     const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-
     const p = (i) => keypoints[i];
-
-    // Safety check
     if (!p(10) || !p(152) || !p(234) || !p(454)) return "oval";
 
     const faceLength = dist(p(10), p(152));
     const cheekWidth = dist(p(234), p(454));
-    // Jaw width is tricky with just single points, we use approximate jaw corners
-    // 58, 288 are often used for jawline width in some maps, or 172/397. Let's use 234/454 for cheeks roughly.
-
     const ratio = faceLength / cheekWidth;
 
     if (ratio > 1.5) return "oblong";
     if (ratio < 1.15) return "round";
-    if (ratio < 1.3) return "square"; // Rough approximation
-
-    return "oval"; // Default
-};
-
-// Heuristic Gender Guess (Very rough, mostly for demo)
-export const guessGender = (keypoints) => {
-    // Men often have wider jaws relative to cheeks compared to women
-    // This is just a placeholder physics-based guess.
-    return Math.random() > 0.5 ? "female" : "female"; // Defaulting to female for a salon app is safer initially
+    return "oval";
 };

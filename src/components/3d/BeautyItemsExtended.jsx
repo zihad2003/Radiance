@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Cylinder, Sphere, Torus, Box, Box } from '@react-three/drei';
+import { Cylinder, Sphere, Torus, Box } from '@react-three/drei';
 import * as THREE from 'three';
 
 // ========== MAKEUP BRUSHES (3 types) ==========
