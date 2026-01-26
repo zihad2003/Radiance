@@ -3,6 +3,7 @@ import SmoothScroll from './components/ui/SmoothScroll';
 import { RewardsProvider } from './context/RewardsContext';
 import CustomCursor from './components/CustomCursor';
 import Gamification from './components/Gamification';
+import FadeIn from './components/ui/FadeIn';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -46,17 +47,35 @@ function App() {
 
           <main>
             <Hero />
-            <Services onBook={handleBookService} />
-            <ExcellencePillars />
+            <FadeIn>
+              <Services onBook={handleBookService} />
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <ExcellencePillars />
+            </FadeIn>
             <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
-              <HairstyleAI />
-              <VirtualTryOn />
+              <FadeIn>
+                <HairstyleAI />
+              </FadeIn>
+              <FadeIn>
+                <VirtualTryOn />
+              </FadeIn>
             </Suspense>
-            <Gallery />
-            <Pricing />
-            <Testimonials />
-            <Booking initialService={selectedService} />
-            <Team />
+            <FadeIn>
+              <Gallery />
+            </FadeIn>
+            <FadeIn>
+              <Pricing />
+            </FadeIn>
+            <FadeIn>
+              <Testimonials />
+            </FadeIn>
+            <FadeIn>
+              <Booking initialService={selectedService} />
+            </FadeIn>
+            <FadeIn>
+              <Team />
+            </FadeIn>
             <ContactFooter />
           </main>
         </div>
