@@ -1,9 +1,11 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Check, Star } from 'lucide-react';
 
 const plans = [
+    // --- SIGNATURE PACKAGES ---
     {
+        category: "Signature",
         name: "Basic Glow",
         price: "5,000",
         features: ["Haircut & Blowdry", "Classic Manicure", "Eyebrow Threading", "Refreshment Drink"],
@@ -11,18 +13,98 @@ const plans = [
         delay: 0
     },
     {
+        category: "Signature",
         name: "Elite Radiance",
         price: "12,000",
         features: ["Premium Hair Color", "Spa Gel Pedicure", "Basic Facial", "Glass of Champagne", "Take-home Sample Kit"],
         popular: true,
-        delay: 0.2
+        delay: 0.1
     },
     {
+        category: "Signature",
         name: "Ultimate Luxury",
         price: "25,000",
         features: ["Full Body Massage", "Premium Facial", "Complete Makeover", "Exclusive Lounge Access", "Full Size Products"],
         popular: false,
-        delay: 0.4
+        delay: 0.2
+    },
+
+    // --- BRIDAL COLLECTION ---
+    {
+        category: "Bridal",
+        name: "Silver Bride",
+        price: "15,000",
+        features: ["HD Bridal Makeup", "Hair Styling", "Saree Draping", "Regular Facial (Pre-Event)"],
+        popular: false,
+        delay: 0
+    },
+    {
+        category: "Bridal",
+        name: "Gold Bride",
+        price: "25,000",
+        features: ["Airbrush Makeup", "Premium Hair Styling", "Jewelry Setting", "Gold Facial", "Trial Session"],
+        popular: true,
+        delay: 0.1
+    },
+    {
+        category: "Bridal",
+        name: "Diamond Royal",
+        price: "45,000",
+        features: ["Celebrity Artist", "Complete Pre-Bridal Spa", "Mehendi Art", "Mother of Bride Makeup", "Luxury Car Service"],
+        popular: false,
+        delay: 0.2
+    },
+
+    // --- SPA & WELLNESS ---
+    {
+        category: "Spa",
+        name: "Stress Relief",
+        price: "6,500",
+        features: ["Swedish Massage (60m)", "Head Massage", "Steam Bath", "Herbal Tea"],
+        popular: false,
+        delay: 0
+    },
+    {
+        category: "Spa",
+        name: "Detox Day",
+        price: "10,000",
+        features: ["Body Scrub", "Clay Wrap", "Lymphatic Massage", "Organic Juice"],
+        popular: false,
+        delay: 0.1
+    },
+    {
+        category: "Spa",
+        name: "Couples Retreat",
+        price: "18,000",
+        features: ["Dual Masage Suite", "Rose Petal Bath", "Candlelit Ambience", "Wine & Chocolates"],
+        popular: true,
+        delay: 0.2
+    },
+
+    // --- SEASONAL SPECIALS ---
+    {
+        category: "Seasonal",
+        name: "Summer Fresh",
+        price: "4,000",
+        features: ["De-tan Facial", "Cooling Mint Pedicure", "Hair Spa", "Sunscreen Application"],
+        popular: false,
+        delay: 0
+    },
+    {
+        category: "Seasonal",
+        name: "Winter Hydration",
+        price: "5,500",
+        features: ["Deep Moisturizing Facial", "Hot Stone Therapy", "Paraffin Hand Wax", "Hot Cocoa"],
+        popular: true,
+        delay: 0.1
+    },
+    {
+        category: "Seasonal",
+        name: "Eid Glow",
+        price: "8,000",
+        features: ["Party Makeup", "Volume Blowdry", "Henna Application", "Lash Extensions"],
+        popular: false,
+        delay: 0.2
     }
 ];
 
@@ -75,6 +157,9 @@ const PricingCard = ({ plan }) => {
 };
 
 const Pricing = () => {
+    const [activeTab, setActiveTab] = React.useState("Signature");
+    const filteredPlans = plans.filter(p => p.category === activeTab);
+
     return (
         <section className="py-24 bg-gradient-to-b from-pearl to-white relative overflow-hidden">
             {/* Background Shapes */}
@@ -86,11 +171,27 @@ const Pricing = () => {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-primary mb-4">Membership</h2>
-                    <h3 className="text-4xl md:text-5xl font-serif text-charcoal">Exclusive Packages</h3>
+                    <h3 className="text-4xl md:text-5xl font-serif text-charcoal mb-8">Exclusive Packages</h3>
+
+                    {/* Category Tabs */}
+                    <div className="flex flex-wrap justify-center gap-4 mb-4">
+                        {["Signature", "Bridal", "Spa", "Seasonal"].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === tab
+                                    ? 'bg-charcoal text-white shadow-lg scale-105'
+                                    : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-charcoal'
+                                    }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
-                    {plans.map((plan) => (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
+                    {filteredPlans.map((plan) => (
                         <PricingCard key={plan.name} plan={plan} />
                     ))}
                 </div>
