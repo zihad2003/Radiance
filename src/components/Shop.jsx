@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, ShoppingCart, Heart, Star, ChevronDown, X, Plus, Minus } from 'lucide-react';
 import { getAllProducts, getBrands } from '../data/makeupBrands';
 import FadeIn from './ui/FadeIn';
+import PaymentGateway from './payment/PaymentGateway';
 
 const Shop = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -14,6 +15,7 @@ const Shop = () => {
     const [cart, setCart] = useState([]);
     const [wishlist, setWishlist] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showCheckout, setShowCheckout] = useState(false);
 
     const allProducts = getAllProducts();
     const brands = getBrands();
@@ -128,7 +130,10 @@ const Shop = () => {
                             </button>
 
                             {/* Cart */}
-                            <button className="relative px-6 py-3 bg-gold text-white rounded-xl hover:bg-gold/90 transition-colors flex items-center gap-2">
+                            <button
+                                onClick={() => cartCount > 0 && setShowCheckout(true)}
+                                className={`relative px-6 py-3 bg-gold text-white rounded-xl hover:bg-gold/90 transition-colors flex items-center gap-2 ${cartCount === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
                                 <ShoppingCart size={20} />
                                 Cart
                                 {cartCount > 0 && (
@@ -209,8 +214,8 @@ const Shop = () => {
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-full whitespace-nowrap transition-all ${selectedCategory === category.id
-                                        ? 'bg-charcoal text-white shadow-lg scale-105'
-                                        : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                    ? 'bg-charcoal text-white shadow-lg scale-105'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                     }`}
                             >
                                 <span>{category.icon}</span>
@@ -387,6 +392,21 @@ const Shop = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Payment Gateway */}
+            {showCheckout && (
+                <PaymentGateway
+                    cart={cart}
+                    total={cartTotal}
+                    onClose={() => setShowCheckout(false)}
+                    onSuccess={(orderDetails) => {
+                        console.log('Order placed:', orderDetails);
+                        setCart([]);
+                        setShowCheckout(false);
+                        alert(`Order ${orderDetails.orderId} placed successfully!`);
+                    }}
+                />
+            )}
         </section>
     );
 };
