@@ -15,6 +15,11 @@ const openDB = () => {
                 const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
                 store.createIndex('timestamp', 'timestamp', { unique: false });
             }
+            if (!db.objectStoreNames.contains('bookings')) {
+                const bookingStore = db.createObjectStore('bookings', { keyPath: 'id' });
+                bookingStore.createIndex('date', 'date', { unique: false });
+                bookingStore.createIndex('status', 'status', { unique: false });
+            }
         };
 
         request.onsuccess = (event) => {
@@ -76,5 +81,64 @@ export const deleteLook = async (id) => {
         await store.delete(id);
     } catch (error) {
         console.error("Failed to delete look:", error);
+    }
+};
+
+export const saveBooking = async (bookingData) => {
+    try {
+        const db = await openDB();
+        const tx = db.transaction('bookings', 'readwrite');
+        const store = tx.objectStore('bookings');
+
+        const booking = {
+            id: bookingData.paymentID || crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            status: 'pending',
+            ...bookingData
+        };
+
+        await store.put(booking);
+        return booking.id;
+    } catch (error) {
+        console.error("Failed to save booking:", error);
+        throw error;
+    }
+};
+
+export const getBookings = async () => {
+    try {
+        const db = await openDB();
+        const tx = db.transaction('bookings', 'readonly');
+        const store = tx.objectStore('bookings');
+
+        return new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result.reverse());
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.warn("Bookings store might not exist yet.", error);
+        return [];
+    }
+};
+
+export const updateBookingStatus = async (id, status) => {
+    try {
+        const db = await openDB();
+        const tx = db.transaction('bookings', 'readwrite');
+        const store = tx.objectStore('bookings');
+
+        const booking = await new Promise((resolve, reject) => {
+            const req = store.get(id);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+
+        if (booking) {
+            booking.status = status;
+            await store.put(booking);
+        }
+    } catch (error) {
+        console.error("Failed to update status", error);
     }
 };

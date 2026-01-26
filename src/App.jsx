@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useEffect } from 'react';
 import SmoothScroll from './components/ui/SmoothScroll';
 import { RewardsProvider } from './context/RewardsContext';
 import CustomCursor from './components/CustomCursor';
@@ -12,12 +12,22 @@ import Testimonials from './components/Testimonials';
 import Booking from './components/Booking';
 import Team from './components/Team';
 import ContactFooter from './components/ContactFooter';
+import { AdminLogin, Dashboard } from './components/admin/Dashboard'; // Import Admin
+import { AnimatePresence } from 'framer-motion';
 
 const VirtualTryOn = lazy(() => import('./components/VirtualTryOn'));
 const HairstyleAI = lazy(() => import('./components/HairstyleAI'));
 
 function App() {
   const [selectedService, setSelectedService] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowAdmin(true);
+    window.addEventListener('open-admin', handler);
+    return () => window.removeEventListener('open-admin', handler);
+  }, []);
 
   const handleBookService = (serviceName) => {
     setSelectedService(serviceName);
@@ -49,6 +59,25 @@ function App() {
           </main>
         </div>
       </SmoothScroll>
+
+      {/* Admin Modal Overlay */}
+      <AnimatePresence>
+        {showAdmin && (
+          <div className="fixed inset-0 z-[100] bg-white">
+            {!isAdminLoggedIn ? (
+              <AdminLogin onLogin={() => setIsAdminLoggedIn(true)} />
+            ) : (
+              <Dashboard onClose={() => { setShowAdmin(false); setIsAdminLoggedIn(false); }} />
+            )}
+            <button
+              onClick={() => setShowAdmin(false)}
+              className="fixed top-4 right-4 z-[110] bg-gray-100 p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-500"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+      </AnimatePresence>
     </RewardsProvider>
   );
 }

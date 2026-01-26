@@ -170,7 +170,10 @@ const ContactFooter = () => {
 
                     <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-white/40">
                         <p>&copy; {new Date().getFullYear()} Radiance Salon. All rights reserved.</p>
-                        <p className="mt-2 md:mt-0">Designed with ❤️ for the Future.</p>
+                        <div className="flex gap-4 items-center">
+                            <p className="mt-2 md:mt-0">Designed with ❤️ for the Future.</p>
+                            <button onClick={() => window.dispatchEvent(new CustomEvent('open-admin'))} className="text-xs hover:text-gold transition-colors">Staff Portal</button>
+                        </div>
                     </div>
                 </div>
             </footer>
