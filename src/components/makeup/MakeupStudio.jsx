@@ -405,6 +405,12 @@ const MakeupStudio = () => {
                                             className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
                                         />
                                     </div>
+                                    <button
+                                        onClick={() => setBeautySettings({ smoothing: 30, brightness: 100, contrast: 100, saturation: 100, lighting: 'natural' })}
+                                        className="w-full py-2 bg-gray-100 text-charcoal rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors mt-4"
+                                    >
+                                        Reset Filters
+                                    </button>
                                 </div>
                             </div>
                         </div>
