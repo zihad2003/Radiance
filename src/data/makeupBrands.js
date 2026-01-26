@@ -125,6 +125,8 @@ const nirvanaProducts = [
 ];
 
 
+import { extendedProducts, extendedBrands } from './extendedProducts';
+
 // --- EXPORT ---
 
 export const internationalBrands = [
@@ -133,6 +135,7 @@ export const internationalBrands = [
     { id: "fenty", name: "Fenty Beauty", origin: "International", logo: "/assets/brands/fenty.png", products: fentyProducts },
     { id: "loreal", name: "L'Oréal Paris", origin: "International", logo: "/assets/brands/loreal.png", products: lorealProducts },
     { id: "huda", name: "Huda Beauty", origin: "International", logo: "/assets/brands/huda.png", products: hudaProducts },
+    ...extendedBrands
 ];
 
 export const localBrands = [
@@ -143,7 +146,11 @@ export const localBrands = [
 ];
 
 export const getAllProducts = () => {
-    return [...internationalBrands.flatMap(b => b.products), ...localBrands.flatMap(b => b.products)];
+    return [
+        ...internationalBrands.flatMap(b => b.products),
+        ...localBrands.flatMap(b => b.products),
+        ...extendedProducts
+    ];
 };
 
 export const getBrands = () => {
