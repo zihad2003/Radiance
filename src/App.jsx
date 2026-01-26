@@ -12,6 +12,7 @@ import Testimonials from './components/Testimonials';
 import Booking from './components/Booking';
 import Team from './components/Team';
 import ContactFooter from './components/ContactFooter';
+import ExcellencePillars from './components/ExcellencePillars';
 import { AdminLogin, Dashboard } from './components/admin/Dashboard'; // Import Admin
 import { AnimatePresence } from 'framer-motion';
 
@@ -46,6 +47,7 @@ function App() {
           <main>
             <Hero />
             <Services onBook={handleBookService} />
+            <ExcellencePillars />
             <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
               <HairstyleAI />
               <VirtualTryOn />
