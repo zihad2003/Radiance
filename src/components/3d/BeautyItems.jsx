@@ -91,3 +91,89 @@ export const Compact = (props) => {
         </group>
     );
 };
+
+export const Perfume = (props) => {
+    return (
+        <group {...props}>
+            {/* Glass Bottle */}
+            <Box args={[0.5, 0.7, 0.2]} position={[0, 0, 0]}>
+                <meshPhysicalMaterial
+                    transmission={1}
+                    roughness={0}
+                    thickness={0.5}
+                    color="#ffefff"
+                    envMapIntensity={2}
+                />
+            </Box>
+            {/* Liquid inside */}
+            <Box args={[0.45, 0.5, 0.15]} position={[0, -0.08, 0]}>
+                <meshStandardMaterial color="#ffbdc9" transparent opacity={0.8} />
+            </Box>
+            {/* Cap */}
+            <Cylinder args={[0.1, 0.1, 0.2, 32]} position={[0, 0.45, 0]}>
+                <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.1} />
+            </Cylinder>
+        </group>
+    );
+};
+
+export const Mascara = (props) => {
+    return (
+        <group {...props}>
+            {/* Tube */}
+            <Cylinder args={[0.08, 0.08, 1.2, 32]} position={[0, 0, 0]}>
+                <meshStandardMaterial color="#111" metalness={0.7} roughness={0.2} />
+            </Cylinder>
+            {/* Gold Band */}
+            <Torus args={[0.08, 0.02, 16, 32]} position={[0, 0.2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.1} />
+            </Torus>
+        </group>
+    );
+};
+
+export const NailPolish = (props) => {
+    return (
+        <group {...props}>
+            {/* Bottle */}
+            <Cylinder args={[0.25, 0.3, 0.5, 32]} position={[0, 0, 0]}>
+                <meshPhysicalMaterial
+                    transmission={1}
+                    roughness={0.1}
+                    thickness={0.3}
+                    color="#ffffff"
+                />
+            </Cylinder>
+            {/* Paint */}
+            <Cylinder args={[0.22, 0.27, 0.4, 32]} position={[0, -0.02, 0]}>
+                <meshStandardMaterial color="#aa2222" />
+            </Cylinder>
+            {/* Cap */}
+            <Cylinder args={[0.1, 0.15, 0.4, 32]} position={[0, 0.45, 0]}>
+                <meshStandardMaterial color="#111" metalness={0.5} roughness={0.4} />
+            </Cylinder>
+        </group>
+    );
+};
+
+export const Palette = (props) => {
+    return (
+        <group {...props}>
+            {/* Base */}
+            <Box args={[1.2, 0.1, 0.8]} position={[0, 0, 0]}>
+                <meshStandardMaterial color="#222" metalness={0.5} roughness={0.2} />
+            </Box>
+            {/* Pans */}
+            {[-0.3, 0, 0.3].map((x, i) => (
+                <Cylinder key={i} args={[0.15, 0.15, 0.02, 32]} position={[x, 0.06, 0.15]} rotation={[0, 0, 0]}>
+                    <meshStandardMaterial color={['#D61C4E', '#E0C097', '#5D4037'][i]} roughness={0.8} />
+                </Cylinder>
+            ))}
+            {[-0.3, 0, 0.3].map((x, i) => (
+                <Cylinder key={i + 3} args={[0.15, 0.15, 0.02, 32]} position={[x, 0.06, -0.15]} rotation={[0, 0, 0]}>
+                    <meshStandardMaterial color={['#D4AF37', '#990000', '#222'][i]} roughness={0.6} metalness={i === 0 ? 0.8 : 0} />
+                </Cylinder>
+            ))}
+        </group>
+    )
+}
