@@ -259,7 +259,7 @@ const MakeupStudio = () => {
 
                 {/* TOP BAR */}
                 <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent z-40 flex justify-between items-center">
-                    <button onClick={() => window.history.back()} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md">
+                    <button onClick={() => window.history.back()} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md" aria-label="Go Back">
                         <ArrowLeft size={20} />
                     </button>
 
@@ -277,10 +277,11 @@ const MakeupStudio = () => {
                             onClick={() => setCompareMode(!compareMode)}
                             className={`p-2 rounded-full backdrop-blur-md transition-colors ${compareMode ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20'}`}
                             title="Split Compare"
+                            aria-label="Toggle Split Comparison"
                         >
                             <Video size={20} />
                         </button>
-                        <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md">
+                        <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md" aria-label="Settings">
                             <Settings size={20} />
                         </button>
                     </div>
@@ -288,13 +289,14 @@ const MakeupStudio = () => {
 
                 {/* BOTTOM BAR (When Panel is Closed or always visible controls) */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-6">
-                    <button className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10">
+                    <button className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10" aria-label="Open Gallery">
                         <ImageIcon size={24} />
                     </button>
 
                     <button
                         onClick={toggleCamera}
                         className={`w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all transform hover:scale-105 ${isCameraActive ? 'border-primary bg-transparent' : 'border-white bg-white'}`}
+                        aria-label={isCameraActive ? "Stop Camera" : "Start Camera"}
                     >
                         {isCameraActive ? <div className="w-16 h-16 bg-primary rounded-full animate-pulse" /> : <Camera className="text-black" size={32} />}
                     </button>
@@ -303,6 +305,7 @@ const MakeupStudio = () => {
                         onClick={handleSaveLook}
                         disabled={!isCameraActive}
                         className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10"
+                        aria-label="Save Look"
                     >
                         <Save size={24} />
                     </button>
@@ -332,6 +335,7 @@ const MakeupStudio = () => {
                 <button
                     onClick={() => setIsPanelOpen(!isPanelOpen)}
                     className="absolute -left-10 top-1/2 -translate-y-1/2 w-10 h-20 bg-white rounded-l-2xl flex items-center justify-center shadow-[-5px_0_15px_-3px_rgba(0,0,0,0.1)] cursor-pointer text-gray-500 hover:text-primary"
+                    aria-label={isPanelOpen ? "Close Panel" : "Open Panel"}
                 >
                     {isPanelOpen ? <ChevronRight /> : <ChevronLeft />}
                 </button>
@@ -342,12 +346,14 @@ const MakeupStudio = () => {
                         <button
                             onClick={() => setActiveTab('beauty')}
                             className={`p-2 rounded-lg transition-colors ${activeTab === 'beauty' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
+                            aria-label="Beauty Settings"
                         >
                             <Sliders size={18} />
                         </button>
                         <button
                             onClick={() => setActiveTab('products')}
                             className={`p-2 rounded-lg transition-colors ${activeTab === 'products' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
+                            aria-label="Product Library"
                         >
                             <Sparkles size={18} />
                         </button>

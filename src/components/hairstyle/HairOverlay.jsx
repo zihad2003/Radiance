@@ -74,12 +74,14 @@ const HairOverlay = ({ style, color, analysis, containerWidth, containerHeight }
                     <button
                         onClick={() => setTransform(p => ({ ...p, scale: p.scale - 0.1 }))}
                         className="p-2 hover:bg-gray-100 rounded-full"
+                        aria-label="Zoom Out Wig"
                     >
-                        <ZoomIn size={16} className="rotate-180" /> {/* Zoom Out */}
+                        <ZoomIn size={16} className="rotate-180" />
                     </button>
                     <button
                         onClick={() => setTransform(p => ({ ...p, scale: p.scale + 0.1 }))}
                         className="p-2 hover:bg-gray-100 rounded-full"
+                        aria-label="Zoom In Wig"
                     >
                         <ZoomIn size={16} />
                     </button>
@@ -87,12 +89,14 @@ const HairOverlay = ({ style, color, analysis, containerWidth, containerHeight }
                     <button
                         onClick={() => setTransform(p => ({ ...p, rotate: p.rotate - 5 }))}
                         className="p-2 hover:bg-gray-100 rounded-full"
+                        aria-label="Rotate Left"
                     >
                         <RotateCw size={16} className="-scale-x-100" />
                     </button>
                     <button
                         onClick={() => setTransform(p => ({ ...p, rotate: p.rotate + 5 }))}
                         className="p-2 hover:bg-gray-100 rounded-full"
+                        aria-label="Rotate Right"
                     >
                         <RotateCw size={16} />
                     </button>
@@ -101,13 +105,13 @@ const HairOverlay = ({ style, color, analysis, containerWidth, containerHeight }
                     {/* For now, buttons are safer than implementing custom drag logic in this snippet */}
                     <div className="grid grid-cols-3 gap-1 w-16 text-[8px] items-center text-center">
                         <div />
-                        <button onClick={() => setTransform(p => ({ ...p, y: p.y - 10 }))}>▲</button>
+                        <button onClick={() => setTransform(p => ({ ...p, y: p.y - 10 }))} aria-label="Move Up">▲</button>
                         <div />
-                        <button onClick={() => setTransform(p => ({ ...p, x: p.x - 10 }))}>◀</button>
+                        <button onClick={() => setTransform(p => ({ ...p, x: p.x - 10 }))} aria-label="Move Left">◀</button>
                         <Move size={12} className="mx-auto text-gray-400" />
-                        <button onClick={() => setTransform(p => ({ ...p, x: p.x + 10 }))}>▶</button>
+                        <button onClick={() => setTransform(p => ({ ...p, x: p.x + 10 }))} aria-label="Move Right">▶</button>
                         <div />
-                        <button onClick={() => setTransform(p => ({ ...p, y: p.y + 10 }))}>▼</button>
+                        <button onClick={() => setTransform(p => ({ ...p, y: p.y + 10 }))} aria-label="Move Down">▼</button>
                         <div />
                     </div>
                 </div>
