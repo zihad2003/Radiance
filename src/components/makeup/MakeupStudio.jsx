@@ -360,6 +360,13 @@ const MakeupStudio = () => {
                         >
                             <Sparkles size={18} />
                         </button>
+                        <button
+                            onClick={() => setActiveTab('looks')}
+                            className={`p-2 rounded-lg transition-colors ${activeTab === 'looks' ? 'bg-primary text-white' : 'bg-white hover:bg-gray-100 text-gray-500'}`}
+                            aria-label="Preset Looks"
+                        >
+                            <Heart size={18} />
+                        </button>
                     </div>
                 </div>
 
@@ -415,6 +422,50 @@ const MakeupStudio = () => {
                                         Reset Filters
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'looks' && (
+                        <div className="p-6">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Curated Looks</h4>
+                            <div className="space-y-4">
+                                {PRESETS.map(preset => (
+                                    <button
+                                        key={preset.id}
+                                        onClick={() => handlePresetSelect(preset)}
+                                        className="w-full bg-gray-50 rounded-xl overflow-hidden border border-gray-100 hover:border-primary/50 transition-all text-left flex"
+                                    >
+                                        <div className="w-24 h-24 bg-gray-200 relative">
+                                            <img
+                                                src={preset.thumbnail}
+                                                alt={preset.name}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => e.target.src = 'https://placehold.co/200x200?text=Look'}
+                                            />
+                                            {/* Compare Icon / Badge */}
+                                            <div className="absolute top-1 left-1 bg-black/50 text-white text-[8px] px-1 rounded backdrop-blur-sm">
+                                                TRY ON
+                                            </div>
+                                        </div>
+                                        <div className="p-3 flex-1 flex flex-col justify-center">
+                                            <div className="flex justify-between items-start">
+                                                <h5 className="font-bold text-charcoal">{preset.name}</h5>
+                                                <span className="text-[10px] uppercase bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
+                                                    {preset.category}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{preset.description}</p>
+                                            <div className="mt-2 flex gap-1">
+                                                {Object.keys(preset.products).map(cat => (
+                                                    <div key={cat} className="w-2 h-2 rounded-full"
+                                                        style={{ backgroundColor: preset.products[cat].id.includes('mac') ? '#D61C4E' : '#E0C097' }} // Visualization hack
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     )}
