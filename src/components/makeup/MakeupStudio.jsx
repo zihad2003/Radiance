@@ -11,7 +11,40 @@ import FaceCanvas from './FaceCanvas';
 import { getAllProducts, getBrands } from '../../data/makeupBrands';
 import { PRESETS } from '../../data/presets';
 import { captureLook, downloadImage } from '../../utils/capture';
-import { saveLook } from '../../utils/storage';
+import { saveLook, getAllLooks, deleteLook } from '../../utils/storage';
+import { trackEvent, AnalyticsEvents } from '../../utils/analytics';
+import { getCompatibleUserMedia } from '../../utils/browserCompat';
+
+// ... (other imports)
+
+const startCamera = async () => {
+    setCameraError(null);
+    try {
+        const constraints = {
+            video: {
+                width: { ideal: 1920, min: 1280 },
+                height: { ideal: 1080, min: 720 },
+                facingMode: facingMode,
+                frameRate: { ideal: 60, min: 30 }
+            }
+        };
+        // Use compatible getUserMedia for Safari support
+        const stream = await getCompatibleUserMedia(constraints);
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            const track = stream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            setCameraRes({ w: settings.width, h: settings.height });
+            videoRef.current.play();
+            setIsCameraActive(true);
+            trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.OPENED, 'HD Studio Camera');
+        }
+    } catch (err) {
+        console.error(err);
+        if (err.name === 'NotAllowedError') setCameraError("Camera blocked. Please enable browser permissions.");
+        else setCameraError("Camera not detected or 1080p resolution not supported.");
+    }
+};
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from '../ui/GlassCard';
 import { Canvas } from '@react-three/fiber';
@@ -29,11 +62,13 @@ import {
 import Product3DPreview from './Product3DPreview';
 import PresetGallery from './PresetGallery';
 import PresetDetailModal from './PresetDetailModal';
+import { useToast } from '../../context/ToastContext';
 
 const MakeupStudio = () => {
     // Media & Hardware State
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const faceCanvasRef = useRef(null);
     const [detector, setDetector] = useState(null);
     const [faceData, setFaceData] = useState(null);
     const [analysis, setAnalysis] = useState(null);
@@ -55,6 +90,37 @@ const MakeupStudio = () => {
     const [compareMode, setCompareMode] = useState(false);
     const [showMesh, setShowMesh] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [savedLooks, setSavedLooks] = useState([]);
+
+    const { success, error, info } = useToast(); // Assuming ToastContext is available or will handle missing hook gracefully. Wait, imports don't show useToast. 
+    // Checking imports... line 7 has icons. line 32 is empty. 
+    // I need to import useToast if it's not there.
+    // Previous view of file showed "import { useToast } from '../../context/ToastContext';" in the truncated part I replaced?
+    // Step 3745 showed line 32: "import { useToast } from '../../context/ToastContext';" in my replacement, but the *restored* file (Step 3764) does NOT show it.
+    // I need to add useToast import.
+
+    // --- PERSISTENCE HOOKS ---
+    useEffect(() => {
+        const savedState = localStorage.getItem('radiance_makeup_state');
+        if (savedState) {
+            try {
+                setMakeupState(JSON.parse(savedState));
+            } catch (e) { console.error(e); }
+        }
+    }, []);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            localStorage.setItem('radiance_makeup_state', JSON.stringify(makeupState));
+        }, 500);
+        return () => clearTimeout(timeout);
+    }, [makeupState]);
+
+    useEffect(() => {
+        if (activeTab === 'bag') {
+            getAllLooks().then(setSavedLooks);
+        }
+    }, [activeTab]);
 
     // Advanced Beauty Filters (B. Feed Enhancements)
     const [beautySettings, setBeautySettings] = useState({
@@ -110,6 +176,7 @@ const MakeupStudio = () => {
                 setCameraRes({ w: settings.width, h: settings.height });
                 videoRef.current.play();
                 setIsCameraActive(true);
+                trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.OPENED, 'HD Studio Camera');
             }
         } catch (err) {
             console.error(err);
@@ -193,6 +260,7 @@ const MakeupStudio = () => {
 
         setMakeupState(newState);
         setActiveProduct(null);
+        trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.PRODUCT_SELECTED, `Preset: ${preset.name}`);
         if (!isCameraActive) startCamera();
     };
 
@@ -204,6 +272,7 @@ const MakeupStudio = () => {
         else if (product.category === 'cheeks') newState.blush = { color: product.hex, opacity: 0.4 };
         else if (product.category === 'face') newState.face = { color: product.hex, opacity: 0.2 };
         setMakeupState(newState);
+        trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.PRODUCT_SELECTED, product.name);
     };
 
     const resetMakeup = () => {
@@ -213,7 +282,57 @@ const MakeupStudio = () => {
             blush: { color: null, opacity: 0.4 },
             face: { color: null, opacity: 0.0 },
         });
-        setActiveProduct(null);
+    };
+
+    // 5. Persistence Handlers
+    const handleSaveLook = async () => {
+        if (!faceCanvasRef.current || !videoRef.current) {
+            // error("Camera not active"); // Need toast
+            alert("Camera not active");
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const dataUrl = await captureLook(videoRef.current, faceCanvasRef.current);
+            if (!dataUrl) throw new Error("Capture failed");
+
+            const lookData = {
+                image: dataUrl,
+                makeup: makeupState,
+                products: activeProduct ? [activeProduct] : [],
+                date: new Date().toISOString()
+            };
+
+            await saveLook(lookData);
+            // success("Look saved!");
+            alert("Look saved to Bag!");
+
+            if (activeTab === 'bag') {
+                const refreshed = await getAllLooks();
+                setSavedLooks(refreshed);
+            }
+            trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.LOOK_SAVED, 'Look Saved to Bag');
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save look");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleLoadLook = (look) => {
+        if (look.makeup) {
+            setMakeupState(look.makeup);
+        }
+    };
+
+    const handleDeleteLook = async (id, e) => {
+        e.stopPropagation();
+        if (window.confirm("Delete this saved look?")) {
+            await deleteLook(id);
+            setSavedLooks(prev => prev.filter(l => l.id !== id));
+        }
     };
 
     // Style Helpers
@@ -242,6 +361,7 @@ const MakeupStudio = () => {
                         {faceData && !compareMode && (
                             <div className={`absolute inset-0 pointer-events-none ${facingMode === 'user' ? '-scale-x-100' : ''}`}>
                                 <FaceCanvas
+                                    ref={faceCanvasRef}
                                     landmarks={faceData}
                                     videoRef={videoRef}
                                     activeMakeup={makeupState}
@@ -332,13 +452,13 @@ const MakeupStudio = () => {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <button onClick={switchCamera} className="p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/5" title="Switch Camera">
+                                    <button onClick={switchCamera} className="p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/5 outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="Switch Camera Facing Mode" title="Switch Camera">
                                         <RefreshCw size={18} />
                                     </button>
-                                    <button onClick={() => setCompareMode(!compareMode)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all ${compareMode ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} title="Comparison View">
+                                    <button onClick={() => setCompareMode(!compareMode)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary ${compareMode ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} aria-label={compareMode ? "Disable Comparison View" : "Enable Comparison View"} aria-pressed={compareMode} title="Comparison View">
                                         <Video size={18} />
                                     </button>
-                                    <button onClick={() => setShowMesh(!showMesh)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all ${showMesh ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} title="Symmetry Grid">
+                                    <button onClick={() => setShowMesh(!showMesh)} className={`p-3 rounded-full backdrop-blur-md border border-white/5 transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary ${showMesh ? 'bg-primary border-primary' : 'bg-black/40 hover:bg-black/60'}`} aria-label={showMesh ? "Hide Face Mesh Grid" : "Show Face Mesh Grid"} aria-pressed={showMesh} title="Symmetry Grid">
                                         <Monitor size={18} />
                                     </button>
                                 </div>
@@ -402,7 +522,7 @@ const MakeupStudio = () => {
                 {/* Tabs Navigation */}
                 <div className="p-6 pb-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/80 sticky top-0 z-10">
                     <div className="flex gap-2 p-1 bg-white rounded-xl border border-gray-100">
-                        {['products', 'looks', 'beauty'].map(tab => (
+                        {['products', 'looks', 'beauty', 'bag'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -410,7 +530,7 @@ const MakeupStudio = () => {
                                     ${activeTab === tab ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}
                                 `}
                             >
-                                {tab}
+                                {tab === 'bag' ? 'My Bag' : tab}
                             </button>
                         ))}
                     </div>
@@ -422,6 +542,41 @@ const MakeupStudio = () => {
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                    {activeTab === 'bag' && (
+                        <div className="space-y-6">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                <Heart size={14} className="text-primary" /> Saved Looks
+                            </h4>
+                            {savedLooks.length === 0 ? (
+                                <div className="text-center py-10 opacity-50">
+                                    <ImageIcon size={32} className="mx-auto mb-2" />
+                                    <p className="text-xs">No saved looks yet</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {savedLooks.map(look => (
+                                        <div key={look.id} className="relative group rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                                            <div className="aspect-[3/4] cursor-pointer" onClick={() => handleLoadLook(look)}>
+                                                <img src={look.image} alt="Saved Look" className="w-full h-full object-cover" />
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleDeleteLook(look.id, e)}
+                                                className="absolute top-2 right-2 p-1.5 bg-white/80 hover:bg-red-50 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <Trash2 size={12} />
+                                            </button>
+                                            <button
+                                                onClick={() => downloadImage(look.image)}
+                                                className="absolute bottom-2 right-2 p-1.5 bg-white/80 hover:bg-blue-50 text-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <Download size={12} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {/* Products View */}
                     {activeTab === 'products' && (
                         <div className="space-y-8">
@@ -579,8 +734,12 @@ const MakeupStudio = () => {
                         </div>
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">3 Products Selected</p>
                     </div>
-                    <button className="w-full bg-charcoal text-white py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-primary transition-all active:scale-95">
-                        Add Look to Bag • 4,250 BDT
+                    <button
+                        onClick={handleSaveLook}
+                        disabled={saving || !isCameraActive}
+                        className="w-full bg-charcoal text-white py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-primary transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                    >
+                        {saving ? "Saving..." : "Save Look to Bag"}
                     </button>
                 </div>
             </motion.div>

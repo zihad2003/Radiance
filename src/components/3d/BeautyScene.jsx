@@ -42,7 +42,7 @@ const FloatingParticles = () => {
     return (
         <>
             <Sparkles
-                count={100}
+                count={30}
                 scale={15}
                 size={3}
                 speed={0.3}
@@ -50,7 +50,7 @@ const FloatingParticles = () => {
                 color="#FFD700"
             />
             <Sparkles
-                count={80}
+                count={20}
                 scale={12}
                 size={2.5}
                 speed={0.4}
@@ -58,7 +58,7 @@ const FloatingParticles = () => {
                 color="#FFB6C1"
             />
             <Sparkles
-                count={60}
+                count={15}
                 scale={10}
                 size={2}
                 speed={0.5}
@@ -76,7 +76,7 @@ const ReflectiveFloor = () => {
             <planeGeometry args={[50, 50]} />
             <MeshReflectorMaterial
                 blur={[300, 100]}
-                resolution={1024}
+                resolution={256} // Reduced 512->256
                 mixBlur={1}
                 mixStrength={40}
                 roughness={1}
@@ -100,8 +100,8 @@ const StudioLighting = () => {
                 position={[5, 8, 5]}
                 intensity={1.5}
                 castShadow
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
+                shadow-mapSize-width={512} // Reduced 1024->512 for mobile performance
+                shadow-mapSize-height={512}
                 shadow-camera-far={50}
                 shadow-camera-left={-10}
                 shadow-camera-right={10}
@@ -269,7 +269,7 @@ const BeautyScene = () => {
         <div className="w-full h-screen relative">
             <Canvas
                 shadows
-                dpr={[1, 2]}
+                dpr={[1, 1.5]}
                 gl={{
                     antialias: true,
                     toneMapping: THREE.ACESFilmicToneMapping,
@@ -318,18 +318,18 @@ const BeautyScene = () => {
                     <ReflectiveFloor />
 
                     {/* Post-Processing Effects */}
-                    <EffectComposer>
+                    <EffectComposer disableNormalPass>
                         <Bloom
                             intensity={0.5}
                             luminanceThreshold={0.9}
                             luminanceSmoothing={0.9}
-                            height={300}
+                            height={200} // Reduced 300 -> 200
                         />
                         <DepthOfField
                             focusDistance={0.01}
                             focalLength={0.2}
-                            bokehScale={3}
-                            height={480}
+                            bokehScale={3.5}
+                            height={240} // Reduced 480 -> 240
                         />
                         <ChromaticAberration
                             offset={[0.0002, 0.0002]}

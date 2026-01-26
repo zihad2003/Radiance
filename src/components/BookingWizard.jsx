@@ -85,17 +85,21 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 className="bg-white rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="booking-wizard-title"
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-primary to-accent p-6 text-white relative">
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                        className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white"
+                        aria-label="Close Booking Wizard"
                     >
                         <X size={20} />
                     </button>
 
-                    <h2 className="text-3xl font-serif mb-2">Book Your Appointment</h2>
+                    <h2 id="booking-wizard-title" className="text-3xl font-serif mb-2">Book Your Appointment</h2>
                     <p className="text-white/80">Step {currentStep} of 5</p>
                 </div>
 
@@ -106,11 +110,12 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
                             <React.Fragment key={step.number}>
                                 <div className="flex flex-col items-center flex-1">
                                     <div
+                                        aria-current={currentStep === step.number ? "step" : undefined}
                                         className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all ${currentStep > step.number
-                                                ? 'bg-green-500 text-white'
-                                                : currentStep === step.number
-                                                    ? 'bg-gradient-to-r from-primary to-accent text-white scale-110'
-                                                    : 'bg-gray-200 text-gray-400'
+                                            ? 'bg-green-500 text-white'
+                                            : currentStep === step.number
+                                                ? 'bg-gradient-to-r from-primary to-accent text-white scale-110 shadow-lg'
+                                                : 'bg-gray-200 text-gray-400'
                                             }`}
                                     >
                                         {currentStep > step.number ? <Check size={24} /> : step.icon}
@@ -168,7 +173,7 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
                             <div className="text-xs text-gray-500 mt-1">{steps[currentStep - 1].title}</div>
                         </div>
 
-                        {currentStep < 5 ? (
+                        {currentStep < 5 && (
                             <button
                                 onClick={goToNextStep}
                                 disabled={!canProceed()}
@@ -177,14 +182,9 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
                                 Next
                                 <ChevronRight size={20} />
                             </button>
-                        ) : (
-                            <button
-                                disabled={!canProceed()}
-                                className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Confirm Booking
-                            </button>
                         )}
+                        {/* Final step confirmation is handled inside the component */}
+                        {currentStep === 5 && <div className="w-[100px]" />}
                     </div>
                 </div>
             </motion.div>

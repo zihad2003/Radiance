@@ -5,7 +5,9 @@ import { stylists } from '../../data/stylists';
 import { Check, ChevronRight, ChevronLeft, Calendar as CalendarIcon, Clock, User, Scissors, Star, ShieldCheck, MapPin, Banknote as BanknoteIcon } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import PaymentGateway from '../payment/PaymentGateway'; // Import Gateway
+import PaymentGateway from '../payment/PaymentGateway';
+import { sanitizeInput, validateEmail, validatePhone } from '../../utils/security';
+import { trackEvent, AnalyticsEvents } from '../../utils/analytics';
 
 // Steps
 const steps = [
@@ -20,6 +22,12 @@ const steps = [
 const BookingWizard = ({ initialService }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [bookingRef, setBookingRef] = useState(null); // Store confirmed booking info
+
+    // Track Start
+    useState(() => {
+        trackEvent('Booking', AnalyticsEvents.BOOKING.STARTED, 'Booking Wizard Opened');
+    }, []);
+
     const [selection, setSelection] = useState({
         services: initialService ? services.filter(s => s.name === initialService) : [],
         date: new Date(),
@@ -38,6 +46,10 @@ const BookingWizard = ({ initialService }) => {
         setSelection(prev => {
             const exists = prev.services.find(s => s.id === service.id);
             if (exists) return { ...prev, services: prev.services.filter(s => s.id !== service.id) };
+
+            // Track Service Selection
+            trackEvent('Booking', AnalyticsEvents.BOOKING.SERVICE_SELECTED, service.name, service.price);
+
             return { ...prev, services: [...prev.services, service] };
         });
     };
@@ -47,7 +59,12 @@ const BookingWizard = ({ initialService }) => {
         nextStep();
     };
 
+
+
     const onPaymentSuccess = (paymentResult) => {
+        // Track Conversion
+        trackEvent('Booking', AnalyticsEvents.BOOKING.COMPLETED, 'Online Payment', totalCost);
+
         const text = `*New Booking Request - PAID*
 -------------------
 *Booking ID:* ${paymentResult.paymentID || 'N/A'}
@@ -134,7 +151,10 @@ Notes: ${selection.details.notes}
                         {currentStep === 3 && (
                             <StepStylist
                                 currentStylist={selection.stylist}
-                                onSelect={(s) => setSelection(p => ({ ...p, stylist: s }))}
+                                onSelect={(s) => {
+                                    setSelection(p => ({ ...p, stylist: s }));
+                                    if (s) trackEvent('Booking', AnalyticsEvents.BOOKING.STYLIST_SELECTED, s.name);
+                                }}
                             />
                         )}
                         {currentStep === 4 && (
@@ -184,7 +204,11 @@ Notes: ${selection.details.notes}
                     {currentStep < 5 ? (
                         <button
                             onClick={nextStep}
-                            disabled={currentStep === 1 && selection.services.length === 0 || currentStep === 2 && !selection.time}
+                            disabled={
+                                (currentStep === 1 && selection.services.length === 0) ||
+                                (currentStep === 2 && !selection.time) ||
+                                (currentStep === 4 && (!selection.details.name || !validatePhone(selection.details.phone) || (selection.details.email && !validateEmail(selection.details.email))))
+                            }
                             className="px-8 py-2 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                         >
                             Next <ChevronRight size={16} className="ml-2" />
@@ -357,8 +381,13 @@ const StepStylist = ({ currentStylist, onSelect }) => {
 const StepDetails = ({ details, onChange }) => {
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        onChange({ ...details, [name]: type === 'checkbox' ? checked : value });
+        // Sanitize text inputs
+        const newVal = type === 'text' || type === 'textarea' ? sanitizeInput(value) : value;
+        onChange({ ...details, [name]: type === 'checkbox' ? checked : newVal });
     };
+
+    const isPhoneValid = !details.phone || validatePhone(details.phone);
+    const isEmailValid = !details.email || validateEmail(details.email);
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto">
@@ -381,9 +410,10 @@ const StepDetails = ({ details, onChange }) => {
                         name="phone"
                         value={details.phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50"
+                        className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 ${!isPhoneValid ? 'border-red-500' : 'border-gray-200'}`}
                         placeholder="+880 1XXX XXXXXX"
                     />
+                    {!isPhoneValid && <p className="text-xs text-red-500 mt-1">Invalid phone format</p>}
                 </div>
             </div>
 
@@ -394,9 +424,10 @@ const StepDetails = ({ details, onChange }) => {
                     name="email"
                     value={details.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50"
+                    className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 ${!isEmailValid ? 'border-red-500' : 'border-gray-200'}`}
                     placeholder="you@example.com"
                 />
+                {!isEmailValid && <p className="text-xs text-red-500 mt-1">Invalid email format</p>}
             </div>
 
             <div>

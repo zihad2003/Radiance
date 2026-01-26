@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ToastProvider } from './context/ToastContext';
+import { HelmetProvider } from 'react-helmet-async';
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
 
@@ -42,9 +44,13 @@ class ErrorBoundary extends Component {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <ConvexProvider client={convex}>
-        <App />
-      </ConvexProvider>
+      <HelmetProvider>
+        <ConvexProvider client={convex}>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </ConvexProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

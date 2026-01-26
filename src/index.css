@@ -35,6 +35,12 @@ body {
   font-family: var(--font-sans);
 }
 
+@media (hover: none) and (pointer: coarse) {
+  body {
+    cursor: auto;
+  }
+}
+
 /* Custom Cursor */
 .cursor-dot,
 .cursor-outline {
@@ -154,4 +160,16 @@ html.lenis {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gold);
+}
+
+/* Accessibility Focus Ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Improve contrast for text selection */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
 }

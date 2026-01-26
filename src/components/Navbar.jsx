@@ -33,32 +33,35 @@ const Navbar = () => {
         >
             <div className="container mx-auto px-6 flex items-center justify-between">
                 {/* Logo */}
-                <a href="#" className="font-serif text-2xl font-bold tracking-widest text-charcoal">
+                <a href="#" className="font-serif text-2xl font-bold tracking-widest text-charcoal outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1" aria-label="Radiance Home">
                     RADIANCE<span className="text-primary">.</span>
                 </a>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-12">
+                <div className="hidden md:flex items-center space-x-12" role="menubar">
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
                             href={link.href}
-                            className="text-sm uppercase tracking-widest hover:text-primary transition-colors relative group"
+                            role="menuitem"
+                            className="text-sm uppercase tracking-widest hover:text-primary transition-colors relative group outline-none focus-visible:text-primary"
                         >
                             {link.name}
                             <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                         </a>
                     ))}
-                    <button className="bg-primary text-white px-8 py-3 rounded-full hover:bg-opacity-90 transition-all hover:scale-105 active:scale-95 shimmer interactive">
+                    <button className="bg-primary text-white px-8 py-3 rounded-full hover:bg-opacity-90 transition-all hover:scale-105 active:scale-95 shimmer interactive outline-none focus-visible:ring-4 focus-visible:ring-primary/30">
                         Book Now
                     </button>
                 </div>
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="md:hidden interactive"
+                    className="md:hidden interactive p-2 rounded-lg outline-none focus-visible:bg-gray-100"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Toggle Menu"
+                    aria-label={mobileMenuOpen ? "Close Menu" : "Open Menu"}
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="mobile-menu"
                 >
                     {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>

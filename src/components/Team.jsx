@@ -1,4 +1,6 @@
 import { useRef } from 'react';
+import LazyImage from './ui/LazyImage';
+import { getOptimizedUnsplashUrl, getLoadingProps } from '../utils/imageOptimization';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Instagram, Twitter, Linkedin } from 'lucide-react';
 
@@ -44,7 +46,14 @@ const TeamCard = ({ member, index }) => {
 
                 {/* Front Face */}
                 <div className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden shadow-xl">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <LazyImage
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        width={400}
+                        height={500}
+                        {...getLoadingProps(false)}
+                    />
                     <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
                         <h3 className="text-white text-2xl font-serif">{member.name}</h3>
                         <p className="text-white/80 font-sans tracking-wide text-sm">{member.role}</p>
@@ -54,7 +63,14 @@ const TeamCard = ({ member, index }) => {
                 {/* Back Face */}
                 <div className={`absolute inset-0 backface-hidden rotate-y-180 rounded-3xl p-8 flex flex-col justify-center items-center text-center bg-gradient-to-br ${member.color} text-white shadow-xl`}>
                     <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden mb-6 mx-auto">
-                        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                        <LazyImage
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                            width={96}
+                            height={96}
+                            loading="lazy"
+                        />
                     </div>
                     <h3 className="text-3xl font-serif mb-2">{member.name}</h3>
                     <p className="text-white/90 font-medium mb-6 uppercase tracking-wider text-sm">{member.role}</p>

@@ -35,15 +35,15 @@ export const LipstickHero = ({
     });
 
     const getBulletGeometry = () => {
-        if (bulletShape === "rounded") return <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]} />;
+        if (bulletShape === "rounded") return <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]} />;
         if (bulletShape === "square") return <Box args={[0.2, 0.5, 0.2]} position={[0, 0, 0]} />;
-        if (bulletShape === "heart") return <Sphere args={[0.13, 32, 32]} position={[0, 0.25, 0]} scale={[1.2, 0.8, 1]} />;
+        if (bulletShape === "heart") return <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1.2, 0.8, 1]} />;
         // Default slanted
         return (
             <group position={[0, 0, 0]}>
-                <Cylinder args={[0.13, 0.13, 0.5, 64]} />
+                <Cylinder args={[0.13, 0.13, 0.5, 32]} />
                 <mesh position={[0, 0.25, 0]} rotation={[0.4, 0, 0]}>
-                    <Cylinder args={[0.13, 0.13, 0.05, 64]} />
+                    <Cylinder args={[0.13, 0.13, 0.05, 32]} />
                 </mesh>
             </group>
         );
@@ -61,10 +61,10 @@ export const LipstickHero = ({
     return (
         <group ref={groupRef} onClick={() => setIsOpened(!isOpened)}>
             {/* Base Case */}
-            <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]} material={caseMaterial} />
+            <Cylinder args={[0.18, 0.18, 1.0, 32]} position={[0, -0.5, 0]} material={caseMaterial} />
 
             {/* Mechanism */}
-            <Cylinder args={[0.15, 0.15, 0.4, 64]} position={[0, 0.2, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.4, 32]} position={[0, 0.2, 0]}>
                 <meshStandardMaterial color="#C0C0C0" metalness={1} roughness={0.1} />
             </Cylinder>
 
@@ -82,9 +82,9 @@ export const LipstickHero = ({
 
             {/* Cap */}
             <group ref={capRef} position={[0, 0.5, 0]}>
-                <Cylinder args={[0.19, 0.19, 1.0, 64]} position={[0, 0, 0]} material={caseMaterial} />
+                <Cylinder args={[0.19, 0.19, 1.0, 32]} position={[0, 0, 0]} material={caseMaterial} />
                 {caseDesign === "jeweled" && (
-                    <Sphere args={[0.05, 16, 16]} position={[0, 0.5, 0]}>
+                    <Sphere args={[0.05, 12, 12]} position={[0, 0.5, 0]}>
                         <meshStandardMaterial color="#FFD700" emmisive="#FFD700" />
                     </Sphere>
                 )}
@@ -175,7 +175,7 @@ export const BottleHero = ({
     return (
         <group>
             {/* Glass Bottle */}
-            <Cylinder args={[0.4, 0.45, 1.2, 64]}>
+            <Cylinder args={[0.4, 0.45, 1.2, 32]}>
                 <meshPhysicalMaterial
                     transmission={0.95}
                     roughness={0.05}
@@ -186,7 +186,7 @@ export const BottleHero = ({
             </Cylinder>
 
             {/* Liquid Inside */}
-            <Cylinder args={[0.35, 0.4, 1.0, 64]} position={[0, -0.05, 0]}>
+            <Cylinder args={[0.35, 0.4, 1.0, 32]} position={[0, -0.05, 0]}>
                 <meshStandardMaterial
                     color={liquidColor}
                     roughness={finish === "matte" ? 0.9 : 0.1}
@@ -198,7 +198,7 @@ export const BottleHero = ({
             {/* Pump Mechanism */}
             {bottleType === "pump" && (
                 <group position={[0, 0.6, 0]}>
-                    <Cylinder args={[0.1, 0.1, 0.3, 32]} position={[0, 0.15, 0]}>
+                    <Cylinder args={[0.1, 0.1, 0.3, 16]} position={[0, 0.15, 0]}>
                         <meshStandardMaterial color="#222" metalness={0.8} />
                     </Cylinder>
                     <Box args={[0.2, 0.1, 0.4]} position={[0, 0.3, 0.1]}>
@@ -221,20 +221,20 @@ export const EyelinerHero = ({
         <group rotation={[Math.PI / 2, 0, 0]}>
             {type === "pencil" && (
                 <group>
-                    <Cylinder args={[0.05, 0.05, 1.5, 32]}>
+                    <Cylinder args={[0.05, 0.05, 1.5, 16]}>
                         <meshStandardMaterial color="#111" roughness={0.5} />
                     </Cylinder>
-                    <Cylinder args={[0.0, 0.05, 0.2, 32]} position={[0, 0.85, 0]}>
+                    <Cylinder args={[0.0, 0.05, 0.2, 16]} position={[0, 0.85, 0]}>
                         <meshStandardMaterial color={color} roughness={0.9} />
                     </Cylinder>
                 </group>
             )}
             {type === "liquid" && (
                 <group>
-                    <Cylinder args={[0.1, 0.1, 1.0, 32]}>
+                    <Cylinder args={[0.1, 0.1, 1.0, 16]}>
                         <meshStandardMaterial color="#0a0a0a" metalness={0.8} />
                     </Cylinder>
-                    <Cylinder args={[0.01, 0.05, 0.4, 32]} position={[0, 0.7, 0]}>
+                    <Cylinder args={[0.01, 0.05, 0.4, 16]} position={[0, 0.7, 0]}>
                         <meshStandardMaterial color={color} roughness={1} />
                     </Cylinder>
                 </group>
@@ -251,26 +251,26 @@ export const MascaraHero = ({
 }) => {
     return (
         <group>
-            {/* Tube */}
-            <Cylinder args={[0.15, 0.15, 1.5, 64]} position={[0, -0.5, 0]}>
+            {/* Tube - Reduced segments 64->32 */}
+            <Cylinder args={[0.15, 0.15, 1.5, 32]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial color="#111" metalness={0.9} envMapIntensity={2} />
             </Cylinder>
 
-            {/* Wand Stem */}
-            <Cylinder args={[0.02, 0.02, 1.0, 32]} position={[0.4, 0.5, 0]} rotation={[0, 0, -0.2]}>
+            {/* Wand Stem - Reduced segments 32->16 */}
+            <Cylinder args={[0.02, 0.02, 1.0, 16]} position={[0.4, 0.5, 0]} rotation={[0, 0, -0.2]}>
                 <meshStandardMaterial color="#444" metalness={1} />
             </Cylinder>
 
             {/* Brush Head */}
             <group position={[0.55, 0.9, 0]} rotation={[0, 0, -0.2]}>
                 {wandType === "straight" && (
-                    <Cylinder args={[0.08, 0.08, 0.4, 32]}>
+                    <Cylinder args={[0.08, 0.08, 0.4, 16]}>
                         <meshStandardMaterial color={color} roughness={1} />
                     </Cylinder>
                 )}
-                {/* Simulate bristles with many small boxes/cylinders */}
-                {Array.from({ length: 50 }).map((_, i) => (
-                    <mesh key={i} position={[Math.sin(i) * 0.1, (i / 50) * 0.4 - 0.2, Math.cos(i) * 0.1]}>
+                {/* Optimized Bristles: Reduced count 50->24, simplified geometry */}
+                {Array.from({ length: 24 }).map((_, i) => (
+                    <mesh key={i} position={[Math.sin(i) * 0.1, (i / 24) * 0.4 - 0.2, Math.cos(i) * 0.1]}>
                         <Box args={[0.005, 0.005, 0.1]} />
                         <meshStandardMaterial color={color} />
                     </mesh>
@@ -285,7 +285,7 @@ export const MascaraHero = ({
 export const BeautyProductStage = ({ children, title, subtitle, price }) => {
     return (
         <div className="w-full h-[500px] relative bg-gradient-to-br from-neutral-900 to-black rounded-3xl overflow-hidden shadow-2xl">
-            <Canvas shadows camera={{ position: [0, 1.5, 4], fov: 35 }}>
+            <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 1.5, 4], fov: 35 }}>
                 <ambientLight intensity={0.5} />
                 <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
                 <Environment preset="city" />

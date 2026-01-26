@@ -1,5 +1,6 @@
 import { useState, Suspense, lazy, useEffect } from 'react';
 import SmoothScroll from './components/ui/SmoothScroll';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import { RewardsProvider } from './context/RewardsContext';
 import CustomCursor from './components/CustomCursor';
 import Gamification from './components/Gamification';
@@ -20,8 +21,13 @@ import BookingWizard from './components/BookingWizard';
 import Team from './components/Team';
 import ContactFooter from './components/ContactFooter';
 import ExcellenceSection from './components/ExcellenceSection';
-import { AdminLogin, Dashboard } from './components/admin/Dashboard'; // Import Admin
+import { AdminLogin, Dashboard } from './components/admin/Dashboard';
 import { AnimatePresence } from 'framer-motion';
+import SEO from './components/SEO';
+import BrowserCompatibilityWarning from './components/BrowserCompatibilityWarning';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import OfflineIndicator from './components/OfflineIndicator';
+import { initAnalytics, trackPageView } from './utils/analytics';
 
 const VirtualTryOn = lazy(() => import('./components/VirtualTryOn'));
 const HairstyleAI = lazy(() => import('./components/HairstyleAI'));
@@ -33,6 +39,10 @@ function App() {
   const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
+    // Initialize Analytics
+    initAnalytics();
+    trackPageView(window.location.pathname);
+
     const handler = () => setShowAdmin(true);
     window.addEventListener('open-admin', handler);
     return () => window.removeEventListener('open-admin', handler);
@@ -45,80 +55,94 @@ function App() {
 
   return (
     <RewardsProvider>
-      <SmoothScroll>
-        <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
-          <CustomCursor />
-          <Gamification />
-          <ScrollProgress />
-          <BackToTop />
-          <ChatBot />
-          <ConvexMigrator />
-          <Navbar />
+      <ErrorBoundary>
+        {/* Global SEO Metadata */}
+        <SEO />
 
-          <main>
-            <Hero />
-            <FadeIn>
-              <Services onBook={handleBookService} />
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <ExcellenceSection />
-            </FadeIn>
-            <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
+        {/* Browser Compatibility Warning */}
+        <BrowserCompatibilityWarning />
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
+
+        {/* Offline Indicator */}
+        <OfflineIndicator />
+
+        <SmoothScroll>
+          <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
+            <CustomCursor />
+            <Gamification />
+            <ScrollProgress />
+            <BackToTop />
+            <ChatBot />
+            <ConvexMigrator />
+            <Navbar />
+
+            <main>
+              <Hero />
               <FadeIn>
-                <HairstyleAI />
+                <Services onBook={handleBookService} />
+              </FadeIn>
+              <FadeIn delay={0.2}>
+                <ExcellenceSection />
+              </FadeIn>
+              <Suspense fallback={<div className="h-96 w-full flex items-center justify-center text-primary font-serif">Loading AI Salon...</div>}>
+                <FadeIn>
+                  <HairstyleAI />
+                </FadeIn>
+                <FadeIn>
+                  <VirtualTryOn />
+                </FadeIn>
+              </Suspense>
+              <FadeIn>
+                <Gallery />
               </FadeIn>
               <FadeIn>
-                <VirtualTryOn />
+                <TransformationCompare />
               </FadeIn>
-            </Suspense>
-            <FadeIn>
-              <Gallery />
-            </FadeIn>
-            <FadeIn>
-              <TransformationCompare />
-            </FadeIn>
-            <FadeIn>
-              <Shop />
-            </FadeIn>
-            <FadeIn>
-              <Pricing />
-            </FadeIn>
-            <FadeIn>
-              <BeautyStories />
-            </FadeIn>
-            <FadeIn>
-              <Team />
-            </FadeIn>
-            <ContactFooter />
-          </main>
-        </div>
-      </SmoothScroll>
-
-      {/* Booking Wizard Modal */}
-      <BookingWizard
-        isOpen={showBooking}
-        onClose={() => setShowBooking(false)}
-        initialService={selectedService}
-      />
-
-      {/* Admin Modal Overlay */}
-      <AnimatePresence>
-        {showAdmin && (
-          <div className="fixed inset-0 z-[100] bg-white">
-            {!isAdminLoggedIn ? (
-              <AdminLogin onLogin={() => setIsAdminLoggedIn(true)} />
-            ) : (
-              <Dashboard onClose={() => { setShowAdmin(false); setIsAdminLoggedIn(false); }} />
-            )}
-            <button
-              onClick={() => setShowAdmin(false)}
-              className="fixed top-4 right-4 z-[110] bg-gray-100 p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
+              <FadeIn>
+                <Shop />
+              </FadeIn>
+              <FadeIn>
+                <Pricing />
+              </FadeIn>
+              <FadeIn>
+                <BeautyStories />
+              </FadeIn>
+              <FadeIn>
+                <Team />
+              </FadeIn>
+              <ContactFooter />
+            </main>
           </div>
-        )}
-      </AnimatePresence>
+        </SmoothScroll>
+
+        {/* Booking Wizard Modal */}
+        <BookingWizard
+          isOpen={showBooking}
+          onClose={() => setShowBooking(false)}
+          initialService={selectedService}
+        />
+
+        {/* Admin Modal Overlay */}
+        <AnimatePresence>
+          {showAdmin && (
+            <div className="fixed inset-0 z-[100] bg-white">
+              {!isAdminLoggedIn ? (
+                <AdminLogin onLogin={() => setIsAdminLoggedIn(true)} />
+              ) : (
+                <Dashboard onClose={() => { setShowAdmin(false); setIsAdminLoggedIn(false); }} />
+              )}
+              <button
+                onClick={() => setShowAdmin(false)}
+                className="fixed top-4 right-4 z-[110] bg-gray-100 p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-500"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </AnimatePresence>
+      </ErrorBoundary>
     </RewardsProvider>
   );
 }

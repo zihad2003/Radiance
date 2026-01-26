@@ -1,9 +1,26 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { User, Phone, Mail, MapPin, Home, Gift, MessageCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Phone, Mail, MapPin, Home, Gift, MessageCircle, AlertCircle } from 'lucide-react';
 
 const CustomerDetails = ({ bookingData, updateBookingData }) => {
     const details = bookingData.customerDetails;
+    const [touched, setTouched] = useState({});
+
+    // Validation Regex
+    const phoneRegex = /^(\+880|880|0)1[3-9]\d{8}$/;
+
+    const getErrors = () => {
+        const errors = {};
+        if (!details.name.trim()) errors.name = "Full name is required";
+        if (!details.phone) {
+            errors.phone = "Phone number is required";
+        } else if (!phoneRegex.test(details.phone.replace(/\s+/g, ''))) {
+            errors.phone = "Invalid Bangladesh phone number (e.g. 01712345678)";
+        }
+        if (!details.address.trim()) errors.address = "Address is required for booking";
+        return errors;
+    };
+
+    const errors = getErrors();
 
     const handleChange = (field, value) => {
         updateBookingData('customerDetails', {
@@ -12,16 +29,29 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
         });
     };
 
+    const handleBlur = (field) => {
+        setTouched(prev => ({ ...prev, [field]: true }));
+    };
+
     const handleHomeServiceToggle = (checked) => {
         handleChange('homeService', checked);
         updateBookingData('travelFee', checked ? 2000 : 0);
     };
 
+    const ErrorParams = ({ field }) => (
+        touched[field] && errors[field] ? (
+            <div className="flex items-center gap-1 mt-1 text-red-500 text-xs font-medium animate-pulse">
+                <AlertCircle size={12} />
+                {errors[field]}
+            </div>
+        ) : null
+    );
+
     return (
         <div className="space-y-6 max-w-3xl mx-auto">
             <div className="text-center">
                 <h3 className="text-3xl font-serif text-charcoal mb-2">Your Details</h3>
-                <p className="text-gray-600">Please provide your contact information</p>
+                <p className="text-gray-600">Please provide your contact information to proceed</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 space-y-6">
@@ -35,10 +65,15 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                         type="text"
                         value={details.name}
                         onChange={(e) => handleChange('name', e.target.value)}
+                        onBlur={() => handleBlur('name')}
                         placeholder="Enter your full name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.name && errors.name
+                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
+                                : 'border-gray-300 focus:ring-primary/20'
+                            }`}
                         required
                     />
+                    <ErrorParams field="name" />
                 </div>
 
                 {/* Phone */}
@@ -51,11 +86,20 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                         type="tel"
                         value={details.phone}
                         onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="+880 1XXX-XXXXXX"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        onBlur={() => handleBlur('phone')}
+                        placeholder="017XXXXXXXX"
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.phone && errors.phone
+                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
+                                : 'border-gray-300 focus:ring-primary/20'
+                            }`}
                         required
                     />
-                    <p className="text-xs text-gray-500 mt-1">We'll send booking confirmation via SMS</p>
+                    <ErrorParams field="phone" />
+                    {!errors.phone && details.phone && (
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <MessageCircle size={10} /> Valid number format
+                        </p>
+                    )}
                 </div>
 
                 {/* Email */}
@@ -83,11 +127,16 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                     <textarea
                         value={details.address}
                         onChange={(e) => handleChange('address', e.target.value)}
+                        onBlur={() => handleBlur('address')}
                         placeholder="Enter your complete address"
                         rows="3"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.address && errors.address
+                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
+                                : 'border-gray-300 focus:ring-primary/20'
+                            }`}
                         required
                     />
+                    <ErrorParams field="address" />
                 </div>
 
                 {/* Home Service */}

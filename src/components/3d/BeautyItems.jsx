@@ -20,7 +20,7 @@ export const LipstickClassicGold = (props) => {
     return (
         <group ref={groupRef} {...rest}>
             {/* Base - Metallic Gold */}
-            <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
+            <Cylinder args={[0.18, 0.18, 1.0, 32]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#D4AF37"
                     metalness={0.95}
@@ -30,23 +30,23 @@ export const LipstickClassicGold = (props) => {
             </Cylinder>
 
             {/* Embossed Logo Ring */}
-            <Torus args={[0.19, 0.02, 16, 64]} position={[0, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <Torus args={[0.19, 0.02, 16, 32]} position={[0, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
                 <meshStandardMaterial color="#B8860B" metalness={1} roughness={0.05} />
             </Torus>
 
             {/* Decorative Band */}
-            <Cylinder args={[0.185, 0.185, 0.08, 64]} position={[0, 0.05, 0]}>
+            <Cylinder args={[0.185, 0.185, 0.08, 32]} position={[0, 0.05, 0]}>
                 <meshStandardMaterial color="#FFD700" metalness={1} roughness={0.05} envMapIntensity={3} />
             </Cylinder>
 
             {/* Inner Mechanism */}
-            <Cylinder args={[0.15, 0.15, 0.35, 64]} position={[0, 0.3, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.35, 32]} position={[0, 0.3, 0]}>
                 <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.3} />
             </Cylinder>
 
             {/* Lipstick Bullet - Red with ridges */}
             <group position={[0, 0.55, 0]}>
-                <Cylinder args={[0.13, 0.13, 0.5, 64]} position={[0, 0, 0]}>
+                <Cylinder args={[0.13, 0.13, 0.5, 32]} position={[0, 0, 0]}>
                     <meshStandardMaterial
                         color={color}
                         roughness={0.15}
@@ -57,12 +57,12 @@ export const LipstickClassicGold = (props) => {
                 </Cylinder>
                 {/* Ridges */}
                 {[0, 0.1, 0.2].map((y, i) => (
-                    <Torus key={i} args={[0.13, 0.005, 8, 64]} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                    <Torus key={i} args={[0.13, 0.005, 8, 32]} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
                         <meshStandardMaterial color={color} roughness={0.2} metalness={0.2} />
                     </Torus>
                 ))}
                 {/* Rounded Tip */}
-                <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
+                <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
                     <meshStandardMaterial color={color} roughness={0.1} metalness={0.05} />
                 </Sphere>
             </group>
@@ -85,7 +85,7 @@ export const LipstickRoseGold = (props) => {
 
     return (
         <group ref={groupRef} {...rest}>
-            <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
+            <Cylinder args={[0.18, 0.18, 1.0, 32]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#B76E79"
                     metalness={0.95}
@@ -93,21 +93,21 @@ export const LipstickRoseGold = (props) => {
                     envMapIntensity={2.5}
                 />
             </Cylinder>
-            <Cylinder args={[0.185, 0.185, 0.08, 64]} position={[0, 0.05, 0]}>
+            <Cylinder args={[0.185, 0.185, 0.08, 32]} position={[0, 0.05, 0]}>
                 <meshStandardMaterial color="#E0B0B0" metalness={1} roughness={0.05} />
             </Cylinder>
-            <Cylinder args={[0.15, 0.15, 0.35, 64]} position={[0, 0.3, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.35, 32]} position={[0, 0.3, 0]}>
                 <meshStandardMaterial color="#2a2a2a" metalness={0.6} roughness={0.4} />
             </Cylinder>
             <group position={[0, 0.55, 0]}>
-                <Cylinder args={[0.13, 0.13, 0.5, 64]}>
+                <Cylinder args={[0.13, 0.13, 0.5, 32]}>
                     <meshStandardMaterial
                         color={color}
                         roughness={0.8}
                         metalness={0.0}
                     />
                 </Cylinder>
-                <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
+                <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
                     <meshStandardMaterial color={color} roughness={0.8} />
                 </Sphere>
             </group>
@@ -128,7 +128,7 @@ export const LipstickBlackDesigner = (props) => {
 
     return (
         <group ref={groupRef} {...rest}>
-            <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
+            <Cylinder args={[0.18, 0.18, 1.0, 32]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#0a0a0a"
                     metalness={0.9}
@@ -136,14 +136,14 @@ export const LipstickBlackDesigner = (props) => {
                     envMapIntensity={2.2}
                 />
             </Cylinder>
-            <Cylinder args={[0.185, 0.185, 0.08, 64]} position={[0, 0.05, 0]}>
+            <Cylinder args={[0.185, 0.185, 0.08, 32]} position={[0, 0.05, 0]}>
                 <meshStandardMaterial color="#C0C0C0" metalness={1} roughness={0.05} />
             </Cylinder>
-            <Cylinder args={[0.15, 0.15, 0.35, 64]} position={[0, 0.3, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.35, 32]} position={[0, 0.3, 0]}>
                 <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.3} />
             </Cylinder>
             <group position={[0, 0.55, 0]}>
-                <Cylinder args={[0.13, 0.13, 0.5, 64]}>
+                <Cylinder args={[0.13, 0.13, 0.5, 32]}>
                     <meshStandardMaterial
                         color={color}
                         roughness={0.05}
@@ -152,7 +152,7 @@ export const LipstickBlackDesigner = (props) => {
                         emissiveIntensity={0.05}
                     />
                 </Cylinder>
-                <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
+                <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
                     <meshStandardMaterial color={color} roughness={0.05} metalness={0.1} />
                 </Sphere>
             </group>
@@ -173,7 +173,7 @@ export const LipstickJeweled = (props) => {
 
     return (
         <group ref={groupRef} {...rest}>
-            <Cylinder args={[0.18, 0.18, 1.0, 64]} position={[0, -0.5, 0]}>
+            <Cylinder args={[0.18, 0.18, 1.0, 32]} position={[0, -0.5, 0]}>
                 <meshStandardMaterial
                     color="#4B0082"
                     metalness={0.95}
@@ -187,7 +187,7 @@ export const LipstickJeweled = (props) => {
                 return (
                     <Sphere
                         key={i}
-                        args={[0.04, 32, 32]}
+                        args={[0.04, 16, 16]}
                         position={[Math.cos(rad) * 0.19, -0.3, Math.sin(rad) * 0.19]}
                     >
                         <meshStandardMaterial
@@ -200,11 +200,11 @@ export const LipstickJeweled = (props) => {
                     </Sphere>
                 );
             })}
-            <Cylinder args={[0.15, 0.15, 0.35, 64]} position={[0, 0.3, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.35, 32]} position={[0, 0.3, 0]}>
                 <meshStandardMaterial color="#2a2a2a" metalness={0.6} roughness={0.4} />
             </Cylinder>
             <group position={[0, 0.55, 0]}>
-                <Cylinder args={[0.13, 0.13, 0.5, 64]}>
+                <Cylinder args={[0.13, 0.13, 0.5, 32]}>
                     <meshStandardMaterial
                         color={color}
                         roughness={0.3}
@@ -213,7 +213,7 @@ export const LipstickJeweled = (props) => {
                         emissiveIntensity={0.2}
                     />
                 </Cylinder>
-                <Sphere args={[0.13, 64, 32]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
+                <Sphere args={[0.13, 32, 16]} position={[0, 0.25, 0]} scale={[1, 0.5, 1]}>
                     <meshStandardMaterial color={color} roughness={0.3} metalness={0.4} />
                 </Sphere>
             </group>
@@ -236,7 +236,7 @@ export const CompactVintageRound = (props) => {
     return (
         <group ref={groupRef} {...props} rotation={[Math.PI / 6, 0, 0]}>
             {/* Bottom Case */}
-            <Cylinder args={[0.6, 0.6, 0.12, 64]} position={[0, 0, 0]}>
+            <Cylinder args={[0.6, 0.6, 0.12, 32]} position={[0, 0, 0]}>
                 <meshStandardMaterial
                     color="#8B4513"
                     metalness={0.7}
@@ -246,12 +246,12 @@ export const CompactVintageRound = (props) => {
             </Cylinder>
 
             {/* Decorative Engraving */}
-            <Torus args={[0.5, 0.01, 16, 64]} position={[0, 0.07, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <Torus args={[0.5, 0.01, 16, 32]} position={[0, 0.07, 0]} rotation={[Math.PI / 2, 0, 0]}>
                 <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.1} />
             </Torus>
 
             {/* Powder */}
-            <Cylinder args={[0.55, 0.55, 0.06, 64]} position={[0, 0.09, 0]}>
+            <Cylinder args={[0.55, 0.55, 0.06, 32]} position={[0, 0.09, 0]}>
                 <meshStandardMaterial
                     color="#E0C097"
                     roughness={0.95}
@@ -261,7 +261,7 @@ export const CompactVintageRound = (props) => {
 
             {/* Top Lid (Open) */}
             <group position={[0, 0.06, -0.6]} rotation={[-2.2, 0, 0]}>
-                <Cylinder args={[0.6, 0.6, 0.12, 64]} position={[0, 0.3, 0.3]}>
+                <Cylinder args={[0.6, 0.6, 0.12, 32]} position={[0, 0.3, 0.3]}>
                     <meshStandardMaterial
                         color="#8B4513"
                         metalness={0.7}
@@ -270,7 +270,7 @@ export const CompactVintageRound = (props) => {
                 </Cylinder>
 
                 {/* Mirror with Real Reflection */}
-                <Cylinder args={[0.55, 0.55, 0.02, 64]} position={[0, 0.24, 0.3]}>
+                <Cylinder args={[0.55, 0.55, 0.02, 32]} position={[0, 0.24, 0.3]}>
                     <meshStandardMaterial
                         color="#E8F4F8"
                         metalness={1}
@@ -365,7 +365,7 @@ export const CompactCushion = (props) => {
 
     return (
         <group ref={groupRef} {...props} rotation={[Math.PI / 6, 0, 0]}>
-            <Cylinder args={[0.65, 0.65, 0.15, 64]} position={[0, 0, 0]}>
+            <Cylinder args={[0.65, 0.65, 0.15, 32]} position={[0, 0, 0]}>
                 <meshStandardMaterial
                     color="#FFB6C1"
                     metalness={0.6}
@@ -374,7 +374,7 @@ export const CompactCushion = (props) => {
             </Cylinder>
 
             {/* Cushion Sponge */}
-            <Cylinder args={[0.6, 0.6, 0.08, 64]} position={[0, 0.11, 0]}>
+            <Cylinder args={[0.6, 0.6, 0.08, 32]} position={[0, 0.11, 0]}>
                 <meshStandardMaterial
                     color="#FFEFD5"
                     roughness={0.95}
@@ -382,7 +382,7 @@ export const CompactCushion = (props) => {
             </Cylinder>
 
             {/* Puff */}
-            <Sphere args={[0.25, 32, 32]} position={[0.3, 0.2, 0.3]} scale={[1, 0.4, 1]}>
+            <Sphere args={[0.25, 24, 24]} position={[0.3, 0.2, 0.3]} scale={[1, 0.4, 1]}>
                 <meshStandardMaterial
                     color="#FFF0F5"
                     roughness={0.9}
@@ -391,7 +391,7 @@ export const CompactCushion = (props) => {
 
             {/* Top Lid */}
             <group position={[0, 0.08, -0.65]} rotation={[-2.3, 0, 0]}>
-                <Cylinder args={[0.65, 0.65, 0.15, 64]} position={[0, 0.35, 0.35]}>
+                <Cylinder args={[0.65, 0.65, 0.15, 32]} position={[0, 0.35, 0.35]}>
                     <meshStandardMaterial
                         color="#FFB6C1"
                         metalness={0.6}
@@ -443,7 +443,7 @@ export const PerfumeCrystalCut = (props) => {
             </Box>
 
             {/* Gold Cap */}
-            <Cylinder args={[0.15, 0.15, 0.25, 64]} position={[0, 0.575, 0]}>
+            <Cylinder args={[0.15, 0.15, 0.25, 32]} position={[0, 0.575, 0]}>
                 <meshStandardMaterial
                     color="#D4AF37"
                     metalness={1}
@@ -473,7 +473,7 @@ export const PerfumeMinimalist = (props) => {
     return (
         <group ref={groupRef} {...props}>
             {/* Frosted Glass Bottle */}
-            <Cylinder args={[0.3, 0.3, 1.0, 64]} position={[0, 0, 0]}>
+            <Cylinder args={[0.3, 0.3, 1.0, 32]} position={[0, 0, 0]}>
                 <meshPhysicalMaterial
                     transmission={0.7}
                     roughness={0.4}
@@ -485,7 +485,7 @@ export const PerfumeMinimalist = (props) => {
             </Cylinder>
 
             {/* Liquid */}
-            <Cylinder args={[0.27, 0.27, 0.75, 64]} position={[0, -0.1, 0]}>
+            <Cylinder args={[0.27, 0.27, 0.75, 32]} position={[0, -0.1, 0]}>
                 <meshStandardMaterial
                     color="#FFB6C1"
                     transparent
@@ -494,7 +494,7 @@ export const PerfumeMinimalist = (props) => {
             </Cylinder>
 
             {/* Minimalist Cap */}
-            <Cylinder args={[0.18, 0.18, 0.2, 64]} position={[0, 0.6, 0]}>
+            <Cylinder args={[0.18, 0.18, 0.2, 32]} position={[0, 0.6, 0]}>
                 <meshStandardMaterial
                     color="#E8E8E8"
                     metalness={0.8}

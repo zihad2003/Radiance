@@ -2,8 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Mic, MessageCircle, Calendar, User, Clock, Loader2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useToast } from '../context/ToastContext';
 
 const SmartBooking = ({ initialService }) => {
+    const { info } = useToast();
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi! I'm Radiance AI. I can help you book an appointment or suggest a look. What can I do for you today?", sender: 'bot' }
     ]);
@@ -71,6 +73,9 @@ const SmartBooking = ({ initialService }) => {
                     sender: 'bot',
                     isAction: true
                 }]);
+
+                info("Redirecting to WhatsApp for secure confirmation...");
+
                 // Simulate WhatsApp Redirect
                 setTimeout(() => {
                     const text = `Hello Radiance Salon! 👋

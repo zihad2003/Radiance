@@ -45,45 +45,68 @@ const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
         setIsConfirming(false);
     };
 
+    // ... logic same ...
+
     if (isConfirmed) {
         return (
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
+                className="text-center py-12 px-4"
             >
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Check size={48} className="text-green-600" />
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                    >
+                        <Check size={48} className="text-green-600" />
+                    </motion.div>
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 0.8, repeat: Infinity }}
+                        className="absolute inset-0 rounded-full border-2 border-green-400"
+                    />
                 </div>
-                <h3 className="text-4xl font-serif text-charcoal mb-4">Booking Confirmed!</h3>
-                <p className="text-gray-600 mb-8">Your appointment has been successfully booked</p>
+                <h3 className="text-4xl font-serif text-charcoal mb-4">You're All Set! ✨</h3>
+                <p className="text-gray-600 mb-8 text-lg">Your appointment has been successfully booked.</p>
 
-                <div className="bg-gradient-to-r from-primary to-accent text-white p-6 rounded-2xl max-w-md mx-auto mb-8">
-                    <div className="text-sm opacity-90 mb-2">Booking ID</div>
-                    <div className="text-3xl font-mono font-bold">RAD{Date.now()}</div>
+                <div className="bg-gradient-to-r from-primary to-accent text-white p-8 rounded-3xl max-w-sm mx-auto mb-10 shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10"><Calendar size={120} /></div>
+                    <div className="text-xs font-bold uppercase tracking-widest opacity-80 mb-2">Booking Reference</div>
+                    <div className="text-4xl font-mono font-bold tracking-wider mb-2">RAD{Date.now().toString().slice(-6)}</div>
+                    <div className="h-px bg-white/20 my-4" />
+                    <div className="flex justify-between items-center text-sm">
+                        <span>{new Date(bookingData.selectedDate).toLocaleDateString()}</span>
+                        <span>{bookingData.selectedTime}</span>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 justify-center">
-                    <button className="flex items-center gap-2 px-6 py-3 bg-charcoal text-white rounded-xl font-semibold hover:bg-primary transition-colors">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button className="flex items-center justify-center gap-2 px-8 py-4 bg-charcoal text-white rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg hover:shadow-xl active:scale-95">
                         <Download size={20} />
                         Download Receipt
                     </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-charcoal text-charcoal rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                    <button className="flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-charcoal text-charcoal rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95">
                         <Calendar size={20} />
                         Add to Calendar
                     </button>
                 </div>
 
-                <p className="text-sm text-gray-600 mt-8">
-                    {details.whatsappNotification && 'A confirmation message has been sent to your WhatsApp. '}
-                    We'll send you a reminder 24 hours before your appointment.
-                </p>
+                <div className="mt-12 p-4 bg-green-50 rounded-xl max-w-lg mx-auto border border-green-100">
+                    <p className="text-sm text-green-800 flex items-center justify-center gap-2">
+                        <MessageCircle size={16} />
+                        {details.whatsappNotification ? 'Authentication & Details sent via WhatsApp.' : 'Booking details sent to your email.'}
+                    </p>
+                </div>
             </motion.div>
         );
     }
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-4xl mx-auto pb-20">
+            {/* Same review content... */}
             <div className="text-center">
                 <h3 className="text-3xl font-serif text-charcoal mb-2">Review Your Booking</h3>
                 <p className="text-gray-600">Please review all details before confirming</p>

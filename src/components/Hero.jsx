@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import BeautyScene from './3d/BeautyScene';
+
+const BeautyScene = lazy(() => import('./3d/BeautyScene'));
 
 const Hero = () => {
     const containerRef = useRef(null);
@@ -17,7 +18,9 @@ const Hero = () => {
                     className="w-full h-full object-cover opacity-60"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-pearl via-pearl/40 to-transparent" />
-                <BeautyScene />
+                <Suspense fallback={null}>
+                    <BeautyScene />
+                </Suspense>
             </div>
 
             {/* Overlay Content */}

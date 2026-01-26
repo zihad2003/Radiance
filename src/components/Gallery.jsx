@@ -81,7 +81,8 @@ const Gallery = () => {
                             />
                             <button
                                 onClick={() => setSelectedImage(null)}
-                                className="absolute -top-12 right-0 md:-right-12 text-white hover:text-primary transition-colors"
+                                className="absolute -top-12 right-0 md:-right-12 text-white hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full p-1"
+                                aria-label="Close Lightbox"
                             >
                                 <X size={40} />
                             </button>

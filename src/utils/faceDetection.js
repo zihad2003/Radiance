@@ -4,20 +4,31 @@ let faceLandmarksDetection = null;
 export const initFaceDetection = async () => {
     if (detector) return detector;
 
-    if (!faceLandmarksDetection) {
-        faceLandmarksDetection = await import('@tensorflow-models/face-landmarks-detection');
-        await import('@tensorflow/tfjs');
+    try {
+        if (!faceLandmarksDetection) {
+            faceLandmarksDetection = await import('@tensorflow-models/face-landmarks-detection');
+            // We only need tfjs-core if we were using tfjs runtime, but importing it allows fallback/interop
+            // However, for 'mediapipe' runtime, the heavy lifting is in the WASM binary.
+            // keeping tfjs import as it might be a dependency of the wrapper, but using dynamic import ensures it's lazy.
+            await import('@tensorflow/tfjs-core');
+            await import('@tensorflow/tfjs-backend-webgl');
+        }
+
+        const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+        const detectorConfig = {
+            runtime: 'mediapipe', // Use WASM backend via MediaPipe logic
+            refineLandmarks: true,
+            maxFaces: 2,
+            solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh' // Ensure WASM assets are loaded from CDN or local node_modules
+        };
+
+        detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
+        return detector;
+    } catch (error) {
+        console.error("Failed to initialize Face Detector:", error);
+        // Fallback or re-throw
+        return null;
     }
-
-    const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
-    const detectorConfig = {
-        runtime: 'tfjs',
-        refineLandmarks: true,
-        maxFaces: 2 // Allow detecting 2 to warn user
-    };
-
-    detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
-    return detector;
 };
 
 export const detectFaceLandmarks = async (videoElement) => {
