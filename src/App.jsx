@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import SmoothScroll from './components/ui/SmoothScroll';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import { RewardsProvider } from './context/RewardsContext';
-import CustomCursor from './components/CustomCursor';
 import Gamification from './components/Gamification';
 import ScrollProgress from './components/ui/ScrollProgress';
 import BackToTop from './components/ui/BackToTop';
@@ -52,11 +51,14 @@ function AnalyticsTracker() {
   return null;
 }
 
+import LoadingScreen from './components/ui/LoadingScreen';
+
 function AppContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Default to loading state
 
   useEffect(() => {
     // Initialize Analytics
@@ -74,81 +76,90 @@ function AppContent() {
 
   return (
     <>
-      {/* Global SEO Metadata */}
-      <SEO />
-
-      {/* Browser Compatibility Warning */}
-      <BrowserCompatibilityWarning />
-
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
-
-      {/* Offline Indicator */}
-      <OfflineIndicator />
-
-      {/* Analytics Tracker */}
-      <AnalyticsTracker />
-
-      {/* Scroll to Top on Route Change */}
-      <ScrollToTop />
-
-      <SmoothScroll>
-        <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
-          <CustomCursor />
-          <Gamification />
-          <ScrollProgress />
-          <BackToTop />
-          <ChatBot />
-          <ConvexMigrator />
-          <Navbar />
-
-          {/* Main Routes */}
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage onBook={handleBookService} />} />
-              <Route path="/services" element={<ServicesPage onBook={handleBookService} />} />
-              <Route path="/virtual-try-on" element={<VirtualTryOnPage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/ai-makeover" element={<AIMakeoverPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              {/* Fallback to home */}
-              <Route path="*" element={<HomePage onBook={handleBookService} />} />
-            </Routes>
-          </main>
-
-          {/* Footer on all pages */}
-          <ContactFooter />
-        </div>
-      </SmoothScroll>
-
-      {/* Booking Wizard Modal */}
-      <BookingWizard
-        isOpen={showBooking}
-        onClose={() => setShowBooking(false)}
-        initialService={selectedService}
-      />
-
-      {/* Admin Modal Overlay */}
       <AnimatePresence>
-        {showAdmin && (
-          <div className="fixed inset-0 z-[100] bg-white">
-            {!isAdminLoggedIn ? (
-              <AdminLogin onLogin={() => setIsAdminLoggedIn(true)} />
-            ) : (
-              <Dashboard onClose={() => { setShowAdmin(false); setIsAdminLoggedIn(false); }} />
-            )}
-            <button
-              onClick={() => setShowAdmin(false)}
-              className="fixed top-4 right-4 z-[110] bg-gray-100 p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-500"
-              aria-label="Close Admin Panel"
-            >
-              ✕
-            </button>
-          </div>
+        {isLoading && (
+          <LoadingScreen onComplete={() => setIsLoading(false)} />
         )}
       </AnimatePresence>
+
+      {!isLoading && (
+        <>
+          {/* Global SEO Metadata */}
+          <SEO />
+
+          {/* Browser Compatibility Warning */}
+          <BrowserCompatibilityWarning />
+
+          {/* PWA Install Prompt */}
+          <PWAInstallPrompt />
+
+          {/* Offline Indicator */}
+          <OfflineIndicator />
+
+          {/* Analytics Tracker */}
+          <AnalyticsTracker />
+
+          {/* Scroll to Top on Route Change */}
+          <ScrollToTop />
+
+          <SmoothScroll>
+            <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
+              <Gamification />
+              <ScrollProgress />
+              <BackToTop />
+              <ChatBot />
+              <ConvexMigrator />
+              <Navbar />
+
+              {/* Main Routes */}
+              <main>
+                <Routes>
+                  <Route path="/" element={<HomePage onBook={handleBookService} />} />
+                  <Route path="/services" element={<ServicesPage onBook={handleBookService} />} />
+                  <Route path="/virtual-try-on" element={<VirtualTryOnPage />} />
+                  <Route path="/gallery" element={<GalleryPage />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/ai-makeover" element={<AIMakeoverPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  {/* Fallback to home */}
+                  <Route path="*" element={<HomePage onBook={handleBookService} />} />
+                </Routes>
+              </main>
+
+              {/* Footer on all pages */}
+              <ContactFooter />
+            </div>
+          </SmoothScroll>
+
+          {/* Booking Wizard Modal */}
+          <BookingWizard
+            isOpen={showBooking}
+            onClose={() => setShowBooking(false)}
+            initialService={selectedService}
+          />
+
+          {/* Admin Modal Overlay */}
+          <AnimatePresence>
+            {showAdmin && (
+              <div className="fixed inset-0 z-[100] bg-white">
+                {!isAdminLoggedIn ? (
+                  <AdminLogin onLogin={() => setIsAdminLoggedIn(true)} />
+                ) : (
+                  <Dashboard onClose={() => { setShowAdmin(false); setIsAdminLoggedIn(false); }} />
+                )}
+                <button
+                  onClick={() => setShowAdmin(false)}
+                  className="fixed top-4 right-4 z-[110] bg-gray-100 p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-500"
+                  aria-label="Close Admin Panel"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </>
   );
 }

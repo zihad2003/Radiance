@@ -5,7 +5,7 @@ import { Scissors, Sparkles, Droplets, Palette, Flower2, Zap } from 'lucide-reac
 const services = [
     {
         id: 1,
-        title: "Hair Styling & Color",
+        title: "Hair Styling",
         price: "৳4,000+",
         icon: Scissors,
         color: "from-pink-500 to-rose-500",
@@ -14,7 +14,7 @@ const services = [
     },
     {
         id: 2,
-        title: "Makeup & Bridal",
+        title: "Makeup Artistry",
         price: "৳8,000+",
         icon: Sparkles,
         color: "from-purple-500 to-indigo-500",
@@ -23,7 +23,7 @@ const services = [
     },
     {
         id: 3,
-        title: "Skin Treatments",
+        title: "Skin Treatment",
         price: "৳4,500+",
         icon: Droplets,
         color: "from-blue-400 to-cyan-500",
@@ -32,7 +32,7 @@ const services = [
     },
     {
         id: 4,
-        title: "Nail Art",
+        title: "Nail Studio",
         price: "৳2,000+",
         icon: Palette,
         color: "from-teal-400 to-emerald-500",
@@ -41,16 +41,16 @@ const services = [
     },
     {
         id: 5,
-        title: "Threading & Waxing",
+        title: "Brows & Lashes",
         price: "৳800+",
         icon: Zap,
         color: "from-orange-400 to-amber-500",
         image: "/assets/services/threading.png",
-        description: "Precise hair removal for smooth, silky skin."
+        description: "Precise threading and styling for the perfect arch."
     },
     {
         id: 6,
-        title: "Spa & Massage",
+        title: "Spa Therapy",
         price: "৳6,000+",
         icon: Flower2,
         color: "from-rose-400 to-pink-600",
@@ -103,29 +103,29 @@ const ServiceCard = ({ service, onBook }) => {
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative min-w-[300px] h-[450px] rounded-3xl overflow-hidden cursor-pointer group perspective-1000 snap-center mx-4 border border-white/20 shadow-xl"
+            className="relative min-w-[300px] h-[450px] rounded-3xl overflow-hidden cursor-pointer group perspective-1000 snap-center mx-4 border border-white/10 shadow-3xl bg-[#0A0A0A]"
         >
             {/* Background Image & Overlay */}
             <div className="absolute inset-0">
                 <OptimizedImage
                     src={service.image}
                     alt={service.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    useWebP={false} // Assuming we haven't generated WebPs for these yet
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60"
+                    useWebP={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 transition-opacity duration-300" />
             </div>
 
             {/* Content */}
             <div className="absolute inset-0 p-8 flex flex-col justify-between z-10 transform-style-3d">
                 <div className="transform translate-z-20">
-                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-glow border border-white/10 group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-glow border border-white/5 group-hover:scale-110 transition-transform duration-300">
                         <Icon className="text-white w-8 h-8 group-hover:animate-pulse" />
                     </div>
                     <h3 className="text-3xl font-serif font-bold text-white mb-2 leading-tight drop-shadow-md">
                         {service.title}
                     </h3>
-                    <p className="text-white/80 text-sm font-light leading-relaxed">
+                    <p className="text-white/60 text-sm font-light leading-relaxed">
                         {service.description}
                     </p>
                 </div>
@@ -133,18 +133,18 @@ const ServiceCard = ({ service, onBook }) => {
                 <div className="transform translate-z-30">
                     <div className="overflow-hidden">
                         <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                            <span className="block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-white mb-4 drop-shadow-sm">
+                            <span className="block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-[#F5E6C8] mb-4 drop-shadow-sm">
                                 {service.price}
                             </span>
                             <button
                                 onClick={() => onBook && onBook(service.title)}
-                                className="w-full py-3 bg-white text-charcoal rounded-xl font-semibold hover:bg-gold hover:text-white transition-all shadow-lg interactive uppercase tracking-wider text-xs"
+                                className="w-full py-3 bg-white text-black rounded-xl font-semibold hover:bg-gold hover:text-white transition-all shadow-lg interactive uppercase tracking-wider text-xs"
                             >
                                 Book Appointment
                             </button>
                         </div>
                         <div className="transform group-hover:-translate-y-full transition-transform duration-500 absolute bottom-0 left-0">
-                            <span className="text-white/60 text-xs tracking-[0.2em] uppercase border-b border-white/20 pb-1">Tap to Explore</span>
+                            <span className="text-white/40 text-xs tracking-[0.2em] uppercase border-b border-white/10 pb-1">Tap to Explore</span>
                         </div>
                     </div>
                 </div>
@@ -158,10 +158,10 @@ const ServiceCard = ({ service, onBook }) => {
 
 const Services = ({ onBook }) => {
     return (
-        <section id="services" className="py-20 bg-pearl relative overflow-hidden">
+        <section id="services" className="py-20 bg-[#050505] relative overflow-hidden">
             {/* Background Decorative Elements */}
-            <div className="absolute top-20 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -z-10" />
-            <div className="absolute bottom-20 right-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-20 left-0 w-64 h-64 bg-gold/10 rounded-full blur-[120px] -z-10" />
+            <div className="absolute bottom-20 right-0 w-96 h-96 bg-white/5 rounded-full blur-[120px] -z-10" />
 
             <div className="container mx-auto px-6 mb-12">
                 <motion.div
@@ -171,15 +171,15 @@ const Services = ({ onBook }) => {
                     transition={{ duration: 0.8 }}
                     className="text-center"
                 >
-                    <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-accent mb-4">Our Expertise</h2>
-                    <h3 className="text-4xl md:text-5xl font-serif text-charcoal mb-6">Curated Beauty Services</h3>
-                    <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent mx-auto rounded-full" />
+                    <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-gold mb-4">Our Expertise</h2>
+                    <h3 className="text-4xl md:text-5xl font-serif text-white mb-6">Curated Beauty Services</h3>
+                    <div className="w-20 h-1 bg-gradient-to-r from-gold to-white/20 mx-auto rounded-full" />
                 </motion.div>
             </div>
 
             {/* Horizontal Scroll Container */}
             <div className="overflow-x-auto pb-12 pt-8 hide-scrollbar cursor-grab active:cursor-grabbing px-6">
-                <div className="flex space-x-8 w-max px-6 stagger-reveal">
+                <div className="flex space-x-8 w-max px-6">
                     {services.map((service) => (
                         <ServiceCard key={service.id} service={service} onBook={onBook} />
                     ))}

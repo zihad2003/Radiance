@@ -31,7 +31,7 @@ body {
   background-color: var(--color-pearl);
   color: var(--color-charcoal);
   overflow-x: hidden;
-  cursor: none;
+  cursor: auto;
   font-family: var(--font-sans);
 }
 

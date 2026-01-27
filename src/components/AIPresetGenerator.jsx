@@ -213,42 +213,55 @@ const AIPresetGenerator = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-50 py-12 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-[#050505] py-20 px-4 relative overflow-hidden">
+            {/* Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-900/10 rounded-full blur-[150px]" />
+            </div>
+
+            <div className="max-w-7xl mx-auto relative z-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-12"
+                    className="text-center mb-16"
                 >
-                    <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                        AI Makeup Generator
+                    <span className="text-gold font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 mb-4 border border-gold/20 w-fit mx-auto px-4 py-1.5 rounded-full bg-gold/5">
+                        <Sparkles size={14} />
+                        AI Magic Studio
+                    </span>
+                    <h1 className="text-5xl md:text-6xl font-serif italic mb-6 text-white">
+                        AI Makeup <span className="text-gradient-gold">Generator</span>
                     </h1>
-                    <p className="text-xl text-gray-600">
-                        Upload your photo and see yourself with professional makeup instantly
+                    <p className="text-xl text-white/40 font-light max-w-2xl mx-auto">
+                        Upload your photo and witness a professional transformation instantly.
                     </p>
                 </motion.div>
 
                 {/* Main Content */}
-                <div className="grid lg:grid-cols-2 gap-8 mb-12">
+                <div className="grid lg:grid-cols-2 gap-8 mb-16">
                     {/* Upload Section */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className="bg-white rounded-3xl shadow-xl p-8">
-                            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                                <Upload className="text-pink-500" />
-                                1. Upload Your Photo
+                        <div className="bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl p-8 backdrop-blur-md h-full">
+                            <h2 className="text-2xl font-serif italic mb-8 flex items-center gap-3 text-white">
+                                <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-sans not-italic font-bold">1</div>
+                                Upload Your Photo
                             </h2>
 
                             {!uploadedImage ? (
-                                <label className="flex flex-col items-center justify-center w-full h-96 border-4 border-dashed border-pink-300 rounded-3xl cursor-pointer hover:border-pink-500 transition-all bg-gradient-to-br from-pink-50 to-purple-50 group">
-                                    <div className="flex flex-col items-center">
-                                        <Upload className="w-16 h-16 text-pink-400 group-hover:text-pink-600 transition-colors" />
-                                        <p className="text-lg text-gray-600 mt-4 font-medium">Click to upload your photo</p>
-                                        <p className="text-sm text-gray-400 mt-2">JPG, PNG up to 10MB</p>
+                                <label className="flex flex-col items-center justify-center w-full h-[400px] border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-gold/50 transition-all bg-black/20 group relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="flex flex-col items-center relative z-10">
+                                        <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                            <Upload className="w-8 h-8 text-white/50 group-hover:text-gold transition-colors" />
+                                        </div>
+                                        <p className="text-lg text-white/80 font-medium mb-2">Click to upload your photo</p>
+                                        <p className="text-sm text-white/40">JPG, PNG up to 10MB</p>
                                     </div>
                                     <input
                                         ref={fileInputRef}
@@ -259,26 +272,35 @@ const AIPresetGenerator = () => {
                                     />
                                 </label>
                             ) : (
-                                <div className="relative">
+                                <div className="relative h-[400px] group">
                                     <img
                                         src={uploadedImage}
                                         alt="Uploaded"
-                                        className="w-full h-96 object-cover rounded-3xl shadow-lg"
+                                        className="w-full h-full object-cover rounded-3xl shadow-lg border border-white/10"
                                     />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="bg-white text-black px-6 py-2 rounded-full font-bold text-sm uppercase tracking-wide hover:bg-gold transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300"
+                                        >
+                                            Change Photo
+                                        </button>
+                                    </div>
                                     <button
                                         onClick={() => {
                                             setUploadedImage(null);
                                             setGeneratedResult(null);
                                         }}
-                                        className="absolute top-4 right-4 bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                                        className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500/80 transition-colors shadow-lg border border-white/10"
                                     >
-                                        <X size={20} />
+                                        <X size={18} />
                                     </button>
                                 </div>
                             )}
 
                             {error && (
-                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                                <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 flex items-center gap-3">
+                                    <X size={18} />
                                     {error}
                                 </div>
                             )}
@@ -291,21 +313,21 @@ const AIPresetGenerator = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <div className="bg-white rounded-3xl shadow-xl p-8">
-                            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                                <Sparkles className="text-purple-500" />
-                                2. Choose Makeup Style
+                        <div className="bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl p-8 backdrop-blur-md h-full flex flex-col">
+                            <h2 className="text-2xl font-serif italic mb-8 flex items-center gap-3 text-white">
+                                <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-sans not-italic font-bold">2</div>
+                                Choose Makeup Style
                             </h2>
 
                             {/* Category Filter */}
-                            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 custom-scrollbar">
                                 {categories.map(category => (
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === category
-                                                ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all border ${selectedCategory === category
+                                            ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-glow'
+                                            : 'bg-transparent text-white/40 border-white/10 hover:border-white/30 hover:text-white'
                                             }`}
                                     >
                                         {category}
@@ -314,32 +336,32 @@ const AIPresetGenerator = () => {
                             </div>
 
                             {/* Presets Grid */}
-                            <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-2 custom-scrollbar flex-grow max-h-[400px]">
                                 {filteredPresets.map(preset => (
                                     <motion.button
                                         key={preset.id}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => setSelectedPreset(preset.id)}
-                                        className={`relative p-3 rounded-2xl border-2 transition-all ${selectedPreset === preset.id
-                                                ? 'border-pink-500 bg-pink-50 shadow-lg'
-                                                : 'border-gray-200 hover:border-pink-300'
+                                        className={`relative p-3 rounded-2xl border transition-all text-left group overflow-hidden ${selectedPreset === preset.id
+                                            ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(245,230,200,0.1)]'
+                                            : 'border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/20'
                                             }`}
                                     >
-                                        <div className="relative">
+                                        <div className="relative mb-3 overflow-hidden rounded-xl">
                                             <img
                                                 src={preset.thumbnail}
                                                 alt={preset.name}
-                                                className="w-full h-32 object-cover rounded-xl"
+                                                className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110"
                                             />
                                             {selectedPreset === preset.id && (
-                                                <div className="absolute top-2 right-2 bg-pink-500 text-white p-1 rounded-full">
-                                                    <Check size={16} />
+                                                <div className="absolute top-2 right-2 bg-gold text-black p-1.5 rounded-full shadow-lg">
+                                                    <Check size={14} strokeWidth={3} />
                                                 </div>
                                             )}
                                         </div>
-                                        <p className="font-medium text-sm mt-2 text-center">{preset.name}</p>
-                                        <p className="text-xs text-gray-500 text-center">৳{preset.price}</p>
+                                        <p className={`font-bold text-sm mb-1 ${selectedPreset === preset.id ? 'text-white' : 'text-white/80'}`}>{preset.name}</p>
+                                        <p className="text-xs text-gold/80 font-mono">৳{preset.price}</p>
                                     </motion.button>
                                 ))}
                             </div>
@@ -352,36 +374,39 @@ const AIPresetGenerator = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-center mb-12"
+                    className="text-center mb-16"
                 >
                     <button
                         onClick={generateWithAI}
                         disabled={!uploadedImage || !selectedPreset || loading}
-                        className="px-12 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-semibold rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-2xl hover:shadow-pink-500/50 transition-all inline-flex items-center gap-3"
+                        className="group relative px-12 py-5 bg-[#F5E6C8] text-black text-sm font-bold uppercase tracking-widest rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-all shadow-[0_0_40px_rgba(245,230,200,0.3)] hover:scale-105 inline-flex items-center gap-3 overflow-hidden"
                     >
-                        {loading ? (
-                            <>
-                                <Loader2 className="animate-spin" size={24} />
-                                Generating Magic...
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles size={24} />
-                                Generate AI Makeup
-                            </>
-                        )}
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                        <div className="relative flex items-center gap-3">
+                            {loading ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Generating Magic...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles size={20} />
+                                    Generate AI Makeup
+                                </>
+                            )}
+                        </div>
                     </button>
 
                     {loading && (
-                        <div className="mt-6 max-w-md mx-auto">
-                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div className="mt-8 max-w-md mx-auto">
+                            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden border border-white/5">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
-                                    className="bg-gradient-to-r from-pink-500 to-purple-600 h-3 rounded-full"
+                                    className="bg-gradient-to-r from-gold to-white h-full rounded-full shadow-[0_0_10px_rgba(245,230,200,0.5)]"
                                 />
                             </div>
-                            <p className="text-sm text-gray-600 mt-2">{progress}% Complete</p>
+                            <p className="text-xs text-gold uppercase tracking-widest mt-4 animate-pulse">{progress}% Complete</p>
                         </div>
                     )}
                 </motion.div>
@@ -393,68 +418,85 @@ const AIPresetGenerator = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="bg-white rounded-3xl shadow-2xl p-8"
+                            className="bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl p-8 backdrop-blur-xl relative overflow-hidden"
                         >
-                            <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                                Your AI Transformation ✨
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent opacity-50" />
+
+                            <h2 className="text-4xl font-serif italic text-center mb-12 text-white">
+                                Your <span className="text-gradient-gold">AI Transformation</span> ✨
                             </h2>
 
-                            {/* Before/After Comparison */}
-                            <div className="max-w-4xl mx-auto mb-8 rounded-3xl overflow-hidden shadow-2xl">
-                                <ReactCompareSlider
-                                    itemOne={<ReactCompareSliderImage src={uploadedImage} alt="Before" />}
-                                    itemTwo={<ReactCompareSliderImage src={generatedResult} alt="After" />}
-                                    style={{ height: '600px' }}
-                                />
-                            </div>
-
-                            {/* Preset Info */}
-                            {selectedPreset && (
-                                <div className="max-w-2xl mx-auto mb-8 p-6 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl">
-                                    <h3 className="text-xl font-semibold mb-2">
-                                        {MAKEUP_PRESETS[selectedPreset].name}
-                                    </h3>
-                                    <p className="text-gray-600 mb-4">
-                                        {MAKEUP_PRESETS[selectedPreset].description}
-                                    </p>
-                                    <div className="flex gap-4 text-sm">
-                                        <span className="font-medium">Price: ৳{MAKEUP_PRESETS[selectedPreset].price}</span>
-                                        <span className="text-gray-500">•</span>
-                                        <span className="font-medium">Duration: {MAKEUP_PRESETS[selectedPreset].duration}</span>
+                            <div className="grid lg:grid-cols-2 gap-12 items-center">
+                                {/* Before/After Comparison */}
+                                <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 relative z-10 group">
+                                    <ReactCompareSlider
+                                        itemOne={<ReactCompareSliderImage src={uploadedImage} alt="Before" />}
+                                        itemTwo={<ReactCompareSliderImage src={generatedResult} alt="After" />}
+                                        style={{ height: '500px' }}
+                                        className="grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                                    />
+                                    <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
+                                        <span className="bg-black/50 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md uppercase tracking-widest border border-white/10">Slide to Compare</span>
                                     </div>
                                 </div>
-                            )}
 
-                            {/* Action Buttons */}
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleDownload}
-                                    className="px-8 py-3 bg-white border-2 border-pink-500 text-pink-500 rounded-full hover:bg-pink-50 transition-all inline-flex items-center gap-2 font-semibold"
-                                >
-                                    <Download size={20} />
-                                    Download Result
-                                </motion.button>
+                                {/* Details & Actions */}
+                                <div className="space-y-8">
+                                    {selectedPreset && (
+                                        <div className="p-8 bg-white/5 border border-white/5 rounded-3xl backdrop-blur-md">
+                                            <h3 className="text-2xl font-serif italic mb-2 text-white">
+                                                {MAKEUP_PRESETS[selectedPreset].name}
+                                            </h3>
+                                            <p className="text-white/60 mb-6 font-light leading-relaxed">
+                                                {MAKEUP_PRESETS[selectedPreset].description}
+                                            </p>
+                                            <div className="flex gap-6 text-sm border-t border-white/5 pt-6">
+                                                <div>
+                                                    <span className="block text-white/40 text-[10px] uppercase tracking-widest mb-1">Estimated Cost</span>
+                                                    <span className="text-xl font-bold text-gold">৳{MAKEUP_PRESETS[selectedPreset].price}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="block text-white/40 text-[10px] uppercase tracking-widest mb-1">Duration</span>
+                                                    <span className="text-xl font-bold text-white">{MAKEUP_PRESETS[selectedPreset].duration}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleShare}
-                                    className="px-8 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all inline-flex items-center gap-2 font-semibold"
-                                >
-                                    <Share2 size={20} />
-                                    Share Result
-                                </motion.button>
+                                    {/* Action Buttons */}
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex gap-4">
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={handleDownload}
+                                                className="flex-1 px-6 py-4 bg-transparent border border-white/20 text-white rounded-2xl hover:bg-white/10 hover:border-white/40 transition-all inline-flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest"
+                                            >
+                                                <Download size={18} />
+                                                Save Image
+                                            </motion.button>
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full hover:shadow-xl transition-all inline-flex items-center gap-2 font-semibold"
-                                >
-                                    <Calendar size={20} />
-                                    Book This Look
-                                </motion.button>
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={handleShare}
+                                                className="flex-1 px-6 py-4 bg-transparent border border-white/20 text-white rounded-2xl hover:bg-white/10 hover:border-white/40 transition-all inline-flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest"
+                                            >
+                                                <Share2 size={18} />
+                                                Share Look
+                                            </motion.button>
+                                        </div>
+
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full px-6 py-4 bg-[#F5E6C8] text-black rounded-2xl hover:bg-white transition-all inline-flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest shadow-glow"
+                                        >
+                                            <Calendar size={18} />
+                                            Book Appointment for this Look
+                                        </motion.button>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -464,18 +506,19 @@ const AIPresetGenerator = () => {
             {/* Custom Scrollbar Styles */}
             <style jsx>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
+                    width: 4px;
+                    height: 4px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 4px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: linear-gradient(to bottom, #ec4899, #9333ea);
-                    border-radius: 10px;
+                    background: rgba(245, 230, 200, 0.3);
+                    border-radius: 4px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: linear-gradient(to bottom, #db2777, #7e22ce);
+                    background: rgba(245, 230, 200, 0.5);
                 }
             `}</style>
         </div>

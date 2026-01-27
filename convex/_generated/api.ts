@@ -1,18 +1,24 @@
-function func(name) {
-    return { functionName: name, isPublic: true };
-}
-
-export const api = {
+export const api: any = {
     chat: {
-        sendMessage: func("chat:sendMessage"),
+        sendMessage: "chat:sendMessage",
     },
     bookings: {
-        getBookings: func("bookings:getBookings"),
-        updateStatus: func("bookings:updateStatus"),
-        createBooking: func("bookings:createBooking"),
+        getBookings: "bookings:getBookings",
+        updateStatus: "bookings:updateStatus",
+        createBooking: "bookings:createBooking",
     },
     products: {
-        list: func("products:list"),
+        list: "products:list",
+        bulkAdd: "products:bulkAdd",
+    },
+    skinAnalysis: {
+        analyze: "skinAnalysis:analyze",
+    },
+    ai: {
+        generateMakeover: "ai:generateMakeover",
+    },
+    tutorials: {
+        generate: "tutorials:generate",
     },
 };
-export const internal = {};
+export const internal: any = {};

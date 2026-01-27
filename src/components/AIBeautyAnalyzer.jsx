@@ -170,24 +170,27 @@ const AIBeautyAnalyzer = () => {
     }, [mode]);
 
     return (
-        <section className="py-20 bg-gradient-to-b from-white to-pearl">
-            <div className="container mx-auto px-6">
+        <section className="py-20 bg-[#050505] relative overflow-hidden min-h-screen">
+            {/* Ambient Glow */}
+            <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
+
+            <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-block px-6 py-2 bg-gradient-to-r from-primary to-accent rounded-full shadow-lg mb-6"
+                        className="inline-block px-6 py-2 bg-white/5 border border-white/10 backdrop-blur-md rounded-full shadow-lg mb-6"
                     >
-                        <span className="text-white font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                        <span className="text-gold font-bold uppercase tracking-widest text-xs flex items-center gap-2">
                             <Sparkles size={14} fill="currentColor" />
                             AI Beauty Analyzer
                         </span>
                     </motion.div>
-                    <h2 className="text-4xl md:text-5xl font-serif italic mb-4">
-                        Discover Your Perfect Colors
+                    <h2 className="text-4xl md:text-5xl font-serif italic mb-4 text-white">
+                        Discover Your <span className="text-gradient-gold">Perfect Colors</span>
                     </h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-white/40 max-w-2xl mx-auto font-light tracking-wide">
                         Our AI analyzes your skin tone and face shape to recommend the perfect makeup shades and techniques just for you
                     </p>
                 </div>
@@ -196,12 +199,12 @@ const AIBeautyAnalyzer = () => {
                 <div className="flex justify-center gap-4 mb-8">
                     <button
                         onClick={() => setMode('camera')}
-                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-sm transition-all flex items-center gap-2 ${mode === 'camera'
-                            ? 'bg-primary text-white shadow-lg'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all flex items-center gap-3 border ${mode === 'camera'
+                            ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-[0_0_20px_rgba(245,230,200,0.3)]'
+                            : 'bg-transparent text-white/50 border-white/10 hover:border-gold/50 hover:text-white'
                             }`}
                     >
-                        <Camera size={18} />
+                        <Camera size={16} />
                         Use Camera
                     </button>
                     <button
@@ -209,26 +212,26 @@ const AIBeautyAnalyzer = () => {
                             setMode('upload');
                             fileInputRef.current?.click();
                         }}
-                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-sm transition-all flex items-center gap-2 ${mode === 'upload'
-                            ? 'bg-primary text-white shadow-lg'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all flex items-center gap-3 border ${mode === 'upload'
+                            ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-[0_0_20px_rgba(245,230,200,0.3)]'
+                            : 'bg-transparent text-white/50 border-white/10 hover:border-gold/50 hover:text-white'
                             }`}
                     >
-                        <Upload size={18} />
+                        <Upload size={16} />
                         Upload Photo
                     </button>
                 </div>
 
                 {/* Camera/Canvas Area */}
                 <div className="max-w-4xl mx-auto">
-                    <div className="relative bg-charcoal rounded-3xl overflow-hidden shadow-2xl aspect-video">
+                    <div className="relative bg-black/40 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl aspect-video backdrop-blur-sm group">
                         {mode === 'camera' ? (
                             <video
                                 ref={videoRef}
                                 autoPlay
                                 playsInline
                                 muted
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
                             />
                         ) : (
                             <canvas
@@ -237,21 +240,24 @@ const AIBeautyAnalyzer = () => {
                             />
                         )}
 
+                        {/* Scanning Overlay Effect */}
+                        <div className="absolute inset-0 pointer-events-none bg-scan-line opacity-10" />
+
                         {/* Overlay Controls */}
-                        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4">
+                        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 z-20">
                             <button
                                 onClick={analyzeSkin}
                                 disabled={loading}
-                                className="bg-white text-primary px-8 py-3 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-pearl transition-all shadow-2xl hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+                                className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-gold hover:text-black hover:border-gold transition-all shadow-glow hover:scale-105 disabled:opacity-50 flex items-center gap-3"
                             >
                                 {loading ? (
                                     <>
-                                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                        <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
                                         Analyzing...
                                     </>
                                 ) : (
                                     <>
-                                        <Palette size={18} />
+                                        <Palette size={16} />
                                         Analyze Skin Tone
                                     </>
                                 )}
@@ -260,20 +266,20 @@ const AIBeautyAnalyzer = () => {
                     </div>
 
                     {/* AR Filter Presets */}
-                    <div className="mt-8">
-                        <h3 className="text-xl font-bold mb-4 text-center">Try AR Filters</h3>
+                    <div className="mt-12">
+                        <h3 className="text-xl font-serif italic mb-6 text-center text-white">Try AR Filters</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {filterPresets.map(preset => (
                                 <button
                                     key={preset.id}
                                     onClick={() => setSelectedFilter(preset.id)}
-                                    className={`p-4 rounded-2xl transition-all ${selectedFilter === preset.id
-                                        ? 'bg-primary text-white shadow-lg scale-105'
-                                        : 'bg-white hover:bg-gray-50 shadow'
+                                    className={`p-6 rounded-2xl transition-all border group relative overflow-hidden ${selectedFilter === preset.id
+                                        ? 'bg-gold/10 border-gold text-white shadow-[0_0_30px_rgba(245,230,200,0.1)]'
+                                        : 'bg-white/5 border-white/5 text-white/60 hover:border-gold/30 hover:bg-white/10'
                                         }`}
                                 >
-                                    <div className="text-3xl mb-2">{preset.icon}</div>
-                                    <div className="font-bold text-sm">{preset.name}</div>
+                                    <div className={`text-4xl mb-4 transition-transform duration-300 ${selectedFilter === preset.id ? 'scale-110' : 'group-hover:scale-110'}`}>{preset.icon}</div>
+                                    <div className={`font-bold text-xs uppercase tracking-widest ${selectedFilter === preset.id ? 'text-gold' : 'text-white/80'}`}>{preset.name}</div>
                                 </button>
                             ))}
                         </div>
@@ -296,7 +302,7 @@ const AIBeautyAnalyzer = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4"
+                            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
                             onClick={() => setShowResults(false)}
                         >
                             <motion.div
@@ -304,43 +310,43 @@ const AIBeautyAnalyzer = () => {
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.9, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                                className="bg-[#0A0A0A] border border-white/10 rounded-[2rem] max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl"
                             >
                                 {/* Header */}
-                                <div className="bg-gradient-to-r from-primary to-accent p-6 text-white flex items-center justify-between sticky top-0 z-10">
+                                <div className="bg-white/5 border-b border-white/5 p-8 text-white flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl">
                                     <div>
-                                        <h2 className="text-2xl font-serif italic mb-1">Your Beauty Profile</h2>
-                                        <p className="text-xs text-white/70">Personalized AI Analysis</p>
+                                        <h2 className="text-3xl font-serif italic mb-1 text-gradient-gold">Your Beauty Profile</h2>
+                                        <p className="text-xs text-white/40 uppercase tracking-widest">Personalized AI Analysis</p>
                                     </div>
                                     <button
                                         onClick={() => setShowResults(false)}
-                                        className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                                        className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 hover:rotate-90 transition-all text-white/50 hover:text-white"
                                     >
                                         <X size={20} />
                                     </button>
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-8">
+                                <div className="p-8 space-y-8">
                                     {/* Skin Tone Analysis */}
-                                    <div className="mb-8">
-                                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                            <Palette className="text-primary" size={24} />
+                                    <div className="bg-white/5 rounded-3xl p-8 border border-white/5">
+                                        <h3 className="text-xl font-bold mb-6 flex items-center gap-3 text-white">
+                                            <Palette className="text-gold" size={20} />
                                             Skin Tone Analysis
                                         </h3>
-                                        <div className="bg-pearl rounded-2xl p-6">
-                                            <div className="flex items-center gap-6 mb-4">
-                                                <div
-                                                    className="w-24 h-24 rounded-full shadow-lg border-4 border-white"
-                                                    style={{ backgroundColor: analysis.skinColor.hex }}
-                                                />
-                                                <div>
-                                                    <p className="text-lg font-bold mb-2">{analysis.description}</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        Undertone: <span className="font-bold capitalize">{analysis.undertone}</span>
+                                        <div className="flex flex-col md:flex-row items-center gap-8">
+                                            <div
+                                                className="w-32 h-32 rounded-full shadow-[0_0_40px_rgba(0,0,0,0.5)] border-4 border-white/10 ring-4 ring-black/50"
+                                                style={{ backgroundColor: analysis.skinColor.hex }}
+                                            />
+                                            <div className="text-center md:text-left">
+                                                <p className="text-2xl font-serif italic mb-3 text-white">{analysis.description}</p>
+                                                <div className="space-y-1">
+                                                    <p className="text-sm text-white/60">
+                                                        Undertone: <span className="font-bold capitalize text-gold">{analysis.undertone}</span>
                                                     </p>
-                                                    <p className="text-sm text-gray-600">
-                                                        Hex: <span className="font-mono">{analysis.skinColor.hex}</span>
+                                                    <p className="text-sm text-white/60">
+                                                        Hex Code: <span className="font-mono text-white/40 bg-white/5 px-2 py-0.5 rounded ml-2">{analysis.skinColor.hex}</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -350,14 +356,14 @@ const AIBeautyAnalyzer = () => {
                                     {/* Product Recommendations */}
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {Object.entries(analysis.recommendations).map(([category, products]) => (
-                                            <div key={category} className="bg-white rounded-2xl p-6 shadow-lg">
-                                                <h4 className="font-bold capitalize mb-3 text-primary">
+                                            <div key={category} className="bg-white/5 border border-white/5 rounded-3xl p-8 hover:border-white/10 transition-all">
+                                                <h4 className="font-bold capitalize mb-6 text-gold text-lg border-b border-white/5 pb-2">
                                                     {category}
                                                 </h4>
-                                                <ul className="space-y-2">
+                                                <ul className="space-y-4">
                                                     {products.map((product, index) => (
-                                                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                                                            <span className="text-primary">•</span>
+                                                        <li key={index} className="text-sm text-white/70 flex items-start gap-3 group">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-gold/50 mt-1.5 group-hover:bg-gold transition-colors" />
                                                             {product}
                                                         </li>
                                                     ))}
@@ -367,10 +373,10 @@ const AIBeautyAnalyzer = () => {
                                     </div>
 
                                     {/* CTA */}
-                                    <div className="mt-8 text-center">
+                                    <div className="mt-8 text-center pb-4">
                                         <button
                                             onClick={() => setShowResults(false)}
-                                            className="bg-primary text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-accent transition-all shadow-2xl hover:scale-105"
+                                            className="bg-[#F5E6C8] text-black px-12 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all shadow-glow hover:scale-105"
                                         >
                                             Try These Recommendations
                                         </button>

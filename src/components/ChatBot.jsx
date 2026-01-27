@@ -54,14 +54,17 @@ const ChatBot = () => {
 
             setMessages(prev => [...prev, botMessage]);
         } catch (error) {
-            console.error("Chat Error:", error);
-            const errorMessage = {
-                id: Date.now() + 1,
-                type: 'bot',
-                text: "I'm currently experiencing some technical difficulties. Please try again later or contact us directly! 🌸",
-                time: new Date()
-            };
-            setMessages(prev => [...prev, errorMessage]);
+            console.warn("Chat API failed, using fallback:", error);
+            // Fallback mock response for demo purposes
+            setTimeout(() => {
+                const botMessage = {
+                    id: Date.now() + 1,
+                    type: 'bot',
+                    text: "I'm currently running in demo mode! I'd love to help you book an appointment or browse our services. ✨",
+                    time: new Date()
+                };
+                setMessages(prev => [...prev, botMessage]);
+            }, 1000);
         } finally {
             setIsTyping(false);
         }

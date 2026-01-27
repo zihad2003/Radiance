@@ -20,6 +20,7 @@ import { useMakeupStore } from '../../store/makeupStore';
 
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from '../ui/GlassCard';
+import PinkButton from '../ui/PinkButton';
 import { Canvas } from '@react-three/fiber';
 import { Float, Environment } from '@react-three/drei';
 import { LipstickClassicGold as Lipstick, CompactVintageRound as Compact } from '../3d/BeautyItems';
@@ -55,6 +56,11 @@ const MakeupStudio = () => {
     const [selectedPreset, setSelectedPreset] = useState(null);
     const [savedLooks, setSavedLooks] = useState([]);
     const [showMyLooks, setShowMyLooks] = useState(false);
+    const [isPanelOpen, setIsPanelOpen] = useState(true);
+    const [compareMode, setCompareMode] = useState(false);
+    const [showMesh, setShowMesh] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Studio UI State
     const [activeTab, setActiveTab] = useState("products");
@@ -98,6 +104,15 @@ const MakeupStudio = () => {
             startCamera();
         }
     };
+
+    // Ensure camera is stopped when navigating away
+    useEffect(() => {
+        return () => {
+            if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+            }
+        };
+    }, []);
 
     const startCamera = async () => {
         setCameraError(null);
@@ -375,26 +390,55 @@ const MakeupStudio = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-xl p-6 text-center">
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
-                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
-                                <Monitor size={32} className="text-primary" />
+                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#050505] p-6 text-center overflow-hidden">
+                        {/* Ambient Background */}
+                        <div className="absolute top-[-50%] left-[-20%] w-[100%] h-[100%] bg-primary/20 rounded-full blur-[200px] pointer-events-none opacity-20" />
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="relative z-10 max-w-lg"
+                        >
+                            <div className="relative mb-12 group cursor-pointer w-40 h-40 mx-auto" onClick={toggleCamera}>
+                                {/* Animated Ring */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-primary to-gold rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-700 blur-xl animate-pulse" />
+                                <div className="relative w-full h-full rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center shadow-2xl group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                                    <Camera size={48} className="text-white/60 group-hover:text-gold transition-colors" />
+
+                                    {/* Scanning Line Animation */}
+                                    <motion.div
+                                        animate={{ top: ["0%", "100%", "0%"] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                        className="absolute top-0 left-0 right-0 h-[2px] bg-gold/50 shadow-[0_0_10px_rgba(245,230,200,0.8)]"
+                                    />
+                                </div>
                             </div>
-                            <h2 className="text-3xl font-serif mb-2 italic">Luxury Mirror</h2>
-                            <p className="text-white/40 mb-8 text-sm leading-relaxed">Local real-time processing at 1080p resolution. Your camera feed is private and never leaves your device.</p>
 
-                            {cameraError ? (
-                                <GlassCard className="p-4 bg-red-500/10 border-red-500/20 text-red-200 text-sm mb-6 flex items-center gap-3">
-                                    <AlertCircle size={20} />
+                            <h2 className="text-5xl font-serif italic text-white mb-6 drop-shadow-2xl tracking-wide">
+                                Luxury <span className="text-[#F5E6C8]">Mirror</span>
+                            </h2>
+                            <p className="text-white/40 text-sm mb-10 tracking-widest uppercase max-w-xs mx-auto leading-relaxed border-t border-b border-white/5 py-4">
+                                AI Neural Analysis • 4K Simulation
+                            </p>
+
+                            {cameraError && (
+                                <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200 text-xs text-left">
+                                    <AlertCircle size={16} className="shrink-0" />
                                     <span>{cameraError}</span>
-                                </GlassCard>
-                            ) : null}
+                                </div>
+                            )}
 
-                            <div className="flex flex-col gap-3">
-                                <button onClick={toggleCamera} className="bg-primary text-white py-4 px-10 rounded-full font-bold uppercase tracking-[0.2em] text-xs hover:bg-primary/80 transition-all shadow-glow">
-                                    Activate HD Studio
+                            <div className="flex flex-col items-center gap-6">
+                                <button
+                                    onClick={toggleCamera}
+                                    className="relative bg-[#F5E6C8] text-black w-64 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-white transition-all shadow-[0_0_30px_rgba(245,230,200,0.15)] hover:shadow-[0_0_50px_rgba(245,230,200,0.4)] flex items-center justify-center gap-3"
+                                >
+                                    <Sparkles size={14} /> Activate Studio
                                 </button>
-                                <button className="text-white/50 text-xs hover:text-white transition-colors">Or Upload a Portrait</button>
+
+                                <button className="text-white/20 text-[9px] uppercase tracking-[0.3em] hover:text-white transition-colors">
+                                    Upload Portrait
+                                </button>
                             </div>
                         </motion.div>
                     </div>
@@ -477,25 +521,25 @@ const MakeupStudio = () => {
             {/* --- RIGHT PANEL: STUDIO CONTROLS (40% Desktop, Full Drawer Mobile) --- */}
             <motion.div
                 initial={{ width: 450 }} animate={{ width: isPanelOpen ? 450 : 0 }}
-                className="bg-white text-charcoal shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col relative h-full border-l border-gray-100"
+                className="bg-black/80 backdrop-blur-2xl text-white shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col relative h-full border-l border-white/10"
             >
                 {/* Panel Drag Handle (Desktop) */}
                 <button
                     onClick={() => setIsPanelOpen(!isPanelOpen)}
-                    className="absolute -left-10 top-1/2 -translate-y-1/2 w-10 h-24 bg-white border border-gray-100 rounded-l-3xl flex items-center justify-center shadow-2xl text-gray-400 hover:text-primary transition-colors"
+                    className="absolute -left-10 top-1/2 -translate-y-1/2 w-10 h-24 bg-black/80 border border-white/10 rounded-l-3xl flex items-center justify-center shadow-2xl text-white/40 hover:text-primary transition-colors backdrop-blur-md"
                 >
                     {isPanelOpen ? <ChevronRight /> : <ChevronLeft />}
                 </button>
 
                 {/* Tabs Navigation */}
-                <div className="p-6 pb-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/80 sticky top-0 z-10">
-                    <div className="flex gap-2 p-1 bg-white rounded-xl border border-gray-100">
+                <div className="p-6 pb-2 border-b border-white/10 flex justify-between items-center bg-black/20 sticky top-0 z-10">
+                    <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
                         {['products', 'looks', 'beauty', 'bag'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all
-                                    ${activeTab === tab ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}
+                                    ${activeTab === tab ? 'bg-[#F5E6C8] text-black shadow-glow' : 'text-white/40 hover:text-white hover:bg-white/5'}
                                 `}
                             >
                                 {tab === 'bag' ? 'My Bag' : tab}
@@ -503,8 +547,8 @@ const MakeupStudio = () => {
                         ))}
                     </div>
                     <div className="flex gap-1">
-                        <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-400"><Undo size={16} /></button>
-                        <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-400"><Redo size={16} /></button>
+                        <button className="p-2 hover:bg-white/10 rounded-lg text-white/40 transition-colors"><Undo size={16} /></button>
+                        <button className="p-2 hover:bg-white/10 rounded-lg text-white/40 transition-colors"><Redo size={16} /></button>
                     </div>
                 </div>
 
@@ -554,7 +598,7 @@ const MakeupStudio = () => {
                                     <button
                                         key={cat} onClick={() => setActiveCategory(cat)}
                                         className={`flex-none px-6 py-2 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-all
-                                            ${activeCategory === cat ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}
+                                            ${activeCategory === cat ? 'bg-white text-black border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/30'}
                                         `}
                                     >
                                         {cat}
@@ -571,8 +615,8 @@ const MakeupStudio = () => {
                                             handleProductSelect(product);
                                             setShow3DPreview(true);
                                         }}
-                                        key={product.id} className={`group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all p-1
-                                            ${activeProduct?.id === product.id ? 'border-primary bg-primary/5' : 'border-gray-50 bg-gray-50'}
+                                        key={product.id} className={`group relative aspect-[3/4] rounded-2xl overflow-hidden border transition-all p-1
+                                            ${activeProduct?.id === product.id ? 'border-gold bg-gold/10' : 'border-white/5 bg-white/5'}
                                         `}
                                     >
                                         <div className="h-full w-full rounded-xl overflow-hidden flex flex-col">
@@ -583,13 +627,13 @@ const MakeupStudio = () => {
                                                     <Maximize2 size={8} /> 3D
                                                 </div>
                                             </div>
-                                            <div className="p-2 bg-white flex flex-col gap-0.5">
-                                                <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">{product.brand}</p>
-                                                <p className="text-[10px] font-bold text-gray-800 line-clamp-1">{product.name}</p>
+                                            <div className="p-2 bg-white/5 flex flex-col gap-0.5">
+                                                <p className="text-[9px] font-black uppercase text-white/30 tracking-tighter">{product.brand}</p>
+                                                <p className="text-[10px] font-bold text-white line-clamp-1 group-hover:text-[#F5E6C8] transition-colors">{product.name}</p>
                                             </div>
                                         </div>
                                         {activeProduct?.id === product.id && (
-                                            <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full shadow-lg">
+                                            <div className="absolute top-2 right-2 bg-[#F5E6C8] text-black p-1 rounded-full shadow-lg">
                                                 <Zap size={8} fill="currentColor" />
                                             </div>
                                         )}
@@ -599,16 +643,16 @@ const MakeupStudio = () => {
 
                             {/* Intensity Slider (Sticky Bottom in category) */}
                             {activeProduct && (
-                                <GlassCard className="p-5 mt-4 border-primary/20 bg-primary/5 sticky bottom-0">
+                                <GlassCard className="p-5 mt-4 !bg-white/5 !border-white/10 sticky bottom-0 backdrop-blur-xl">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-xl" style={{ background: activeProduct.hex }} />
+                                            <div className="w-10 h-10 rounded-full border-2 border-white/20 shadow-xl" style={{ background: activeProduct.hex }} />
                                             <div>
-                                                <h5 className="font-bold text-xs">{activeProduct.name}</h5>
-                                                <p className="text-[10px] text-gray-400 uppercase tracking-widest">{activeProduct.finish} Intensity</p>
+                                                <h5 className="font-bold text-xs text-white">{activeProduct.name}</h5>
+                                                <p className="text-[10px] text-white/40 uppercase tracking-widest">{activeProduct.finish} Intensity</p>
                                             </div>
                                         </div>
-                                        <span className="text-xs font-bold text-primary">{Math.round((makeupState[activeCategory]?.opacity || 0) * 100)}%</span>
+                                        <span className="text-xs font-bold text-[#F5E6C8]">{Math.round((makeupState[activeCategory]?.opacity || 0) * 100)}%</span>
                                     </div>
                                     <input
                                         type="range" min="0" max="1" step="0.05"
@@ -619,7 +663,7 @@ const MakeupStudio = () => {
                                             newState[activeCategory].opacity = val;
                                             setMakeupState(newState);
                                         }}
-                                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#F5E6C8]"
                                     />
                                 </GlassCard>
                             )}
@@ -693,21 +737,21 @@ const MakeupStudio = () => {
                 </div>
 
                 {/* Bottom Total Bar */}
-                <div className="p-6 bg-gray-50 border-t border-gray-100">
+                <div className="p-6 bg-white/5 border-t border-white/10">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex -space-x-3">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200" />
+                                <div key={i} className="w-8 h-8 rounded-full border-2 border-black/50 bg-white/20 backdrop-blur-md" />
                             ))}
                         </div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">3 Products Selected</p>
+                        <p className="text-xs font-bold text-white/40 uppercase tracking-widest">3 Products Selected</p>
                     </div>
                     <button
                         onClick={handleSaveLook}
                         disabled={saving || !isCameraActive}
-                        className="w-full bg-charcoal text-white py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-primary transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                        className="w-full bg-[#F5E6C8] text-black py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-[0_0_20px_rgba(245,230,200,0.2)] hover:bg-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                     >
-                        {saving ? "Saving..." : "Save Look to Bag"}
+                        {saving ? "Saving..." : "Save Look"}
                     </button>
                 </div>
             </motion.div>
@@ -948,11 +992,6 @@ const MakeupStudio = () => {
 };
 
 // Helper components & icons as needed
-const PinkButton = ({ children, onClick, className, icon: Icon }) => (
-    <button onClick={onClick} className={`bg-primary text-white font-bold uppercase tracking-widest text-[10px] rounded-full hover:bg-primary/80 transition-all shadow-glow flex items-center justify-center gap-2 ${className}`}>
-        {Icon && <Icon size={14} />}
-        {children}
-    </button>
-);
+
 
 export default MakeupStudio;

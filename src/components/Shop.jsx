@@ -75,6 +75,14 @@ const ShopContent = ({ cloudProducts }) => {
     const [onlyInStock, setOnlyInStock] = useState(false);
     const [selectedBrands, setSelectedBrands] = useState([]);
 
+    // Mock Create Order Function (until backend is ready)
+    const createOrder = async (orderData) => {
+        console.log('Mock Order Created:', orderData);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return { success: true, orderId: orderData.orderId };
+    };
+
     const brands = useMemo(() => {
         return [...new Set(products.map(p => p.brand))].sort();
     }, [products]);

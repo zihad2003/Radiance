@@ -1,4 +1,4 @@
-import Hero from '../components/Hero';
+import Hero3D from '../components/landing/Hero3D';
 import Services from '../components/Services';
 import ExcellenceSection from '../components/ExcellenceSection';
 import BeautyStories from '../components/BeautyStories';
@@ -15,7 +15,7 @@ const HomePage = ({ onBook }) => {
                 description="Experience Bangladesh's first AI-powered virtual makeup try-on. Professional hairstyling, premium beauty services, and instant booking in Dhaka."
             />
             {/* Hero Section */}
-            <Hero />
+            <Hero3D />
 
             {/* Services Preview */}
             <FadeIn>

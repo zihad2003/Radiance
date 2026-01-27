@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, AlertCircle, CheckCircle, ArrowRight, Droplets, Sun, Activity, Moon } from 'lucide-react';
+import { Camera, Upload, AlertCircle, CheckCircle, ArrowRight, Droplets, Sun, Activity, Moon, X, Scan, Sparkles } from 'lucide-react';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
@@ -16,6 +16,15 @@ const SkinHealthAnalyzer = () => {
     const [cameraActive, setCameraActive] = useState(false);
 
     const analyzeSkin = useAction(api.skinAnalysis.analyze);
+
+    // Camera Cleanup
+    useEffect(() => {
+        return () => {
+            if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, []);
 
     // Start Camera
     const startCamera = async () => {
@@ -120,25 +129,28 @@ const SkinHealthAnalyzer = () => {
     };
 
     return (
-        <section className="py-24 bg-rose-50/50">
-            <div className="container mx-auto px-6">
+        <section className="py-24 bg-[#050505] relative overflow-hidden">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 left-[-10%] w-[50%] h-[50%] bg-[#F5E6C8]/5 rounded-full blur-[150px] pointer-events-none" />
+
+            <div className="container mx-auto px-6 relative z-10">
                 <div className="text-center mb-12">
-                    <span className="text-primary font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 mb-4">
+                    <span className="text-gold font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 mb-4 border border-gold/20 w-fit mx-auto px-4 py-1.5 rounded-full bg-gold/5">
                         <Activity size={16} />
                         AI Health Check
                     </span>
-                    <h2 className="text-4xl md:text-5xl font-serif italic mb-6">
-                        Advanced Skin Analysis
+                    <h2 className="text-4xl md:text-5xl font-serif italic mb-6 text-white">
+                        Advanced <span className="text-gradient-gold">Skin Analysis</span>
                     </h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-white/40 max-w-2xl mx-auto font-light tracking-wide">
                         Upload a close-up selfie to detect specialized skin concerns and get a medically-graded treatment plan tailored just for you.
                     </p>
                 </div>
 
-                <div className="max-w-5xl mx-auto bg-white rounded-[2.5rem] shadow-xl overflow-hidden min-h-[600px] flex flex-col md:flex-row relative">
+                <div className="max-w-6xl mx-auto bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[-20px_0_40px_rgba(0,0,0,0.5)] overflow-hidden min-h-[600px] flex flex-col md:flex-row relative">
 
                     {/* Left Side: Input / Image */}
-                    <div className="md:w-1/2 bg-gray-100 relative flex flex-col items-center justify-center p-8 border-r border-gray-200">
+                    <div className="md:w-1/2 bg-white/5 relative flex flex-col items-center justify-center p-8 border-r border-white/5">
 
                         {/* Camera View */}
                         <AnimatePresence>
@@ -150,11 +162,30 @@ const SkinHealthAnalyzer = () => {
                                     className="absolute inset-0 z-20 bg-black flex items-center justify-center"
                                 >
                                     <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                                    {/* Scanning Overlay */}
+                                    <div className="absolute inset-0 border-[2px] border-gold/30 opacity-50 m-8 rounded-3xl pointer-events-none">
+                                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-gold rounded-tl-xl" />
+                                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-gold rounded-tr-xl" />
+                                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-gold rounded-bl-xl" />
+                                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-gold rounded-br-xl" />
+                                    </div>
+
                                     <button
                                         onClick={capturePhoto}
-                                        className="absolute bottom-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full border-4 border-primary/50 shadow-lg hover:scale-110 transition-transform flex items-center justify-center cursor-pointer"
+                                        className="absolute bottom-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-[#F5E6C8] rounded-full border-4 border-white/20 shadow-glow hover:scale-110 transition-transform flex items-center justify-center cursor-pointer z-30"
                                     >
-                                        <div className="w-12 h-12 bg-primary rounded-full" />
+                                        <div className="w-12 h-12 bg-white/20 rounded-full" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            const stream = videoRef.current?.srcObject;
+                                            stream?.getTracks().forEach(track => track.stop());
+                                            setCameraActive(false);
+                                        }}
+                                        className="absolute top-6 right-6 bg-black/50 p-2 rounded-full text-white/70 hover:text-white hover:bg-black/70 transition-all z-30"
+                                    >
+                                        <X size={24} />
                                     </button>
                                 </motion.div>
                             )}
@@ -165,33 +196,34 @@ const SkinHealthAnalyzer = () => {
                             <div className="relative w-full h-full min-h-[400px]">
                                 <img src={image} alt="Selfie" className="w-full h-full object-cover rounded-3xl" />
                                 {analyzing && (
-                                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
-                                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                                        <p className="font-bold text-primary animate-pulse">Scanning Dermis...</p>
+                                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl border border-white/10">
+                                        <div className="w-20 h-20 border-4 border-gold border-t-transparent rounded-full animate-spin mb-6" />
+                                        <p className="font-bold text-[#F5E6C8] animate-pulse tracking-widest text-sm uppercase">Scanning Dermis...</p>
+                                        <p className="text-white/40 text-xs mt-2">Analyzing micro-texture</p>
                                     </div>
                                 )}
                                 {!analyzing && (
                                     <button
                                         onClick={reset}
-                                        className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-red-50 text-red-500 transition-all z-10"
+                                        className="absolute top-4 right-4 bg-black/60 backdrop-blur-md p-2 rounded-full shadow-lg hover:bg-red-900/50 text-white/70 hover:text-red-400 transition-all z-10 border border-white/10"
                                     >
-                                        <Upload size={20} className="rotate-45" /> {/* Use X icon ideally, reusing upload rotated for now */}
+                                        <X size={20} />
                                     </button>
                                 )}
                             </div>
                         ) : (
-                            <div className="text-center space-y-6">
-                                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md mx-auto mb-4">
-                                    <UserFaceIcon />
+                            <div className="text-center space-y-8 w-full max-w-sm">
+                                <div className="w-32 h-32 bg-white/5 rounded-full flex items-center justify-center shadow-glow mx-auto mb-4 border border-white/10 animate-pulse">
+                                    <Scan size={48} className="text-white/20" />
                                 </div>
 
-                                <div className="flex flex-col gap-3 w-full max-w-xs mx-auto relative z-10">
+                                <div className="flex flex-col gap-4 w-full relative z-10">
                                     <button
                                         onClick={startCamera}
-                                        className="w-full py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-lg"
+                                        className="w-full py-4 bg-[#F5E6C8] text-black rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all flex items-center justify-center gap-3 shadow-glow"
                                     >
                                         <Camera size={18} />
-                                        Take Photo
+                                        Start Facial Scan
                                     </button>
 
                                     <div className="relative">
@@ -204,15 +236,16 @@ const SkinHealthAnalyzer = () => {
                                         />
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="w-full py-4 bg-white border-2 border-primary/20 text-primary rounded-xl font-bold uppercase tracking-widest text-xs hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-4 bg-transparent border border-white/20 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:border-gold/50 hover:text-gold hover:bg-white/5 transition-all flex items-center justify-center gap-3"
                                         >
                                             <Upload size={18} />
-                                            Upload Selfie
+                                            Upload Image
                                         </button>
                                     </div>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-4">
-                                    Privacy Note: Images are analyzed securely and never stored.
+                                <p className="text-[10px] text-white/30 uppercase tracking-wider flex items-center justify-center gap-2">
+                                    <CheckCircle size={10} className="text-gold" />
+                                    Encrypted & Private Analysis
                                 </p>
                             </div>
                         )}
@@ -222,7 +255,7 @@ const SkinHealthAnalyzer = () => {
                     </div>
 
                     {/* Right Side: Results */}
-                    <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto max-h-[800px]">
+                    <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto max-h-[800px] custom-scrollbar">
                         {result ? (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
@@ -230,31 +263,31 @@ const SkinHealthAnalyzer = () => {
                                 className="space-y-8"
                             >
                                 {/* Header */}
-                                <div>
-                                    <h3 className="text-2xl font-serif italic mb-2">Analysis Complete</h3>
-                                    <p className="text-gray-500 text-sm">Based on clinical AI assessments</p>
+                                <div className="border-b border-white/10 pb-6">
+                                    <h3 className="text-2xl font-serif italic mb-2 text-white">Analysis Complete</h3>
+                                    <p className="text-gold text-xs uppercase tracking-widest">Clinical AI Assessment</p>
                                 </div>
 
                                 {/* Concerns Grid */}
                                 <div className="grid grid-cols-1 gap-4">
                                     {Object.entries(result.concerns).map(([key, data]) => (
-                                        <div key={key} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                                            <div className="flex items-center justify-between mb-2">
+                                        <div key={key} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/20 transition-all">
+                                            <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-gray-50 rounded-full">
+                                                    <div className="p-2 bg-black/40 rounded-full text-gold">
                                                         {getConcernIcon(key)}
                                                     </div>
                                                     <div>
-                                                        <span className="font-bold capitalize block text-sm">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                                        <span className="text-xs text-gray-500 font-medium">{data.level}</span>
+                                                        <span className="font-bold capitalize block text-sm text-white">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                        <span className="text-xs text-white/40 font-medium uppercase tracking-wider">{data.level}</span>
                                                     </div>
                                                 </div>
-                                                <span className={`text-sm font-bold ${data.score > 50 ? 'text-red-500' : 'text-green-500'}`}>
+                                                <span className={`text-xl font-serif italic ${data.score > 50 ? 'text-red-400' : 'text-green-400'}`}>
                                                     {data.score}%
                                                 </span>
                                             </div>
                                             {/* Progress Bar */}
-                                            <div className="w-full h-1.5 bg-gray-100 rounded-full mb-2 overflow-hidden">
+                                            <div className="w-full h-1 bg-white/10 rounded-full mb-3 overflow-hidden">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${data.score}%` }}
@@ -265,7 +298,7 @@ const SkinHealthAnalyzer = () => {
                                                         }`}
                                                 />
                                             </div>
-                                            <p className="text-xs text-gray-500 leading-relaxed">
+                                            <p className="text-xs text-white/50 leading-relaxed font-light">
                                                 {data.description}
                                             </p>
                                         </div>
@@ -274,21 +307,21 @@ const SkinHealthAnalyzer = () => {
 
                                 {/* Color Match Result */}
                                 {result.foundationShade && (
-                                    <div className="bg-charcoal/5 rounded-2xl p-6 border border-charcoal/10 flex items-center justify-between">
+                                    <div className="bg-gradient-to-r from-white/10 to-transparent rounded-2xl p-6 border border-white/10 flex items-center justify-between">
                                         <div>
-                                            <h4 className="font-bold text-charcoal mb-1 flex items-center gap-2">
-                                                <Sun size={18} className="text-amber-500" />
+                                            <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-xs uppercase tracking-widest">
+                                                <Sun size={14} className="text-gold" />
                                                 Perfect Match Found
                                             </h4>
-                                            <p className="text-sm text-gray-600">Recommended Foundation Shade</p>
+                                            <p className="text-sm text-white/60">Recommended Foundation Shade</p>
                                         </div>
                                         <div className="text-right flex items-center gap-4">
                                             <div className="text-right">
-                                                <div className="font-serif text-xl font-bold">{result.foundationShade.name}</div>
-                                                <div className="text-xs uppercase tracking-widest text-gray-400">Match Accuracy: 96%</div>
+                                                <div className="font-serif text-xl font-bold text-gold">{result.foundationShade.name}</div>
+                                                <div className="text-[10px] uppercase tracking-widest text-white/40">Accuracy: 96%</div>
                                             </div>
                                             <div
-                                                className="w-12 h-12 rounded-full border-4 border-white shadow-md"
+                                                className="w-12 h-12 rounded-full border-2 border-white/20 shadow-glow"
                                                 style={{ backgroundColor: result.foundationShade.hex }}
                                             />
                                         </div>
@@ -296,20 +329,20 @@ const SkinHealthAnalyzer = () => {
                                 )}
 
                                 {/* Recommended Routine */}
-                                <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10">
-                                    <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
-                                        <CheckCircle size={18} />
+                                <div className="bg-[#F5E6C8]/5 rounded-2xl p-6 border border-[#F5E6C8]/20">
+                                    <h4 className="font-bold text-[#F5E6C8] mb-6 flex items-center gap-2 text-sm uppercase tracking-widest">
+                                        <Sparkles size={16} />
                                         Your Personalized Routine
                                     </h4>
-                                    <ul className="space-y-4">
+                                    <ul className="space-y-6">
                                         {result.routine.map((step, i) => (
-                                            <li key={i} className="flex gap-4 text-sm">
-                                                <span className="font-bold text-primary/60 min-w-[70px] uppercase text-xs tracking-wide pt-1">
+                                            <li key={i} className="flex gap-4 text-sm group">
+                                                <span className="font-bold text-white/20 min-w-[70px] uppercase text-[10px] tracking-wide pt-1 group-hover:text-gold transition-colors">
                                                     {step.step}
                                                 </span>
                                                 <div>
-                                                    <div className="font-bold text-gray-800">{step.product}</div>
-                                                    <div className="text-xs text-gray-500 mt-1">{step.why}</div>
+                                                    <div className="font-bold text-white group-hover:text-[#F5E6C8] transition-colors">{step.product}</div>
+                                                    <div className="text-xs text-white/50 mt-1 font-light">{step.why}</div>
                                                 </div>
                                             </li>
                                         ))}
@@ -317,10 +350,10 @@ const SkinHealthAnalyzer = () => {
                                 </div>
 
                                 {/* Recommended Services CTA */}
-                                <div className="bg-charcoal text-white rounded-2xl p-6 text-center">
-                                    <h4 className="font-medium text-gray-300 text-xs uppercase tracking-widest mb-2">Recommended Treatment</h4>
-                                    <div className="text-2xl font-serif italic mb-6">{result.recommendedService}</div>
-                                    <button className="w-full py-3 bg-white text-charcoal rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all">
+                                <div className="bg-gradient-to-br from-gold/10 to-black text-white rounded-2xl p-8 text-center border border-gold/20">
+                                    <h4 className="font-medium text-gold/70 text-xs uppercase tracking-widest mb-2">Recommended Treatment</h4>
+                                    <div className="text-2xl font-serif italic mb-6 text-white">{result.recommendedService}</div>
+                                    <button className="w-full py-4 bg-[#F5E6C8] text-black rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all shadow-glow">
                                         Book Appointment
                                     </button>
                                 </div>
@@ -328,12 +361,16 @@ const SkinHealthAnalyzer = () => {
                             </motion.div>
                         ) : (
                             // Placeholder State (Right Side)
-                            <div className="h-full flex flex-col items-center justify-center text-center opacity-40 p-8">
-                                <Activity size={64} className="mb-4" />
-                                <h3 className="text-xl font-bold mb-2">Ready to Scan</h3>
-                                <p className="text-sm">
-                                    Analysis results, custom routine, and treatment plan will appear here instantly.
-                                </p>
+                            <div className="h-full flex flex-col items-center justify-center text-center opacity-30 p-8 space-y-6">
+                                <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
+                                    <Activity size={32} className="text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-serif italic text-white mb-2">Ready to Scan</h3>
+                                    <p className="text-sm text-white/60 max-w-xs mx-auto">
+                                        Analysis results, custom routine, and treatment plan will appear here instantly.
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>

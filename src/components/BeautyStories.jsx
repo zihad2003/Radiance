@@ -50,7 +50,7 @@ const BeautyStories = () => {
     }, [activeFilter, searchQuery, filters]);
 
     return (
-        <section id="stories" className="py-24 bg-charcoal text-white relative overflow-hidden">
+        <section id="stories" className="py-24 bg-[#050505] text-white relative overflow-hidden">
             {/* Background Decor */}
             <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -62,12 +62,12 @@ const BeautyStories = () => {
                     <motion.span
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        className="text-primary font-bold tracking-[0.4em] uppercase text-xs mb-4 block"
+                        className="text-gold font-bold tracking-[0.4em] uppercase text-xs mb-4 block"
                     >
                         Radiance Transformations
                     </motion.span>
                     <h2 className="text-5xl md:text-7xl font-serif text-white mb-8 italic">
-                        Bangladesh <span className="text-gold">Beauty</span> Stories
+                        Bangladesh <span className="text-gradient-gold">Beauty</span> Stories
                     </h2>
                     <p className="max-w-2xl mx-auto text-white/60 text-sm leading-relaxed mb-12">
                         Authentic journeys of transformation from across Bangladesh. Real brides,
@@ -83,7 +83,7 @@ const BeautyStories = () => {
                                 placeholder="Search stories by name or occasion..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-16 pr-6 py-4 bg-transparent border-none outline-none text-xs font-bold tracking-widest uppercase placeholder:text-white/20"
+                                className="w-full pl-16 pr-6 py-4 bg-transparent border-none outline-none text-xs font-bold tracking-widest uppercase placeholder:text-white/20 text-white"
                             />
                         </div>
                         <div className="flex gap-4">
@@ -92,14 +92,14 @@ const BeautyStories = () => {
                                 onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
                                 className="appearance-none pl-8 pr-12 py-4 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest outline-none hover:bg-white/10 transition-all cursor-pointer text-white"
                             >
-                                <option className="bg-neutral-900">Most Recent</option>
-                                <option className="bg-neutral-900">Most Popular</option>
-                                <option className="bg-neutral-900">Highest Rated</option>
-                                <option className="bg-neutral-900">Similar to Me</option>
+                                <option className="bg-[#050505]">Most Recent</option>
+                                <option className="bg-[#050505]">Most Popular</option>
+                                <option className="bg-[#050505]">Highest Rated</option>
+                                <option className="bg-[#050505]">Similar to Me</option>
                             </select>
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-8 py-4 rounded-full transition-all border ${showFilters ? 'bg-primary border-primary' : 'bg-white/5 border-white/10'}`}
+                                className={`flex items-center gap-2 px-8 py-4 rounded-full transition-all border ${showFilters ? 'bg-[#F5E6C8] text-black border-[#F5E6C8]' : 'bg-white/5 border-white/10 text-white'}`}
                             >
                                 <Filter size={18} />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Advanced</span>
@@ -118,13 +118,13 @@ const BeautyStories = () => {
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-10 bg-white/5 rounded-[2.5rem] border border-white/10 text-left">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary">Story Category</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gold">Story Category</label>
                                         <div className="flex flex-wrap gap-2">
                                             {STORY_CATEGORIES.map(cat => (
                                                 <button
                                                     key={cat}
                                                     onClick={() => setActiveFilter(cat)}
-                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${activeFilter === cat ? 'bg-primary text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${activeFilter === cat ? 'bg-gold text-black' : 'bg-white/5 text-white/40 hover:text-white'}`}
                                                 >
                                                     {cat}
                                                 </button>
@@ -132,13 +132,13 @@ const BeautyStories = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary">Skin Tone</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gold">Skin Tone</label>
                                         <div className="flex flex-wrap gap-2">
                                             {SKIN_TONES.map(tone => (
                                                 <button
                                                     key={tone}
                                                     onClick={() => setFilters({ ...filters, skinTone: tone })}
-                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${filters.skinTone === tone ? 'bg-primary text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${filters.skinTone === tone ? 'bg-gold text-black' : 'bg-white/5 text-white/40 hover:text-white'}`}
                                                 >
                                                     {tone}
                                                 </button>
@@ -146,13 +146,13 @@ const BeautyStories = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary">Budget Range</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gold">Budget Range</label>
                                         <div className="flex flex-wrap gap-2">
                                             {BUDGET_RANGES.map(range => (
                                                 <button
                                                     key={range}
                                                     onClick={() => setFilters({ ...filters, budget: range })}
-                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${filters.budget === range ? 'bg-primary text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                                                    className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${filters.budget === range ? 'bg-gold text-black' : 'bg-white/5 text-white/40 hover:text-white'}`}
                                                 >
                                                     {range}
                                                 </button>
@@ -197,14 +197,14 @@ const BeautyStories = () => {
                                 <Facebook size={24} className="text-white" />
                             </div>
                         </div>
-                        <h3 className="text-3xl font-serif italic mb-6">Be Our Next <span className="text-primary">Cover Bride</span></h3>
+                        <h3 className="text-3xl font-serif italic mb-6">Be Our Next <span className="text-gold">Cover Bride</span></h3>
                         <p className="max-w-xl mx-auto text-white/40 text-sm mb-10 leading-relaxed font-light uppercase tracking-widest">
                             Share your transformation with #RadianceTransformation and tag us
                             to be featured in our monthly digital lookbook.
                         </p>
                         <div className="flex gap-4">
-                            <button className="px-10 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-glow">Apply for Showcase</button>
-                            <button className="px-10 py-4 bg-white/5 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] border border-white/10">Browse Hashtag</button>
+                            <button className="px-10 py-4 bg-[#F5E6C8] text-black rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-glow hover:bg-white">Apply for Showcase</button>
+                            <button className="px-10 py-4 bg-white/5 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] border border-white/10 hover:bg-white/10">Browse Hashtag</button>
                         </div>
                     </div>
                 </motion.div>
@@ -235,7 +235,7 @@ const StoryCard = ({ story, index, onClick }) => (
         onClick={onClick}
         className="group cursor-pointer"
     >
-        <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/5">
+        <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/5 border border-white/5">
             <OptimizedImage
                 src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"}
                 alt={story.name}
@@ -248,10 +248,10 @@ const StoryCard = ({ story, index, onClick }) => (
 
             {/* Category Badge & Star */}
             <div className="absolute top-6 left-6 flex flex-col gap-2">
-                <span className="px-4 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-xl">
+                <span className="px-4 py-1.5 bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-xl border border-white/10">
                     {story.category}
                 </span>
-                <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-gold text-[10px] font-bold border border-white/10">
+                <div className="flex items-center gap-1 bg-gold/90 backdrop-blur-md px-3 py-1 rounded-full text-black text-[10px] font-bold border border-gold/20 shadow-lg">
                     <Star size={10} fill="currentColor" /> {story.rating}.0
                 </div>
             </div>
@@ -266,10 +266,10 @@ const StoryCard = ({ story, index, onClick }) => (
                 </div>
 
                 <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <button className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 group-hover:gap-5 transition-all">
-                        Read Story <ArrowRight size={14} className="text-primary" />
+                    <button className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 group-hover:gap-5 transition-all text-white hover:text-gold">
+                        Read Story <ArrowRight size={14} className="text-gold" />
                     </button>
-                    {story.video && <div className="p-3 bg-white/10 backdrop-blur-md rounded-full"><Play size={12} fill="white" /></div>}
+                    {story.video && <div className="p-3 bg-white/10 backdrop-blur-md rounded-full hover:bg-gold hover:text-black transition-colors"><Play size={12} fill="currentColor" /></div>}
                 </div>
             </div>
 
@@ -279,7 +279,7 @@ const StoryCard = ({ story, index, onClick }) => (
                 initial={false}
             >
                 <Quote size={80} className="text-white/10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-12" />
-                <p className="text-lg font-serif italic text-center relative z-10 leading-relaxed">
+                <p className="text-lg font-serif italic text-center relative z-10 leading-relaxed text-white">
                     "{story.quote}"
                 </p>
             </motion.div>
@@ -301,7 +301,7 @@ const StoryDetailModal = ({ story, onClose }) => {
             <motion.div
                 initial={{ scale: 0.9, y: 100 }}
                 animate={{ scale: 1, y: 0 }}
-                className="bg-neutral-900 rounded-[4rem] w-full max-w-7xl relative overflow-hidden flex flex-col lg:flex-row shadow-3xl"
+                className="bg-[#0A0A0A] border border-white/10 rounded-[4rem] w-full max-w-7xl relative overflow-hidden flex flex-col lg:flex-row shadow-3xl"
             >
                 {/* Close Button */}
                 <button

@@ -5,7 +5,7 @@ const ContactFooter = () => {
     return (
         <>
             {/* Contact Section */}
-            <section id="contact" className="py-24 bg-pearl relative">
+            <section id="contact" className="py-24 bg-[#050505] relative">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col lg:flex-row gap-16">
                         {/* Map & Info */}
@@ -15,33 +15,33 @@ const ContactFooter = () => {
                             transition={{ duration: 0.8 }}
                             className="lg:w-1/2"
                         >
-                            <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-primary mb-4">Visit Us</h2>
-                            <h3 className="text-4xl md:text-5xl font-serif text-charcoal mb-8">Sanctuary Location</h3>
+                            <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-gold mb-4">Visit Us</h2>
+                            <h3 className="text-4xl md:text-5xl font-serif text-white mb-8">Sanctuary Location</h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                                    <MapPin className="text-primary mb-4" size={24} />
-                                    <h4 className="font-serif text-lg mb-2">Address</h4>
-                                    <p className="text-charcoal/70 text-sm">House 15, Road 103, <br />Gulshan 2, Dhaka 1212</p>
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                                    <MapPin className="text-gold mb-4 group-hover:scale-110 transition-transform" size={24} />
+                                    <h4 className="font-serif text-lg mb-2 text-white">Address</h4>
+                                    <p className="text-white/60 text-sm">House 15, Road 103, <br />Gulshan 2, Dhaka 1212</p>
                                 </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                                    <Phone className="text-primary mb-4" size={24} />
-                                    <h4 className="font-serif text-lg mb-2">Phone</h4>
-                                    <p className="text-charcoal/70 text-sm">+880 1711-234567<br />+880 1819-876543</p>
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                                    <Phone className="text-gold mb-4 group-hover:scale-110 transition-transform" size={24} />
+                                    <h4 className="font-serif text-lg mb-2 text-white">Phone</h4>
+                                    <p className="text-white/60 text-sm">+880 1711-234567<br />+880 1819-876543</p>
                                 </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                                    <Mail className="text-primary mb-4" size={24} />
-                                    <h4 className="font-serif text-lg mb-2">Email</h4>
-                                    <p className="text-charcoal/70 text-sm">concierge@radiance.com<br />press@radiance.com</p>
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                                    <Mail className="text-gold mb-4 group-hover:scale-110 transition-transform" size={24} />
+                                    <h4 className="font-serif text-lg mb-2 text-white">Email</h4>
+                                    <p className="text-white/60 text-sm">concierge@radiance.com<br />press@radiance.com</p>
                                 </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                                    <Clock className="text-primary mb-4" size={24} />
-                                    <h4 className="font-serif text-lg mb-2">Hours</h4>
-                                    <p className="text-charcoal/70 text-sm">Mon-Fri: 9am - 8pm<br />Sat: 10am - 6pm</p>
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                                    <Clock className="text-gold mb-4 group-hover:scale-110 transition-transform" size={24} />
+                                    <h4 className="font-serif text-lg mb-2 text-white">Hours</h4>
+                                    <p className="text-white/60 text-sm">Mon-Fri: 9am - 8pm<br />Sat: 10am - 6pm</p>
                                 </div>
                             </div>
 
-                            <div className="h-[300px] w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                            <div className="h-[300px] w-full rounded-3xl overflow-hidden shadow-xl border-4 border-white/5">
                                 <iframe
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.0874457713433!2d90.41144131543187!3d23.794895884567484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c70c534063df%3A0x7d25e01bd6a6669!2sGulshan%202%20Circle%2C%20Dhaka%201212!5e0!3m2!1sen!2sbd!4v1644837543210!5m2!1sen!2sbd"
                                     width="100%"
@@ -50,7 +50,7 @@ const ContactFooter = () => {
                                     allowFullScreen=""
                                     loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade"
-                                    className="grayscale hover:grayscale-0 transition-all duration-700"
+                                    className="filter grayscale contrast-125 opacity-80 hover:opacity-100 transition-all duration-700 invert"
                                 ></iframe>
                             </div>
                         </motion.div>
@@ -62,36 +62,36 @@ const ContactFooter = () => {
                             transition={{ duration: 0.8 }}
                             className="lg:w-1/2"
                         >
-                            <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl">
-                                <h3 className="text-3xl font-serif mb-6">Send a Message</h3>
+                            <div className="bg-white/5 border border-white/10 p-8 md:p-12 rounded-[2rem] shadow-xl backdrop-blur-sm">
+                                <h3 className="text-3xl font-serif mb-6 text-white">Send a Message</h3>
                                 <form className="space-y-6">
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">First Name</label>
-                                            <input type="text" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="Jane" />
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">First Name</label>
+                                            <input type="text" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="Jane" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Last Name</label>
-                                            <input type="text" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="Doe" />
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Last Name</label>
+                                            <input type="text" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="Doe" />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Email Address</label>
-                                        <input type="email" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="jane@example.com" />
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Email Address</label>
+                                        <input type="email" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="jane@example.com" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Subject</label>
-                                        <select className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20">
-                                            <option>General Inquiry</option>
-                                            <option>Feedback</option>
-                                            <option>Partnership</option>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Subject</label>
+                                        <select className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20">
+                                            <option className="bg-black">General Inquiry</option>
+                                            <option className="bg-black">Feedback</option>
+                                            <option className="bg-black">Partnership</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Message</label>
-                                        <textarea rows="4" className="w-full bg-pearl p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-transparent focus:border-primary/20" placeholder="How can we help you?"></textarea>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Message</label>
+                                        <textarea rows="4" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="How can we help you?"></textarea>
                                     </div>
-                                    <button className="w-full bg-charcoal text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-primary transition-colors duration-300 shadow-lg interactive flex items-center justify-center">
+                                    <button className="w-full bg-[#F5E6C8] text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors duration-300 shadow-lg interactive flex items-center justify-center">
                                         Send Message <Send className="ml-2 w-4 h-4" />
                                     </button>
                                 </form>
@@ -102,7 +102,7 @@ const ContactFooter = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-charcoal text-white pt-20 pb-10 rounded-t-[3rem] mt-[-2rem] relative z-20">
+            <footer className="bg-[#020202] text-white pt-20 pb-10 rounded-t-[3rem] mt-[-2rem] relative z-20 border-t border-white/5">
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                         {/* Column 1: Brand */}
