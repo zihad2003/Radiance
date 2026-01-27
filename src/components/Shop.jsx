@@ -9,7 +9,7 @@ import {
 import { useShopStore } from '../store/useShopStore';
 import { ALL_PRODUCTS, SHOP_CATEGORIES } from '../data/boutiqueProducts';
 import { getAllProducts } from '../data/makeupBrands';
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 import FadeIn from './ui/FadeIn';
@@ -17,6 +17,7 @@ import Counter from './ui/Counter';
 import ProductModal from './ProductModal';
 import CartSlideOut from './CartSlideOut';
 import PaymentGateway from './payment/PaymentGateway';
+import OptimizedImage from './ui/OptimizedImage';
 
 // --- ERROR BOUNDARY ---
 class QueryErrorBoundary extends React.Component {
@@ -352,9 +353,21 @@ const ShopContent = ({ cloudProducts }) => {
                     cart={cart}
                     total={getCartTotal()}
                     onClose={() => setShowCheckout(false)}
-                    onSuccess={(details) => {
-                        useShopStore.getState().clearCart();
-                        setShowCheckout(false);
+                    onSuccess={async (details) => {
+                        try {
+                            await createOrder({
+                                orderId: details.orderId,
+                                total: details.total,
+                                items: details.items,
+                                delivery: details.delivery,
+                                method: details.method,
+                                status: 'pending' // Default status
+                            });
+                            useShopStore.getState().clearCart();
+                            // setShowCheckout(false); // Do not close immediately so Success step shows in modal
+                        } catch (err) {
+                            console.error("Order Failed", err);
+                        }
                     }}
                 />
             )}
@@ -378,9 +391,11 @@ const ProductCard = ({ product, index, viewMode, onClick }) => {
         >
             {/* Image Wrap */}
             <div className={`relative bg-gray-50 flex-shrink-0 cursor-pointer overflow-hidden ${viewMode === 'list' ? 'w-48 h-48 rounded-[2rem]' : 'aspect-square'}`} onClick={onClick}>
-                <img
+                <OptimizedImage
                     src={product.images?.[0] || 'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800'}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    alt={product.name}
+                    useWebP={false}
                 />
 
                 {/* Overlay Controls */}

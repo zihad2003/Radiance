@@ -3,17 +3,17 @@ import { v } from "convex/values";
 
 export const list = query({
     args: {},
-    handler: async (ctx) => {
+    handler: async (ctx: any) => {
         return await ctx.db.query("products").collect();
     },
 });
 
 export const getByCategory = query({
     args: { category: v.string() },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         return await ctx.db
             .query("products")
-            .withIndex("by_category", (q) => q.eq("category", args.category))
+            .withIndex("by_category", (q: any) => q.eq("category", args.category))
             .collect();
     },
 });
@@ -42,10 +42,10 @@ export const addProduct = mutation({
         architecture: v.any(),
         image: v.optional(v.union(v.string(), v.null())),
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         const existing = await ctx.db
             .query("products")
-            .withIndex("by_id", (q) => q.eq("id", args.id))
+            .withIndex("by_id", (q: any) => q.eq("id", args.id))
             .first();
 
         if (existing) {
@@ -59,11 +59,11 @@ export const addProduct = mutation({
 
 export const bulkAdd = mutation({
     args: { products: v.array(v.any()) },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         for (const product of args.products) {
             const existing = await ctx.db
                 .query("products")
-                .withIndex("by_id", (q) => q.eq("id", product.id))
+                .withIndex("by_id", (q: any) => q.eq("id", product.id))
                 .first();
 
             if (existing) {

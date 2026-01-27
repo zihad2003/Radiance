@@ -11,6 +11,7 @@ import {
 } from '../data/beautyStories';
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from './ui/GlassCard';
+import OptimizedImage from './ui/OptimizedImage';
 
 const BeautyStories = () => {
     const [selectedStory, setSelectedStory] = useState(null);
@@ -235,10 +236,11 @@ const StoryCard = ({ story, index, onClick }) => (
         className="group cursor-pointer"
     >
         <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/5">
-            <img
+            <OptimizedImage
                 src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"}
                 alt={story.name}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                useWebP={false}
             />
 
             {/* Overlay Gradient */}

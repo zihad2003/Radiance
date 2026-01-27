@@ -3,8 +3,11 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, User, MapPin, Phone, Mail, Check, Download, FileText } from 'lucide-react';
 import { getServiceById, calculateTotalPrice, calculateTotalDuration } from '../../data/servicesDatabase';
 import { getStylistById } from '../../data/stylistsDatabase';
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
+    const createBooking = useMutation(api.bookings.createBooking);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
@@ -27,22 +30,43 @@ const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
         return `${hours} hr${hours > 1 ? 's' : ''} ${mins} mins`;
     };
 
+
+
     const handleConfirmBooking = async () => {
         setIsConfirming(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            // Save to Database
+            const bookingId = await createBooking({
+                service: selectedServices.map(s => s.name).join(", "),
+                date: bookingData.selectedDate,
+                time: bookingData.selectedTime,
+                customer: details,
+                status: "pending"
+            });
 
-        // Generate booking ID
-        const bookingId = `RAD${Date.now()}`;
+            // Generate WhatsApp Message
+            const whatsappMessage = `
+*New Booking Request* 📅
+Name: ${details.name}
+Phone: ${details.phone}
+Service: ${selectedServices.map(s => s.name).join(", ")}
+Date: ${bookingData.selectedDate} at ${bookingData.selectedTime}
+Address: ${details.address}
+            `.trim();
 
-        // In real app, send WhatsApp message here
-        if (details.whatsappNotification) {
-            console.log('Sending WhatsApp confirmation to:', details.phone);
+            // Send WhatsApp (Auto-open)
+            if (details.whatsappNotification) {
+                window.open(`https://wa.me/8801712345678?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+            }
+
+            setIsConfirmed(true);
+        } catch (error) {
+            console.error("Booking failed:", error);
+            alert("Failed to confirm booking. Please try again.");
+        } finally {
+            setIsConfirming(false);
         }
-
-        setIsConfirmed(true);
-        setIsConfirming(false);
     };
 
     // ... logic same ...

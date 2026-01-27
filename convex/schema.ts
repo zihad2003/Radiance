@@ -26,15 +26,7 @@ export default defineSchema({
         image: v.optional(v.union(v.string(), v.null())),
     }).index("by_id", ["id"]).index("by_category", ["category"]).index("by_brand", ["brand"]),
 
-    orders: defineTable({
-        orderId: v.string(),
-        total: v.number(),
-        items: v.array(v.any()),
-        delivery: v.any(),
-        method: v.string(),
-        timestamp: v.string(),
-        status: v.string(), // pending, processing, shipped, delivered
-    }).index("by_orderId", ["orderId"]),
+
 
     bookings: defineTable({
         bookingId: v.string(),
@@ -44,4 +36,22 @@ export default defineSchema({
         customer: v.any(),
         status: v.string(),
     }).index("by_date", ["date"]),
+
+    generated_images: defineTable({
+        prompt: v.string(),
+        inputImageUrl: v.string(),
+        outputImageUrl: v.string(),
+        preset: v.string(),
+        timestamp: v.number(),
+    }).index("by_input", ["inputImageUrl", "preset"]),
+
+    orders: defineTable({
+        orderId: v.string(),
+        total: v.number(),
+        items: v.any(),
+        delivery: v.any(), // Storing object as any/json for flexibility or define structure
+        paymentMethod: v.string(),
+        status: v.string(),
+        timestamp: v.number(),
+    }).index("by_orderId", ["orderId"]),
 });

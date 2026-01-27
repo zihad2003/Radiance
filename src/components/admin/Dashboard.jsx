@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Calendar, TrendingUp, CheckCircle, XCircle, Clock, LogOut, Lock } from 'lucide-react';
-import { getBookings, updateBookingStatus, saveBooking } from '../../utils/storage';
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import GlassCard from '../ui/GlassCard';
 import PinkButton from '../ui/PinkButton';
 
@@ -48,45 +49,20 @@ const AdminLogin = ({ onLogin }) => {
 };
 
 const Dashboard = ({ onClose }) => {
-    const [bookings, setBookings] = useState([]);
-    const [stats, setStats] = useState({ revenue: 0, customers: 0, pending: 0 });
+    const bookings = useQuery(api.bookings.getBookings) || [];
+    const updateStatus = useMutation(api.bookings.updateStatus);
     const [filter, setFilter] = useState('all');
 
-    const loadData = async () => {
-        const data = await getBookings();
-
-        // If empty, seed mock data
-        if (data.length === 0) {
-            const mockData = [
-                { id: 'Booking-001', details: { name: 'Sarah Khan', phone: '01711000000' }, services: [{ name: 'Bridal Makeover', price: 15000 }], date: new Date(), time: '10:00 AM', status: 'pending' },
-                { id: 'Booking-002', details: { name: 'Nusrat Jahan', phone: '01711000001' }, services: [{ name: 'Hair Spa', price: 2500 }], date: new Date(Date.now() - 86400000), time: '2:00 PM', status: 'completed' }
-            ];
-            mockData.forEach(saveBooking);
-            setBookings(mockData);
-        } else {
-            setBookings(data);
-        }
-    };
-
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    useEffect(() => {
-        // Calculate stats
-        const revenue = bookings.reduce((acc, b) => b.status === 'completed' ? acc + (b.totalPaid || b.services?.reduce((sAcc, s) => sAcc + s.price, 0) || 0) : acc, 0);
-        const pending = bookings.filter(b => b.status === 'pending').length;
-        setStats({
-            revenue,
-            customers: new Set(bookings.map(b => b.details.phone)).size,
-            pending
-        });
-    }, [bookings]);
+    // Calculate Stats
+    const stats = { revenue: 0, customers: 0, pending: 0 };
+    if (bookings) {
+        stats.revenue = bookings.reduce((acc, b) => b.status === 'completed' ? acc + (b.totalPaid || 0) : acc, 0); // Simplified
+        stats.pending = bookings.filter(b => b.status === 'pending').length;
+        stats.customers = new Set(bookings.map(b => b.customer?.phone)).size;
+    }
 
     const handleStatus = async (id, status) => {
-        await updateBookingStatus(id, status);
-        const updated = bookings.map(b => b.id === id ? { ...b, status } : b);
-        setBookings(updated);
+        await updateStatus({ id, status });
     };
 
     const filteredBookings = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
@@ -167,21 +143,19 @@ const Dashboard = ({ onClose }) => {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filteredBookings.length > 0 ? filteredBookings.map((b) => (
-                                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={b._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <p className="font-bold text-charcoal text-sm">{b.details.name}</p>
-                                            <p className="text-xs text-gray-400">{b.details.phone}</p>
+                                            <p className="font-bold text-charcoal text-sm">{b.customer?.name || 'Guest'}</p>
+                                            <p className="text-xs text-gray-400">{b.customer?.phone}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
-                                                {b.services && b.services.map((s, i) => (
-                                                    <span key={i} className="text-sm text-gray-600">{s.name}</span>
-                                                ))}
-                                                {b.details.homeService && <span className="text-[10px] text-primary font-bold">Home Service</span>}
+                                                <span className="text-sm text-gray-600">{b.service}</span>
+                                                {b.customer?.homeService && <span className="text-[10px] text-primary font-bold">Home Service</span>}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm text-gray-600">{new Date(b.date).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-600">{b.date}</p>
                                             <p className="text-xs text-gray-400">{b.time}</p>
                                         </td>
                                         <td className="px-6 py-4">
@@ -199,13 +173,13 @@ const Dashboard = ({ onClose }) => {
                                                 {b.status === 'pending' && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleStatus(b.id, 'confirmed')}
+                                                            onClick={() => handleStatus(b._id, 'confirmed')}
                                                             className="p-1 rounded bg-green-50 text-green-600 hover:bg-green-100" title="Approve"
                                                         >
                                                             <CheckCircle size={18} />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleStatus(b.id, 'cancelled')}
+                                                            onClick={() => handleStatus(b._id, 'cancelled')}
                                                             className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100" title="Reject"
                                                         >
                                                             <XCircle size={18} />
@@ -214,7 +188,7 @@ const Dashboard = ({ onClose }) => {
                                                 )}
                                                 {b.status === 'confirmed' && (
                                                     <button
-                                                        onClick={() => handleStatus(b.id, 'completed')}
+                                                        onClick={() => handleStatus(b._id, 'completed')}
                                                         className="px-3 py-1 rounded-full bg-charcoal text-white text-xs font-bold hover:bg-primary transition-colors"
                                                     >
                                                         Mark Done

@@ -14,37 +14,10 @@ import { captureLook, downloadImage } from '../../utils/capture';
 import { saveLook, getAllLooks, deleteLook } from '../../utils/storage';
 import { trackEvent, AnalyticsEvents } from '../../utils/analytics';
 import { getCompatibleUserMedia } from '../../utils/browserCompat';
+import { useMakeupStore } from '../../store/makeupStore';
 
 // ... (other imports)
 
-const startCamera = async () => {
-    setCameraError(null);
-    try {
-        const constraints = {
-            video: {
-                width: { ideal: 1920, min: 1280 },
-                height: { ideal: 1080, min: 720 },
-                facingMode: facingMode,
-                frameRate: { ideal: 60, min: 30 }
-            }
-        };
-        // Use compatible getUserMedia for Safari support
-        const stream = await getCompatibleUserMedia(constraints);
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            const track = stream.getVideoTracks()[0];
-            const settings = track.getSettings();
-            setCameraRes({ w: settings.width, h: settings.height });
-            videoRef.current.play();
-            setIsCameraActive(true);
-            trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.OPENED, 'HD Studio Camera');
-        }
-    } catch (err) {
-        console.error(err);
-        if (err.name === 'NotAllowedError') setCameraError("Camera blocked. Please enable browser permissions.");
-        else setCameraError("Camera not detected or 1080p resolution not supported.");
-    }
-};
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import GlassCard from '../ui/GlassCard';
 import { Canvas } from '@react-three/fiber';
@@ -68,7 +41,7 @@ const MakeupStudio = () => {
     // Media & Hardware State
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const faceCanvasRef = useRef(null);
+    const faceCanvasRef = useRef(null); // Ref to FaceCanvas for capturing
     const [detector, setDetector] = useState(null);
     const [faceData, setFaceData] = useState(null);
     const [analysis, setAnalysis] = useState(null);
@@ -80,72 +53,41 @@ const MakeupStudio = () => {
     const [showPrivacyNotice, setShowPrivacyNotice] = useState(true);
     const [show3DPreview, setShow3DPreview] = useState(false);
     const [selectedPreset, setSelectedPreset] = useState(null);
+    const [savedLooks, setSavedLooks] = useState([]);
+    const [showMyLooks, setShowMyLooks] = useState(false);
 
     // Studio UI State
     const [activeTab, setActiveTab] = useState("products");
     const [activeCategory, setActiveCategory] = useState("lips");
-    const [activeProduct, setActiveProduct] = useState(null);
-    const [isPanelOpen, setIsPanelOpen] = useState(true);
-    const [isLoading, setIsLoading] = useState(true);
-    const [compareMode, setCompareMode] = useState(false);
-    const [showMesh, setShowMesh] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [savedLooks, setSavedLooks] = useState([]);
+    // State from Zustand Store
+    const {
+        beautySettings, setBeautySetting, setBeautySettings,
+        makeupState, setMakeupState, resetMakeup: resetMakeupState,
+        activeProduct, setActiveProduct
+    } = useMakeupStore();
 
-    const { success, error, info } = useToast(); // Assuming ToastContext is available or will handle missing hook gracefully. Wait, imports don't show useToast. 
-    // Checking imports... line 7 has icons. line 32 is empty. 
-    // I need to import useToast if it's not there.
-    // Previous view of file showed "import { useToast } from '../../context/ToastContext';" in the truncated part I replaced?
-    // Step 3745 showed line 32: "import { useToast } from '../../context/ToastContext';" in my replacement, but the *restored* file (Step 3764) does NOT show it.
-    // I need to add useToast import.
-
-    // --- PERSISTENCE HOOKS ---
-    useEffect(() => {
-        const savedState = localStorage.getItem('radiance_makeup_state');
-        if (savedState) {
-            try {
-                setMakeupState(JSON.parse(savedState));
-            } catch (e) { console.error(e); }
-        }
-    }, []);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            localStorage.setItem('radiance_makeup_state', JSON.stringify(makeupState));
-        }, 500);
-        return () => clearTimeout(timeout);
-    }, [makeupState]);
-
-    useEffect(() => {
-        if (activeTab === 'bag') {
-            getAllLooks().then(setSavedLooks);
-        }
-    }, [activeTab]);
-
-    // Advanced Beauty Filters (B. Feed Enhancements)
-    const [beautySettings, setBeautySettings] = useState({
-        smoothing: 40,
-        brightness: 110,
-        contrast: 105,
-        saturation: 100,
-        lighting: 'daylight', // ring, warm, daylight
-        vignette: 20
-    });
-
-    // Makeup State
-    const [makeupState, setMakeupState] = useState({
-        lips: { color: null, opacity: 0.7, finish: 'matte' },
-        eyes: { color: null, opacity: 0.5 },
-        blush: { color: null, opacity: 0.4 },
-        face: { color: null, opacity: 0.0 },
-    });
-
-    // 1. Initialize AI Model
+    // Initialize Face Detection
     useEffect(() => {
         initFaceDetection().then(det => {
             setDetector(det);
             setIsLoading(false);
+            console.log('✅ Face detection initialized');
+        }).catch(err => {
+            console.error('❌ Face detection failed:', err);
         });
+    }, []);
+
+    // Load saved looks from IndexedDB
+    useEffect(() => {
+        const loadSavedLooks = async () => {
+            try {
+                const looks = await getAllLooks();
+                setSavedLooks(looks || []);
+            } catch (error) {
+                console.error('Failed to load saved looks:', error);
+            }
+        };
+        loadSavedLooks();
     }, []);
 
     // 2. Camera Logic (HD 1080p, Auto-Focus, FPS)
@@ -162,13 +104,13 @@ const MakeupStudio = () => {
         try {
             const constraints = {
                 video: {
-                    width: { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720 },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
                     facingMode: facingMode,
-                    frameRate: { ideal: 60, min: 30 }
+                    frameRate: { ideal: 30, max: 30 }
                 }
             };
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const stream = await getCompatibleUserMedia(constraints);
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
                 const track = stream.getVideoTracks()[0];
@@ -276,63 +218,89 @@ const MakeupStudio = () => {
     };
 
     const resetMakeup = () => {
-        setMakeupState({
-            lips: { color: null, opacity: 0.7, finish: 'matte' },
-            eyes: { color: null, opacity: 0.5 },
-            blush: { color: null, opacity: 0.4 },
-            face: { color: null, opacity: 0.0 },
-        });
+        resetMakeupState();
     };
 
     // 5. Persistence Handlers
+    // Save Current Look
     const handleSaveLook = async () => {
-        if (!faceCanvasRef.current || !videoRef.current) {
-            // error("Camera not active"); // Need toast
-            alert("Camera not active");
-            return;
-        }
-
+        if (!isCameraActive) return;
         setSaving(true);
         try {
-            const dataUrl = await captureLook(videoRef.current, faceCanvasRef.current);
-            if (!dataUrl) throw new Error("Capture failed");
+            // Capture the canvas with makeup overlay
+            const canvas = faceCanvasRef.current;
+            if (!canvas || !videoRef.current) {
+                throw new Error('Canvas or video not available');
+            }
+
+            // Create a combined canvas with video + makeup overlay
+            const outputCanvas = document.createElement('canvas');
+            outputCanvas.width = videoRef.current.videoWidth;
+            outputCanvas.height = videoRef.current.videoHeight;
+            const ctx = outputCanvas.getContext('2d');
+
+            // Draw video frame
+            ctx.drawImage(videoRef.current, 0, 0);
+
+            // Draw makeup overlay
+            ctx.drawImage(canvas, 0, 0);
+
+            const imageData = outputCanvas.toDataURL('image/png');
 
             const lookData = {
-                image: dataUrl,
-                makeup: makeupState,
-                products: activeProduct ? [activeProduct] : [],
-                date: new Date().toISOString()
+                image: imageData,
+                makeupState,
+                beautySettings,
+                timestamp: Date.now(),
+                name: `Look ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`
             };
 
             await saveLook(lookData);
-            // success("Look saved!");
-            alert("Look saved to Bag!");
 
-            if (activeTab === 'bag') {
-                const refreshed = await getAllLooks();
-                setSavedLooks(refreshed);
-            }
+            // Reload saved looks
+            const looks = await getAllLooks();
+            setSavedLooks(looks || []);
+
+            alert('✨ Look saved successfully!');
             trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.LOOK_SAVED, 'Look Saved to Bag');
-        } catch (err) {
-            console.error(err);
-            alert("Failed to save look");
+        } catch (error) {
+            console.error('Failed to save look:', error);
+            alert('❌ Failed to save look: ' + error.message);
         } finally {
             setSaving(false);
         }
     };
 
-    const handleLoadLook = (look) => {
-        if (look.makeup) {
-            setMakeupState(look.makeup);
+    // Delete a saved look
+    const handleDeleteLook = async (lookId) => {
+        try {
+            await deleteLook(lookId);
+            const looks = await getAllLooks();
+            setSavedLooks(looks || []);
+        } catch (error) {
+            console.error('Failed to delete look:', error);
+            alert('Failed to delete look');
         }
     };
 
-    const handleDeleteLook = async (id, e) => {
-        e.stopPropagation();
-        if (window.confirm("Delete this saved look?")) {
-            await deleteLook(id);
-            setSavedLooks(prev => prev.filter(l => l.id !== id));
+    // Export/Download a saved look
+    const handleExportLook = (look) => {
+        const link = document.createElement('a');
+        link.href = look.image;
+        link.download = `radiance-${look.name || 'look'}-${Date.now()}.png`;
+        link.click();
+    };
+
+    // Load a saved look (restore makeup configuration)
+    const handleLoadLook = (look) => {
+        if (look.makeupState) {
+            setMakeupState(look.makeupState);
         }
+        if (look.beautySettings) {
+            setBeautySettings(look.beautySettings);
+        }
+        setShowMyLooks(false);
+        alert('✨ Look loaded! Apply to your face.');
     };
 
     // Style Helpers
@@ -683,7 +651,7 @@ const MakeupStudio = () => {
                                     ].map(light => (
                                         <button
                                             key={light.id}
-                                            onClick={() => setBeautySettings(p => ({ ...p, lighting: light.id }))}
+                                            onClick={() => setBeautySetting('lighting', light.id)}
                                             className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2
                                                 ${beautySettings.lighting === light.id ? 'bg-gold/10 border-gold/50 text-gold shadow-lg' : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'}
                                             `}
@@ -714,7 +682,7 @@ const MakeupStudio = () => {
                                         <input
                                             type="range" min={setting.id === 'brightness' || setting.id === 'contrast' ? "50" : "0"} max={setting.id === 'saturation' ? "200" : "150"}
                                             value={beautySettings[setting.id]}
-                                            onChange={(e) => setBeautySettings(p => ({ ...p, [setting.id]: parseInt(e.target.value) }))}
+                                            onChange={(e) => setBeautySetting(setting.id, parseInt(e.target.value))}
                                             className="w-full h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
                                         />
                                     </div>
@@ -840,6 +808,139 @@ const MakeupStudio = () => {
                         onClose={() => setSelectedPreset(null)}
                         onApply={handlePresetSelect}
                     />
+                )}
+            </AnimatePresence>
+
+            {/* My Looks Gallery Modal */}
+            <AnimatePresence>
+                {showMyLooks && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4"
+                        onClick={() => setShowMyLooks(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+                        >
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-primary to-accent p-6 text-white flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-serif italic mb-1">My Saved Looks</h2>
+                                    <p className="text-xs text-white/70">{savedLooks.length} looks saved locally</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowMyLooks(false)}
+                                    className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                                    aria-label="Close My Looks"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto p-6">
+                                {savedLooks.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-center py-20">
+                                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                            <ImageIcon size={40} className="text-gray-300" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">No Saved Looks Yet</h3>
+                                        <p className="text-gray-500 text-sm max-w-md">
+                                            Start creating your perfect makeup looks and save them here.
+                                            Your looks are stored locally and never leave your device.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {savedLooks.map((look) => (
+                                            <motion.div
+                                                key={look.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="group relative bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-primary/30 transition-all shadow-lg hover:shadow-2xl"
+                                            >
+                                                {/* Image */}
+                                                <div className="aspect-[3/4] relative overflow-hidden bg-gray-100">
+                                                    <img
+                                                        src={look.image}
+                                                        alt={look.name || 'Saved Look'}
+                                                        className="w-full h-full object-cover"
+                                                    />
+
+                                                    {/* Hover Overlay */}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleLoadLook(look)}
+                                                                className="flex-1 bg-primary text-white py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                                            >
+                                                                <Sparkles size={14} />
+                                                                Load
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleExportLook(look)}
+                                                                className="flex-1 bg-white text-charcoal py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                                                            >
+                                                                <Download size={14} />
+                                                                Export
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (confirm('Delete this look?')) {
+                                                                        handleDeleteLook(look.id);
+                                                                    }
+                                                                }}
+                                                                className="bg-red-500 text-white py-2 px-3 rounded-lg text-xs font-bold hover:bg-red-600 transition-colors flex items-center justify-center"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Info */}
+                                                <div className="p-4">
+                                                    <h4 className="font-bold text-sm text-gray-800 mb-1 line-clamp-1">
+                                                        {look.name || 'Untitled Look'}
+                                                    </h4>
+                                                    <p className="text-xs text-gray-400">
+                                                        {new Date(look.timestamp).toLocaleDateString()} at {new Date(look.timestamp).toLocaleTimeString()}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-6 bg-gray-50 border-t border-gray-100">
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck size={16} className="text-green-500" />
+                                        <span>All looks are stored locally on your device</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Clear all saved looks? This cannot be undone.')) {
+                                                savedLooks.forEach(look => deleteLook(look.id));
+                                                setSavedLooks([]);
+                                            }
+                                        }}
+                                        className="text-red-500 hover:text-red-600 font-medium"
+                                    >
+                                        Clear All
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </section>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import GlassCard from './GlassCard';
+import { trackEvent } from '../../utils/analytics';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -17,6 +18,12 @@ class ErrorBoundary extends React.Component {
         // You can also log the error to an error reporting service
         console.error("Uncaught error:", error, errorInfo);
         this.setState({ errorInfo });
+
+        try {
+            trackEvent('System', 'Crash', error.toString().substring(0, 100));
+        } catch (e) {
+            // Ignore analytics failures during crash
+        }
     }
 
     handleRetry = () => {

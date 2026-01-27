@@ -40,6 +40,8 @@ export default defineConfig({
           }
         ],
 
+        /* 
+        // TODO: Add screenshots to public/screenshots/ for Rich Install UI
         screenshots: [
           {
             src: '/screenshots/home.png',
@@ -54,6 +56,7 @@ export default defineConfig({
             form_factor: 'narrow'
           }
         ]
+        */
       },
 
       workbox: {

@@ -4,24 +4,11 @@ import {
     MessageSquare, X, Send, Sparkles, User,
     Calendar, ShoppingBag, Info, Camera, ChevronRight
 } from 'lucide-react';
-
-const AURA_KNOWLEDGE = {
-    greetings: ["hello", "hi", "hey", "hola", "greetings"],
-    booking: ["book", "appointment", "schedule", "reservation", "visit"],
-    services: ["service", "makeup", "bridal", "packages", "styling", "hair"],
-    ai: ["try on", "virtual", "ai", "face mesh", "hairstyle", "ar"],
-    shop: ["buy", "product", "shop", "boutique", "lipstick", "skin", "authentic"],
-    location: ["where", "address", "gulshan", "dhaka", "location", "place"]
-};
+import { useAction } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 const RESPONSES = {
-    greeting: "Hello! I am Aura, your Radiance Beauty Concierge. How may I assist your transformation today? ✨",
-    booking: "To schedule your exclusive Radiance experience, simply click the 'Book Appointment' button at the top, or I can guide you through our Bridal Packages! Would you like to see our pricing?",
-    services: "We offer World-Class Bridal Artistry, Salon Services, and Advanced AI-powered styling. You can explore our 'Master Styling' section to see everything we do.",
-    ai: "Our AI Virtual Studio is revolutionary! You can try on hundreds of lipstick shades or use our Hairstyle AI to test looks before we even touch a brush. Shall I take you there?",
-    shop: "Our Boutique features only 100% authentic international brands like MAC, Fenty, and Olaplex. You can shop our curated selection in the 'Radiance Boutique' section below.",
-    location: "Radiance is located in the heart of Gulshan, Dhaka. We provide a medical-grade, luxury environment for all our clients. We are open from 10 AM to 9 PM daily.",
-    fallback: "That sounds interesting! While I'm still learning, I can certainly help you with bookings, AI styling, or our product boutique. What would you like to explore?"
+    greeting: "Hello! I am Aura, your Radiance Beauty Concierge. How may I assist your transformation today? ✨"
 };
 
 const ChatBot = () => {
@@ -39,7 +26,9 @@ const ChatBot = () => {
         }
     }, [messages, isTyping]);
 
-    const handleSend = (text = inputValue) => {
+    const sendMessage = useAction(api.chat.sendMessage);
+
+    const handleSend = async (text = inputValue) => {
         if (!text.trim()) return;
 
         const userMessage = {
@@ -53,28 +42,29 @@ const ChatBot = () => {
         setInputValue('');
         setIsTyping(true);
 
-        // Simulate AI Thinking
-        setTimeout(() => {
-            let responseText = RESPONSES.fallback;
-            const lowerText = text.toLowerCase();
-
-            if (AURA_KNOWLEDGE.greetings.some(word => lowerText.includes(word))) responseText = RESPONSES.greeting;
-            else if (AURA_KNOWLEDGE.booking.some(word => lowerText.includes(word))) responseText = RESPONSES.booking;
-            else if (AURA_KNOWLEDGE.ai.some(word => lowerText.includes(word))) responseText = RESPONSES.ai;
-            else if (AURA_KNOWLEDGE.shop.some(word => lowerText.includes(word))) responseText = RESPONSES.shop;
-            else if (AURA_KNOWLEDGE.services.some(word => lowerText.includes(word))) responseText = RESPONSES.services;
-            else if (AURA_KNOWLEDGE.location.some(word => lowerText.includes(word))) responseText = RESPONSES.location;
+        try {
+            const responseText = await sendMessage({ message: text });
 
             const botMessage = {
                 id: Date.now() + 1,
                 type: 'bot',
-                text: responseText,
+                text: responseText || "I'm having a little trouble thinking of a response. Could you try asking that again?",
                 time: new Date()
             };
 
             setMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error("Chat Error:", error);
+            const errorMessage = {
+                id: Date.now() + 1,
+                type: 'bot',
+                text: "I'm currently experiencing some technical difficulties. Please try again later or contact us directly! 🌸",
+                time: new Date()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
             setIsTyping(false);
-        }, 1200);
+        }
     };
 
     const quickActions = [
@@ -143,8 +133,8 @@ const ChatBot = () => {
                                     className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div className={`max-w-[80%] p-4 rounded-3xl text-sm ${msg.type === 'user'
-                                            ? 'bg-charcoal text-white rounded-tr-none shadow-lg'
-                                            : 'bg-white text-charcoal rounded-tl-none border border-gray-100 shadow-sm'
+                                        ? 'bg-charcoal text-white rounded-tr-none shadow-lg'
+                                        : 'bg-white text-charcoal rounded-tl-none border border-gray-100 shadow-sm'
                                         }`}>
                                         <p className="leading-relaxed">{msg.text}</p>
                                         <span className={`text-[8px] mt-2 block opacity-40 ${msg.type === 'user' ? 'text-right' : 'text-left'}`}>

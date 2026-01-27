@@ -1,0 +1,78 @@
+/* Hero 3D Scene Animations */
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-gradient {
+    animation: gradient 3s ease infinite;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 1;
+    }
+
+    80% {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.animate-scroll {
+    animation: scroll 1.5s ease-in-out infinite;
+}
+
+/* Glassmorphism utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-strong {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+
+    .animate-gradient,
+    .animate-scroll,
+    [class*="animate-"] {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+
+    /* Reduce particle count on mobile */
+    canvas {
+        image-rendering: optimizeSpeed;
+    }
+}

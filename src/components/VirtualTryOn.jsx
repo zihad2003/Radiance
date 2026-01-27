@@ -6,6 +6,24 @@ const MakeupStudio = lazy(() => import('./makeup/MakeupStudio'));
 
 const VirtualTryOn = () => {
     const [isStarted, setIsStarted] = useState(false);
+    const [isPreloading, setIsPreloading] = useState(false);
+
+    const handleStartExperience = async () => {
+        setIsPreloading(true);
+        try {
+            // Explicitly preload the AI logic and heavy dependencies
+            // This matches the "Solution" pattern of dynamic imports on demand
+            const { initFaceDetection } = await import('../utils/faceDetection');
+            await initFaceDetection();
+            setIsStarted(true);
+        } catch (error) {
+            console.error("Failed to load AI models:", error);
+            // Allow entry anyway, inner components handle errors
+            setIsStarted(true);
+        } finally {
+            setIsPreloading(false);
+        }
+    };
 
     return (
         <section id="experience" className="relative min-h-screen bg-black overflow-hidden">
@@ -30,11 +48,20 @@ const VirtualTryOn = () => {
                         </p>
 
                         <button
-                            onClick={() => setIsStarted(true)}
-                            className="group relative px-10 py-5 bg-white text-black rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(244,63,94,0.6)] overflow-hidden"
+                            onClick={handleStartExperience}
+                            disabled={isPreloading}
+                            className="group relative px-10 py-5 bg-white text-black rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(244,63,94,0.6)] overflow-hidden disabled:opacity-70 disabled:cursor-wait"
                         >
                             <span className="relative z-10 flex items-center gap-3">
-                                <Camera size={18} /> Enter Studio
+                                {isPreloading ? (
+                                    <>
+                                        <RefreshCw size={18} className="animate-spin" /> Loading Engine...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Camera size={18} /> Enter Studio
+                                    </>
+                                )}
                             </span>
                         </button>
 

@@ -11,6 +11,7 @@ import GlassCard from '../ui/GlassCard';
 import PinkButton from '../ui/PinkButton';
 import HairOverlay from './HairOverlay';
 import './HairStudio.css';
+import html2canvas from 'html2canvas';
 
 const HairstyleFinder = () => {
     // Mode & Interaction State
@@ -53,7 +54,12 @@ const HairstyleFinder = () => {
         setMode('camera');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user', width: 1280, height: 720 }
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    frameRate: { ideal: 30, max: 30 },
+                    facingMode: 'user'
+                }
             });
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
@@ -159,10 +165,27 @@ const HairstyleFinder = () => {
         localStorage.setItem('radiance_fav_hair', JSON.stringify(newFavs));
     };
 
+
+
     // --- EXPORT ---
-    const handleDownload = () => {
-        // Logic to combine canvas and overlay (simplified)
-        alert("Preparing your makeover preview for download...");
+    const handleDownload = async () => {
+        if (!containerRef.current) return;
+
+        try {
+            const canvas = await html2canvas(containerRef.current, {
+                useCORS: true,
+                scale: 2, // High res
+                backgroundColor: null,
+            });
+
+            const link = document.createElement('a');
+            link.download = `radiance-hairstyle-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (err) {
+            console.error("Download failed:", err);
+            alert("Could not save image. Please try again.");
+        }
     };
 
     return (
@@ -562,6 +585,39 @@ const HairstyleFinder = () => {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Shop Recommendations (Phase 4 Integration) */}
+                                {selectedStyle && (
+                                    <GlassCard className="p-4 bg-gradient-to-r from-primary/5 to-white border-primary/20">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="font-bold text-gray-800 text-xs flex items-center gap-2">
+                                                <Sparkles className="w-3 h-3 text-gold" /> Style Essentials
+                                            </h5>
+                                            <button className="text-[10px] text-primary font-bold hover:underline">SHOP ALL</button>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            {selectedStyle.maintenance === 'high' ? (
+                                                // High maintenance -> Treatment
+                                                <div className="flex-1 bg-white rounded-lg p-2 flex gap-2 items-center shadow-sm hover:shadow-md transition-all cursor-pointer">
+                                                    <img src="https://images.unsplash.com/photo-1527799822340-4107127bcfb9?q=80&w=100" className="w-10 h-10 object-cover rounded-md" alt="Treatment" />
+                                                    <div>
+                                                        <p className="text-[10px] font-bold line-clamp-1">Intensive Repair</p>
+                                                        <p className="text-[9px] text-gray-500">$32.00</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // Low maintenance -> Accecories
+                                                <div className="flex-1 bg-white rounded-lg p-2 flex gap-2 items-center shadow-sm hover:shadow-md transition-all cursor-pointer">
+                                                    <img src="https://images.unsplash.com/photo-1610444583737-231697316710?q=80&w=100" className="w-10 h-10 object-cover rounded-md" alt="Scrunchies" />
+                                                    <div>
+                                                        <p className="text-[10px] font-bold line-clamp-1">Silk Scrunchies</p>
+                                                        <p className="text-[9px] text-gray-500">$12.00</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </GlassCard>
+                                )}
                             </motion.div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-primary/20 rounded-3xl opacity-50">

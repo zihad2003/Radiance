@@ -1,48 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { User, Phone, Mail, MapPin, Home, Gift, MessageCircle, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Validation Schema
+const bookingSchema = z.object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    phone: z.string().regex(/^(\+880|880|0)?1[3-9]\d{8}$/, 'Invalid Bangladesh phone number (e.g. 01712345678)'),
+    email: z.string().email('Invalid email').or(z.literal('')).optional(),
+    address: z.string().min(5, 'Address must be detailed'),
+    homeService: z.boolean(),
+    specialRequests: z.string().optional(),
+    referralCode: z.string().optional(),
+    whatsappNotification: z.boolean()
+});
 
 const CustomerDetails = ({ bookingData, updateBookingData }) => {
-    const details = bookingData.customerDetails;
-    const [touched, setTouched] = useState({});
+    const defaultValues = bookingData.customerDetails;
 
-    // Validation Regex
-    const phoneRegex = /^(\+880|880|0)1[3-9]\d{8}$/;
+    // Setup form
+    const {
+        register,
+        watch,
+        trigger,
+        setValue,
+        formState: { errors, isValid, touchedFields }
+    } = useForm({
+        resolver: zodResolver(bookingSchema),
+        mode: 'onChange',
+        defaultValues
+    });
 
-    const getErrors = () => {
-        const errors = {};
-        if (!details.name.trim()) errors.name = "Full name is required";
-        if (!details.phone) {
-            errors.phone = "Phone number is required";
-        } else if (!phoneRegex.test(details.phone.replace(/\s+/g, ''))) {
-            errors.phone = "Invalid Bangladesh phone number (e.g. 01712345678)";
+    // Watch all fields to sync with parent
+    const formValues = watch();
+
+    // Sync with parent state whenever form changes
+    useEffect(() => {
+        // We only want to update the parent if the values strictly changed to avoid loops,
+        // but simple object spread is usually fine.
+        // We need to loop through keys to update individually or update whole object if parent supports it.
+        // The parent `updateBookingData` takes (field, value).
+        // BUT `bookingData.customerDetails` is an object.
+        // The parent `updateBookingData` handles `setBookingData(prev => ({...prev, [field]: value}))`.
+        // If I call `updateBookingData('customerDetails', newDetails)`, it should work.
+
+        // Let's verify existing usage: 
+        // `handleChange` was: `updateBookingData('customerDetails', { ...details, [field]: value })`
+
+        updateBookingData('customerDetails', formValues);
+
+        // Also handle side effects like travel fee
+        if (formValues.homeService !== defaultValues.homeService) {
+            updateBookingData('travelFee', formValues.homeService ? 2000 : 0);
         }
-        if (!details.address.trim()) errors.address = "Address is required for booking";
-        return errors;
-    };
 
-    const errors = getErrors();
+    }, [JSON.stringify(formValues)]);
 
-    const handleChange = (field, value) => {
-        updateBookingData('customerDetails', {
-            ...details,
-            [field]: value
-        });
-    };
-
-    const handleBlur = (field) => {
-        setTouched(prev => ({ ...prev, [field]: true }));
-    };
-
-    const handleHomeServiceToggle = (checked) => {
-        handleChange('homeService', checked);
-        updateBookingData('travelFee', checked ? 2000 : 0);
-    };
+    // Check validity on mount/update to ensure 'Next' button state is correct in parent
+    useEffect(() => {
+        trigger();
+    }, []);
 
     const ErrorParams = ({ field }) => (
-        touched[field] && errors[field] ? (
+        errors[field] ? (
             <div className="flex items-center gap-1 mt-1 text-red-500 text-xs font-medium animate-pulse">
                 <AlertCircle size={12} />
-                {errors[field]}
+                {errors[field]?.message}
             </div>
         ) : null
     );
@@ -54,24 +78,19 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                 <p className="text-gray-600">Please provide your contact information to proceed</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 space-y-6">
+            <div className="bg-white rounded-2xl p-6 space-y-6 border border-gray-100 shadow-sm">
                 {/* Name */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <User size={18} />
+                        <User size={18} className="text-primary" />
                         Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
+                        {...register('name')}
                         type="text"
-                        value={details.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        onBlur={() => handleBlur('name')}
                         placeholder="Enter your full name"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.name && errors.name
-                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
-                                : 'border-gray-300 focus:ring-primary/20'
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.name ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
                             }`}
-                        required
                     />
                     <ErrorParams field="name" />
                 </div>
@@ -79,23 +98,18 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                 {/* Phone */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Phone size={18} />
+                        <Phone size={18} className="text-primary" />
                         Phone Number <span className="text-red-500">*</span>
                     </label>
                     <input
+                        {...register('phone')}
                         type="tel"
-                        value={details.phone}
-                        onChange={(e) => handleChange('phone', e.target.value)}
-                        onBlur={() => handleBlur('phone')}
                         placeholder="017XXXXXXXX"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.phone && errors.phone
-                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
-                                : 'border-gray-300 focus:ring-primary/20'
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.phone ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
                             }`}
-                        required
                     />
                     <ErrorParams field="phone" />
-                    {!errors.phone && details.phone && (
+                    {!errors.phone && touchedFields.phone && (
                         <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                             <MessageCircle size={10} /> Valid number format
                         </p>
@@ -105,47 +119,42 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                 {/* Email */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Mail size={18} />
+                        <Mail size={18} className="text-primary" />
                         Email Address
                     </label>
                     <input
+                        {...register('email')}
                         type="email"
-                        value={details.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
                         placeholder="your.email@example.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.email ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
+                            }`}
                     />
                     <p className="text-xs text-gray-500 mt-1">Optional but recommended for booking receipt</p>
+                    <ErrorParams field="email" />
                 </div>
 
                 {/* Address */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <MapPin size={18} />
+                        <MapPin size={18} className="text-primary" />
                         Address <span className="text-red-500">*</span>
                     </label>
                     <textarea
-                        value={details.address}
-                        onChange={(e) => handleChange('address', e.target.value)}
-                        onBlur={() => handleBlur('address')}
+                        {...register('address')}
                         placeholder="Enter your complete address"
                         rows="3"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${touched.address && errors.address
-                                ? 'border-red-300 focus:ring-red-200 bg-red-50'
-                                : 'border-gray-300 focus:ring-primary/20'
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.address ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
                             }`}
-                        required
                     />
                     <ErrorParams field="address" />
                 </div>
 
                 {/* Home Service */}
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <div className={`border rounded-xl p-4 transition-colors ${formValues.homeService ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input
                             type="checkbox"
-                            checked={details.homeService}
-                            onChange={(e) => handleHomeServiceToggle(e.target.checked)}
+                            {...register('homeService')}
                             className="mt-1 w-5 h-5 text-primary rounded focus:ring-primary"
                         />
                         <div className="flex-1">
@@ -156,9 +165,11 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                             <p className="text-sm text-gray-600 mt-1">
                                 Our stylist will come to your location (within Dhaka)
                             </p>
-                            <p className="text-sm font-semibold text-amber-700 mt-2">
-                                Additional travel fee: ৳2,000
-                            </p>
+                            {formValues.homeService && (
+                                <p className="text-sm font-semibold text-amber-700 mt-2 animate-in fade-in slide-in-from-top-1">
+                                    Additional travel fee: ৳2,000
+                                </p>
+                            )}
                         </div>
                     </label>
                 </div>
@@ -166,12 +177,11 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                 {/* Special Requests */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <MessageCircle size={18} />
+                        <MessageCircle size={18} className="text-primary" />
                         Special Requests / Allergies
                     </label>
                     <textarea
-                        value={details.specialRequests}
-                        onChange={(e) => handleChange('specialRequests', e.target.value)}
+                        {...register('specialRequests')}
                         placeholder="Any allergies, preferences, or special requirements..."
                         rows="3"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -181,25 +191,23 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
                 {/* Referral Code */}
                 <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Gift size={18} />
+                        <Gift size={18} className="text-primary" />
                         Referral Code
                     </label>
                     <input
+                        {...register('referralCode')}
                         type="text"
-                        value={details.referralCode}
-                        onChange={(e) => handleChange('referralCode', e.target.value)}
                         placeholder="Enter referral code for discount"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                 </div>
 
                 {/* WhatsApp Notification */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className={`border rounded-xl p-4 transition-colors ${formValues.whatsappNotification ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input
                             type="checkbox"
-                            checked={details.whatsappNotification}
-                            onChange={(e) => handleChange('whatsappNotification', e.target.checked)}
+                            {...register('whatsappNotification')}
                             className="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500"
                         />
                         <div className="flex-1">

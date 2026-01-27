@@ -1,5 +1,6 @@
 import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import OptimizedImage from './ui/OptimizedImage';
 
 const BeautyScene = lazy(() => import('./3d/BeautyScene'));
 
@@ -12,10 +13,12 @@ const Hero = () => {
         <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-[#FFF9F5]">
             {/* 3D Background */}
             <div className="absolute inset-0 z-0 parallax-hero">
-                <img
+                <OptimizedImage
                     src="/assets/hero/bridal_hero.png"
                     alt="Radiance Luxury Bridal"
                     className="w-full h-full object-cover opacity-60"
+                    priority={true}
+                    useWebP={true}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-pearl via-pearl/40 to-transparent" />
                 <Suspense fallback={null}>

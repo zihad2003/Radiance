@@ -59,7 +59,10 @@ const services = [
     }
 ];
 
+import OptimizedImage from './ui/OptimizedImage';
+
 const ServiceCard = ({ service, onBook }) => {
+    // ... (rest of hook logic)
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
@@ -104,10 +107,11 @@ const ServiceCard = ({ service, onBook }) => {
         >
             {/* Background Image & Overlay */}
             <div className="absolute inset-0">
-                <img
+                <OptimizedImage
                     src={service.image}
                     alt={service.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    useWebP={false} // Assuming we haven't generated WebPs for these yet
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
             </div>

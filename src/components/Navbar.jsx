@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -14,12 +16,23 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [location]);
+
     const navLinks = [
-        { name: 'Services', href: '#services' },
-        { name: 'Gallery', href: '#gallery' },
-        { name: 'Experience', href: '#experience' }, // Virtual Try-On
-        { name: 'Team', href: '#team' },
+        { name: 'Home', href: '/' },
+        { name: 'Services', href: '/services' },
+        { name: 'Virtual Try-On', href: '/virtual-try-on' },
+        { name: 'AI Makeover', href: '/ai-makeover' },
+        { name: 'Gallery', href: '/gallery' },
+        { name: 'Shop', href: '/shop' },
+        { name: 'About', href: '/about' },
+        { name: 'Contact', href: '/contact' },
     ];
+
+    const isActive = (path) => location.pathname === path;
 
     return (
         <motion.nav
@@ -33,31 +46,40 @@ const Navbar = () => {
         >
             <div className="container mx-auto px-6 flex items-center justify-between">
                 {/* Logo */}
-                <a href="#" className="font-serif text-2xl font-bold tracking-widest text-charcoal outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1" aria-label="Radiance Home">
+                <Link
+                    to="/"
+                    className="font-serif text-2xl font-bold tracking-widest text-charcoal outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1"
+                    aria-label="Radiance Home"
+                >
                     RADIANCE<span className="text-primary">.</span>
-                </a>
+                </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-12" role="menubar">
+                <div className="hidden lg:flex items-center space-x-8" role="menubar">
                     {navLinks.map((link) => (
-                        <a
+                        <Link
                             key={link.name}
-                            href={link.href}
+                            to={link.href}
                             role="menuitem"
-                            className="text-sm uppercase tracking-widest hover:text-primary transition-colors relative group outline-none focus-visible:text-primary"
+                            className={`text-xs uppercase tracking-widest hover:text-primary transition-colors relative group outline-none focus-visible:text-primary ${isActive(link.href) ? 'text-primary font-bold' : ''
+                                }`}
                         >
                             {link.name}
-                            <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-                        </a>
+                            <span className={`absolute -bottom-2 left-0 h-0.5 bg-primary transition-all duration-300 ${isActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'
+                                }`} />
+                        </Link>
                     ))}
-                    <button className="bg-primary text-white px-8 py-3 rounded-full hover:bg-opacity-90 transition-all hover:scale-105 active:scale-95 shimmer interactive outline-none focus-visible:ring-4 focus-visible:ring-primary/30">
+                    <button
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="bg-primary text-white px-8 py-3 rounded-full hover:bg-opacity-90 transition-all hover:scale-105 active:scale-95 shimmer interactive outline-none focus-visible:ring-4 focus-visible:ring-primary/30 text-xs uppercase tracking-widest font-bold"
+                    >
                         Book Now
                     </button>
                 </div>
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="md:hidden interactive p-2 rounded-lg outline-none focus-visible:bg-gray-100"
+                    className="lg:hidden interactive p-2 rounded-lg outline-none focus-visible:bg-gray-100"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     aria-label={mobileMenuOpen ? "Close Menu" : "Open Menu"}
                     aria-expanded={mobileMenuOpen}
@@ -71,23 +93,30 @@ const Navbar = () => {
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
+                        id="mobile-menu"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: '100vh' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden absolute top-full left-0 w-full bg-pearl/95 backdrop-blur-xl border-t border-white/20 overflow-hidden"
+                        className="lg:hidden absolute top-full left-0 w-full bg-pearl/95 backdrop-blur-xl border-t border-white/20 overflow-hidden"
                     >
-                        <div className="flex flex-col items-center justify-center h-full space-y-8 pb-20">
+                        <div className="flex flex-col items-center justify-center h-full space-y-6 pb-20">
                             {navLinks.map((link) => (
-                                <a
+                                <Link
                                     key={link.name}
-                                    href={link.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="text-2xl font-serif text-charcoal hover:text-primary"
+                                    to={link.href}
+                                    className={`text-2xl font-serif hover:text-primary transition-colors ${isActive(link.href) ? 'text-primary font-bold' : 'text-charcoal'
+                                        }`}
                                 >
                                     {link.name}
-                                </a>
+                                </Link>
                             ))}
-                            <button className="bg-primary text-white px-10 py-4 rounded-full text-lg mt-8 shimmer interactive">
+                            <button
+                                onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="bg-primary text-white px-10 py-4 rounded-full text-lg mt-8 shimmer interactive"
+                            >
                                 Book Appointment
                             </button>
                         </div>
