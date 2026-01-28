@@ -40,8 +40,8 @@ const Navbar = () => {
             animate={{ y: 0 }}
             transition={{ duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] }}
             className={`fixed top-0 left-0 right-0 z-[90] transition-all duration-500 ${isScrolled
-                ? 'py-3 bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
-                : 'py-8 bg-transparent'
+                ? 'py-3 bg-black/90 backdrop-blur-2xl border-b border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.8)]'
+                : 'py-5 bg-black/40 backdrop-blur-md border-b border-white/5'
                 }`}
         >
             <div className="container mx-auto px-6 flex items-center justify-between">

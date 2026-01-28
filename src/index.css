@@ -1,43 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;600;700&family=Pacifico&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-pearl: #FFF9F5;
-  --color-charcoal: #1A1A1D;
-  --color-primary: #B76E79;
-  /* Soft Rose */
-  --color-secondary: #F4E4D7;
-  /* Champagne */
-  --color-gold: #D4AF37;
-  --color-plum: #4A1942;
-  --color-rose-50: #FFF0F5;
+  /* Brand Palette - Luxury Gold & Champagne (Replacing Vibrant Pink) */
+  --color-primary-50: #fafaf9;
+  --color-primary-100: #f5f5f4;
+  --color-primary-200: #e7e5e4;
+  --color-primary-300: #d6d3d1;
+  --color-primary-400: #a8a29e;
+  --color-primary-500: #C5A059;
+  /* Elite Champagne Gold */
+  --color-primary-600: #b08d4a;
+  --color-primary-700: #8c703b;
+  --color-primary-800: #735c31;
+  --color-primary-900: #5c4a27;
 
+  --color-secondary-50: #F5F3FF;
+  --color-secondary-100: #EDE9FE;
+  --color-secondary-200: #DDD6FE;
+  --color-secondary-300: #C4B5FD;
+  --color-secondary-400: #A78BFA;
+  --color-secondary-500: #9B59B6;
+  --color-secondary-600: #7C3AED;
+  --color-secondary-700: #6D28D9;
+  --color-secondary-800: #5B21B6;
+  --color-secondary-900: #4C1D95;
+
+  --color-accent-gold: #FFD700;
+  --color-accent-rose: #B76E79;
+  --color-accent-champagne: #F7E7CE;
+
+  /* Legacy Compat */
+  --color-pearl: #fcfcfc;
+  --color-charcoal: #121214;
+  --color-primary: #C5A059;
+  --color-gold: #C5A059;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+  --font-cursive: 'Pacifico', cursive;
   --font-serif: 'Playfair Display', serif;
-  --font-sans: 'Poppins', sans-serif;
-  --font-script: 'Great Vibes', cursive;
+
+  --shadow-soft: 0 2px 15px -3px rgba(197, 160, 89, 0.15);
+  --shadow-glow: 0 0 20px rgba(197, 160, 89, 0.4);
+  --shadow-inner-glow: inset 0 0 20px rgba(197, 160, 89, 0.2);
+
+  /* Skeuomorphic Shadows (Realistic Depth) */
+  --shadow-skeuo-flat: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+  --shadow-skeuo-pressed: inset 2px 2px 5px #b8b9be, inset -3px -3px 7px #ffffff;
+  --shadow-skeuo-elevated: 10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff;
+  --shadow-real-depth: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --animate-gradient: gradient 8s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* 
-  Re-declare critical variables in :root for external JS/Canvas usage 
-  that might be using getComputedStyle(document.body).getPropertyValue('--color-primary')
-*/
-:root {
-  --color-primary: #B76E79;
-  --color-pearl: #FFF9F5;
-  --color-charcoal: #1A1A1D;
-  --color-gold: #D4AF37;
+@keyframes gradient {
+
+  0%,
+  100% {
+    background-position: 0% 50%
+  }
+
+  50% {
+    background-position: 100% 50%
+  }
 }
 
-body {
-  background-color: var(--color-pearl);
-  color: var(--color-charcoal);
-  overflow-x: hidden;
-  cursor: auto;
-  font-family: var(--font-sans);
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px)
+  }
+
+  50% {
+    transform: translateY(-20px)
+  }
 }
 
-@media (hover: none) and (pointer: coarse) {
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    cursor: auto;
+    font-family: var(--font-sans);
+    color: white;
+    background-color: #121110;
+    overflow-x: hidden;
+    /* Subtle noise texture to break flat digital colors */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+    background-attachment: fixed;
+    opacity: 0.98;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display font-bold text-shadow-sm;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+}
+
+@layer utilities {
+  .skeuo-card {
+    background: #f0f2f5;
+    box-shadow: var(--shadow-skeuo-flat);
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+  }
+
+  .skeuo-card:hover {
+    box-shadow: var(--shadow-skeuo-elevated);
+    transform: translateY(-2px);
+  }
+
+  .skeuo-button {
+    background: #f0f2f5;
+    box-shadow: var(--shadow-skeuo-flat);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .skeuo-button:active {
+    box-shadow: var(--shadow-skeuo-pressed);
+    transform: scale(0.98);
+  }
+
+  .metal-texture {
+    background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #e0e0e0 100%);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .metal-texture::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .glass-realistic {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+      0 8px 32px 0 rgba(31, 38, 135, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    position: relative;
+  }
+
+  .glass-realistic::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 md:px-8 md:py-24 lg:px-16 lg:py-32;
+  }
+
+  /* Bento & Deep Luxury Aesthetics - Organic High-Depth Styles */
+  .bento-card {
+    background: linear-gradient(165deg, #1f1d1b 0%, #121110 100%);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 4rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow:
+      0 10px 40px -10px rgba(0, 0, 0, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  }
+
+  .bento-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  .bento-card:hover {
+    border-color: rgba(197, 160, 89, 0.15);
+    background: linear-gradient(165deg, #252220 0%, #121110 100%);
+    transform: translateY(-8px) scale(1.005);
+    box-shadow:
+      0 30px 60px -12px rgba(0, 0, 0, 0.7),
+      0 18px 36px -18px rgba(197, 160, 89, 0.1),
+      inset 0 1px 2px rgba(255, 255, 255, 0.05);
+  }
+
+  .bento-notch {
+    background: rgba(15, 14, 13, 0.6);
+    backdrop-filter: blur(40px);
+    border-bottom-left-radius: 4rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 2rem 3.5rem;
+    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Experimental Glass Ribbon - Inspired by Image 2 */
+  .bento-ribbon {
+    background: linear-gradient(90deg, rgba(197, 160, 89, 0.1) 0%, transparent 100%);
+    border-radius: 100px;
+    padding: 0.75rem 2rem;
+    border: 1px solid rgba(197, 160, 89, 0.05);
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .tab-folder {
+    @apply px-10 py-4 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .tab-folder:hover {
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .tab-folder-active {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    color: white;
+    border-color: rgba(197, 160, 89, 0.3);
+    box-shadow:
+      0 10px 20px -5px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -66,53 +292,6 @@ body {
   transition: width 0.2s, height 0.2s, background-color 0.2s;
 }
 
-@layer utilities {
-  .glass {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px 0 rgba(183, 110, 121, 0.15);
-  }
-
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .gold-glow {
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
-  }
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
 /* --- Scroll Optimizations --- */
 html.lenis {
   height: auto;
@@ -130,27 +309,13 @@ html.lenis {
   overflow: hidden;
 }
 
-/* GPU Acceleration & Performance */
-.gpu-accelerated {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
-/* Scroll Reveal Classes */
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: none;
-  /* GSAP will handle transitions */
-}
-
-/* Custom Scrollbar for Luxury Look */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-pearl);
+  background: #1c1917;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -159,17 +324,5 @@ html.lenis {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold);
-}
-
-/* Accessibility Focus Ring */
-:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* Improve contrast for text selection */
-::selection {
-  background-color: var(--color-primary);
-  color: white;
+  background: #b08d4a;
 }

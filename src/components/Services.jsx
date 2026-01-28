@@ -59,7 +59,7 @@ const services = [
     }
 ];
 
-import OptimizedImage from './ui/OptimizedImage';
+import Image from './ui/Image';
 
 const ServiceCard = ({ service, onBook }) => {
     // ... (rest of hook logic)
@@ -107,11 +107,10 @@ const ServiceCard = ({ service, onBook }) => {
         >
             {/* Background Image & Overlay */}
             <div className="absolute inset-0">
-                <OptimizedImage
+                <Image
                     src={service.image}
                     alt={service.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60"
-                    useWebP={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 transition-opacity duration-300" />
             </div>

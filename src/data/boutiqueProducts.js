@@ -2,13 +2,13 @@
 // Includes Skincare, Haircare, Nails, Fragrance, and Accessories
 
 export const SHOP_CATEGORIES = [
-    { id: 'all', name: 'All Boutique', icon: '🛍️' },
-    { id: 'makeup', name: 'Makeup', icon: '💄', sub: ['Face', 'Eyes', 'Lips', 'Tools'] },
-    { id: 'skincare', name: 'Skincare', icon: '🧴', sub: ['Cleansers', 'Treatments', 'Moisturizers', 'Sun Care'] },
-    { id: 'haircare', name: 'Haircare', icon: '💆‍♀️', sub: ['Shampoo', 'Conditioner', 'Treatments', 'Styling'] },
-    { id: 'nails', name: 'Nails', icon: '💅', sub: ['Polish', 'Care', 'Tools', 'Nail Art'] },
-    { id: 'fragrance', name: 'Fragrance', icon: '✨', sub: ['Perfumes', 'Body Mist', 'Discovery Sets'] },
-    { id: 'accessories', name: 'Accessories', icon: '🎀', sub: ['Hair', 'Bags', 'Organizers', 'Gift Sets'] }
+    { id: 'all', name: 'All Boutique', icon: 'All' },
+    { id: 'makeup', name: 'Makeup', icon: 'Makeup' },
+    { id: 'skincare', name: 'Skincare', icon: 'Skincare' },
+    { id: 'haircare', name: 'Haircare', icon: 'Haircare' },
+    { id: 'nails', name: 'Nails', icon: 'Nails' },
+    { id: 'fragrance', name: 'Fragrance', icon: 'Fragrance' },
+    { id: 'accessories', name: 'Accessories', icon: 'Accessories' }
 ];
 
 export const BOUTIQUE_PRODUCTS = [
@@ -116,8 +116,8 @@ export const BOUTIQUE_PRODUCTS = [
         reviews: 620,
         stockStatus: 'In Stock',
         sku: 'LOR-TR-002',
-        description: 'Repairs the 5 signs of damaged hair: hair fall, dryness, roughness, dullness, and split ends.',
-        images: ['https://images.unsplash.com/photo-1585232004423-244e0e6904e3?q=80&w=800']
+        howToUse: 'Apply to wet hair, massage into lather and rinse.',
+        images: ['https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?q=80&w=800']
     },
 
     // --- NAILS ---

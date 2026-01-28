@@ -1,6 +1,6 @@
 import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import OptimizedImage from './ui/OptimizedImage';
+import Image from './ui/Image';
 
 const BeautyScene = lazy(() => import('./3d/BeautyScene'));
 
@@ -13,12 +13,11 @@ const Hero = () => {
         <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-[#050505]">
             {/* 3D Background */}
             <div className="absolute inset-0 z-0 parallax-hero">
-                <OptimizedImage
+                <Image
                     src="/assets/hero/bridal_hero.png"
                     alt="Radiance Luxury Bridal"
                     className="w-full h-full object-cover opacity-40 mix-blend-overlay"
-                    priority={true}
-                    useWebP={true}
+                    priority="true"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#050505]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent opacity-50" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X, Tag, Sparkles, ChevronDown, Upload } from 'lucide-react';
 import { autoTagPhoto, searchPhotosByTags, getPopularTags } from '../utils/photoTagging';
+import Image from './ui/Image';
 
 const AITaggedGallery = () => {
     const [photos, setPhotos] = useState([]);
@@ -272,7 +273,7 @@ const AITaggedGallery = () => {
                                 <div className="relative aspect-[4/3] overflow-hidden group-hover:scale-[1.02] transition-transform duration-700">
                                     <div className="absolute inset-0 grid grid-cols-2">
                                         <div className="relative border-r border-white/20">
-                                            <img
+                                            <Image
                                                 src={photo.beforeImage}
                                                 alt="Before"
                                                 className="w-full h-full object-cover"
@@ -282,7 +283,7 @@ const AITaggedGallery = () => {
                                             </div>
                                         </div>
                                         <div className="relative">
-                                            <img
+                                            <Image
                                                 src={photo.afterImage}
                                                 alt="After"
                                                 className="w-full h-full object-cover"
@@ -382,7 +383,7 @@ const AITaggedGallery = () => {
                                 <div className="grid md:grid-cols-2 gap-2 p-2 bg-black/20">
                                     <div className="relative group overflow-hidden rounded-[2rem]">
                                         <div className="absolute top-4 left-4 px-4 py-1.5 bg-black/60 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest rounded-full z-10 border border-white/10">Before</div>
-                                        <img
+                                        <Image
                                             src={selectedPhoto.beforeImage}
                                             alt="Before"
                                             className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
@@ -390,7 +391,7 @@ const AITaggedGallery = () => {
                                     </div>
                                     <div className="relative group overflow-hidden rounded-[2rem]">
                                         <div className="absolute top-4 right-4 px-4 py-1.5 bg-gold/90 backdrop-blur-md text-black text-xs font-bold uppercase tracking-widest rounded-full z-10 shadow-lg">After</div>
-                                        <img
+                                        <Image
                                             src={selectedPhoto.afterImage}
                                             alt="After"
                                             className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"

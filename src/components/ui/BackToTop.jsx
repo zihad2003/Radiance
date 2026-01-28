@@ -33,7 +33,7 @@ const BackToTop = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.5, y: 20 }}
                     onClick={scrollToTop}
-                    className="fixed bottom-10 right-10 z-[80] p-4 bg-primary text-white rounded-full shadow-2xl hover:bg-gold transition-colors interactive"
+                    className="fixed bottom-36 right-10 z-[80] p-4 bg-primary text-black rounded-full shadow-2xl hover:bg-white transition-all interactive"
                     aria-label="Back to top"
                 >
                     <ChevronUp size={24} />

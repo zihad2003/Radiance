@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
 import { Sparkles, Star, ShieldCheck, Zap, ArrowRight, Camera } from 'lucide-react';
+import Image from './ui/Image';
 
 const COMPARISON_ITEMS = [
     {
@@ -76,13 +77,13 @@ const TransformationCompare = () => {
                                     <ReactCompareSlider
                                         itemOne={
                                             <div className="w-full h-full relative">
-                                                <img src={item.before} className="w-full h-full object-cover grayscale opacity-80" />
+                                                <Image src={item.before} className="w-full h-full object-cover grayscale opacity-80" />
                                                 <div className="absolute top-8 left-8 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">Natural Canvas</div>
                                             </div>
                                         }
                                         itemTwo={
                                             <div className="w-full h-full relative">
-                                                <img src={item.after} className="w-full h-full object-cover" />
+                                                <Image src={item.after} className="w-full h-full object-cover" />
                                                 <div className="absolute top-8 right-8 px-4 py-2 bg-gold/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-black shadow-lg">The Radiance</div>
                                             </div>
                                         }

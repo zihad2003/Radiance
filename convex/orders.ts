@@ -20,7 +20,7 @@ export const createOrder = mutation({
         method: v.string(), // Payment method
         status: v.string(), // 'pending', 'paid', 'shipped'
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         const id = await ctx.db.insert("orders", {
             orderId: args.orderId,
             total: args.total,
@@ -34,13 +34,20 @@ export const createOrder = mutation({
     },
 });
 
+// List all orders
+export const listOrders = query({
+    handler: async (ctx: any) => {
+        return await ctx.db.query("orders").order("desc").collect();
+    },
+});
+
 // Get user orders (by phone for now, since auth is minimal)
 export const getOrdersByPhone = query({
     args: { phone: v.string() },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         return await ctx.db
             .query("orders")
-            .filter(q => q.eq(q.field("delivery.phone"), args.phone))
+            .filter((q: any) => q.eq(q.field("delivery.phone"), args.phone))
             .collect();
     }
 });

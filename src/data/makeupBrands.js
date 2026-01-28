@@ -2,6 +2,37 @@ import { extendedProducts, extendedBrands } from './extendedProducts';
 // Comprehensive Makeup Database for Radiance Beauty Salon
 // Contains 100+ SKUs across 6 categories with advanced metadata
 
+const getCategoryImage = (category, brand) => {
+    const images = {
+        lips: [
+            'https://images.unsplash.com/photo-1586776108066-135d02167302?q=80&w=800',
+            'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?q=80&w=800',
+            'https://images.unsplash.com/photo-1591360236630-4ed9bc37679a?q=80&w=800'
+        ],
+        face: [
+            'https://images.unsplash.com/photo-1522338242992-e1a5a1334641?q=80&w=800',
+            'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800',
+            'https://images.unsplash.com/photo-1617319034895-835399564756?q=80&w=800'
+        ],
+        eyes: [
+            'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=800',
+            'https://images.unsplash.com/photo-1583241475879-da372d6ca1f4?q=80&w=800'
+        ],
+        cheeks: [
+            'https://images.unsplash.com/photo-1457913347322-3a187d601fa9?q=80&w=800',
+            'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800'
+        ],
+        skincare: [
+            'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=800',
+            'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=800'
+        ]
+    };
+
+    const catImages = images[category] || images['face'];
+    // Return a stable image based on name hash or just first one
+    return [catImages[Math.abs(brand.length) % catImages.length]];
+};
+
 const createProduct = (index, brand, name, category, type, shadeName, hex, finish, priceBDT, description, extras = {}) => ({
     id: `${brand.toLowerCase().replace(/\s+/g, '_')}_${category}_${index}`,
     name: `${name} - ${shadeName}`,
@@ -22,7 +53,8 @@ const createProduct = (index, brand, name, category, type, shadeName, hex, finis
     rating: 4.5 + Math.random() * 0.5,
     reviews: Math.floor(Math.random() * 500) + 50,
     inStock: true,
-    architecture: extras.architecture || null
+    architecture: extras.architecture || null,
+    images: extras.images || getCategoryImage(category, brand)
 });
 
 // --- BRAND DATA ---
@@ -137,6 +169,12 @@ export const internationalBrands = [
     { id: "fenty", name: "Fenty Beauty", origin: "International", logo: "/assets/brands/fenty.png", products: fentyProducts },
     { id: "loreal", name: "L'Oréal Paris", origin: "International", logo: "/assets/brands/loreal.png", products: lorealProducts },
     { id: "huda", name: "Huda Beauty", origin: "International", logo: "/assets/brands/huda.png", products: hudaProducts },
+    { id: "dot_key", name: "Dot & Key", origin: "Regional", logo: "/assets/brands/dot_key.png", products: [] },
+    { id: "ordinary", name: "The Ordinary", origin: "International", logo: "/assets/brands/ordinary.png", products: [] },
+    { id: "cerave", name: "CeraVe", origin: "International", logo: "/assets/brands/cerave.png", products: [] },
+    { id: "chanel", name: "Chanel", origin: "International", logo: "/assets/brands/chanel.png", products: [] },
+    { id: "dior", name: "Dior", origin: "International", logo: "/assets/brands/dior.png", products: [] },
+    { id: "estee_lauder", name: "Estée Lauder", origin: "International", logo: "/assets/brands/estee_lauder.png", products: [] },
     ...extendedBrands
 ];
 

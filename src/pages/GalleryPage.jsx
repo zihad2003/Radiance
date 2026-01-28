@@ -2,83 +2,64 @@ import Gallery from '../components/Gallery';
 import TransformationCompare from '../components/TransformationCompare';
 import AITaggedGallery from '../components/AITaggedGallery';
 import FadeIn from '../components/ui/FadeIn';
+import PageBentoHeader from '../components/ui/PageBentoHeader';
 import { Camera, Star, TrendingUp } from 'lucide-react';
 
 const GalleryPage = () => {
     return (
-        <div className="min-h-screen bg-pearl pt-24">
-            {/* Page Header */}
-            <section className="py-16 bg-gradient-to-br from-purple-50 via-pink-50 to-transparent">
-                <div className="container mx-auto px-6 text-center">
-                    <FadeIn>
-                        <div className="inline-block px-6 py-2 bg-white rounded-full shadow-md mb-6">
-                            <span className="text-primary font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                                <Camera size={14} />
-                                Transformation Gallery
-                            </span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-serif italic mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
-                            Our Work Speaks
-                        </h1>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Witness the stunning transformations we've created for our clients. Every face tells a story of confidence, beauty, and radiance.
-                        </p>
-                    </FadeIn>
+        <div className="min-h-screen bg-[#121110] text-white">
+            <PageBentoHeader
+                title={<>VISIONARY<br /><span className="text-primary">RESULTS</span></>}
+                badge="The Portfolio"
+                description="Witness the cinematic transformations that define the Radiance aesthetic. Our work is where precision meets poetry."
+                image="https://images.unsplash.com/photo-1595475038784-bbe4766e9afa?q=80&w=1200"
+                stats={[
+                    { label: "Elite Clients", value: "5000+", description: "Satisfied individuals across Bangladesh." },
+                    { label: "Recognition", value: "12", description: "Awards for bridal and avant-garde artistry." },
+                    { label: "Success Rate", value: "98%", description: "Client retention and satisfaction benchmark." }
+                ]}
+            />
 
-                    {/* Stats */}
-                    <FadeIn delay={0.2}>
-                        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-12">
-                            <div className="bg-white rounded-2xl p-8 shadow-lg">
-                                <div className="text-4xl font-bold text-primary mb-2">5000+</div>
-                                <p className="text-gray-500 font-medium">Happy Clients</p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-8 shadow-lg">
-                                <div className="text-4xl font-bold text-accent mb-2">4.9★</div>
-                                <p className="text-gray-500 font-medium">Average Rating</p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-8 shadow-lg">
-                                <div className="text-4xl font-bold text-gold mb-2">98%</div>
-                                <p className="text-gray-500 font-medium">Satisfaction Rate</p>
-                            </div>
-                        </div>
-                    </FadeIn>
-                </div>
-            </section>
-
-            {/* AI-Tagged Gallery - NEW! */}
-            <FadeIn>
-                <AITaggedGallery />
-            </FadeIn>
+            {/* AI-Tagged Gallery */}
+            <div className="container mx-auto px-6 mb-24">
+                <FadeIn>
+                    <div className="mb-16">
+                        <h2 className="text-4xl font-sans font-black uppercase tracking-tighter mb-4 text-white">The Archive</h2>
+                        <div className="h-1 w-20 bg-primary"></div>
+                    </div>
+                    <AITaggedGallery />
+                </FadeIn>
+            </div>
 
             {/* Transformation Compare */}
-            <FadeIn>
-                <TransformationCompare />
-            </FadeIn>
+            <div className="container mx-auto px-6 mb-24">
+                <FadeIn>
+                    <TransformationCompare />
+                </FadeIn>
+            </div>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-br from-primary via-accent to-gold text-white">
+            <section className="py-24 bg-[#1A1A1A] border-y border-white/5">
                 <div className="container mx-auto px-6 text-center">
                     <FadeIn>
-                        <h2 className="text-4xl md:text-5xl font-serif italic mb-6">
-                            Your Transformation Awaits
+                        <h2 className="text-5xl md:text-7xl font-sans font-black text-white mb-8 uppercase tracking-tighter">
+                            Your <span className="text-primary">Legacy</span> Begins
                         </h2>
-                        <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+                        <p className="text-gray-400 text-[10px] mb-12 uppercase tracking-[0.4em] font-bold">
                             Join thousands of satisfied clients who've discovered their radiant self
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <button
                                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                                className="bg-white text-primary px-12 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-pearl transition-all shadow-2xl hover:scale-105"
+                                className="bg-white text-black px-12 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-2xl"
                             >
-                                Book Now
+                                Secure Your Look
                             </button>
                             <button
                                 onClick={() => window.location.href = '/virtual-try-on'}
-                                className="bg-transparent border-2 border-white text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-primary transition-all shadow-2xl hover:scale-105"
+                                className="bg-white/5 backdrop-blur-md border border-white/10 text-white px-12 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all"
                             >
-                                Try Virtual Makeup
+                                Launch Virtual Studio
                             </button>
                         </div>
                     </FadeIn>

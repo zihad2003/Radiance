@@ -141,7 +141,7 @@ const SocialProof = () => {
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -50 }}
-                    className="fixed bottom-6 left-6 z-40 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl shadow-lg border border-primary/10 flex items-center space-x-3 pointer-events-none"
+                    className="fixed top-32 left-6 z-40 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl shadow-lg border border-primary/10 flex items-center space-x-3 pointer-events-none"
                 >
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     <span className="text-sm font-medium text-charcoal">{notification}</span>
@@ -199,7 +199,7 @@ const Gamification = () => {
                     animate={{ scale: 1 }}
                     whileHover={{ scale: 1.1, rotate: 10 }}
                     onClick={() => setIsOpen(true)}
-                    className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-r from-gold to-yellow-600 rounded-full shadow-2xl flex items-center justify-center cursor-pointer interactive"
+                    className="fixed bottom-10 left-32 z-[100] w-16 h-16 bg-gradient-to-r from-gold to-yellow-600 rounded-full shadow-2xl flex items-center justify-center cursor-pointer interactive"
                 >
                     <Gift className="text-white w-8 h-8 animate-bounce-slow" />
                 </motion.button>

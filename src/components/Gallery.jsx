@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ZoomIn } from 'lucide-react';
+import Image from './ui/Image';
 
 const galleryImages = [
     { id: 1, src: "/assets/gallery/bridal_1.png", title: "Biye Special (Bridal)", height: "h-96" },
@@ -40,11 +41,10 @@ const Gallery = () => {
                             onClick={() => setSelectedImage(image)}
                             className="relative group break-inside-avoid rounded-2xl overflow-hidden cursor-pointer"
                         >
-                            <img
+                            <Image
                                 src={image.src}
                                 alt={image.title}
                                 className="w-full h-auto object-cover transform group-hover:scale-110 transition-transform duration-700"
-                                loading="lazy"
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                 <div className="text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -74,7 +74,7 @@ const Gallery = () => {
                             className="relative max-w-5xl max-h-[90vh] w-full"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <img
+                            <Image
                                 src={selectedImage.src}
                                 alt={selectedImage.title}
                                 className="w-full h-full object-contain rounded-lg shadow-2xl"

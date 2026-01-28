@@ -50,15 +50,22 @@ const AdminLogin = ({ onLogin }) => {
 
 const Dashboard = ({ onClose }) => {
     const bookings = useQuery(api.bookings.getBookings) || [];
+    const orders = useQuery(api.orders.listOrders) || []; // Assume this exists or I'll create it
     const updateStatus = useMutation(api.bookings.updateStatus);
+    const [view, setView] = useState('bookings'); // 'bookings' or 'orders'
     const [filter, setFilter] = useState('all');
 
     // Calculate Stats
     const stats = { revenue: 0, customers: 0, pending: 0 };
     if (bookings) {
-        stats.revenue = bookings.reduce((acc, b) => b.status === 'completed' ? acc + (b.totalPaid || 0) : acc, 0); // Simplified
-        stats.pending = bookings.filter(b => b.status === 'pending').length;
-        stats.customers = new Set(bookings.map(b => b.customer?.phone)).size;
+        stats.revenue += bookings.reduce((acc, b) => b.status === 'completed' ? acc + (b.totalPaid || 0) : acc, 0);
+        stats.pending += bookings.filter(b => b.status === 'pending').length;
+        stats.customers += new Set(bookings.map(b => b.customer?.phone)).size;
+    }
+    if (orders) {
+        stats.revenue += orders.reduce((acc, o) => o.status !== 'cancelled' ? acc + (o.total || 0) : acc, 0);
+        stats.pending += orders.filter(o => o.status === 'pending').length;
+        stats.customers = new Set([...bookings.map(b => b.customer?.phone), ...orders.map(o => o.delivery?.phone)]).size;
     }
 
     const handleStatus = async (id, status) => {
@@ -66,14 +73,32 @@ const Dashboard = ({ onClose }) => {
     };
 
     const filteredBookings = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+    const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.status === filter);
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#F9FAFB] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-[#F9FAFB] overflow-y-auto font-sans">
             {/* Top Bar */}
             <div className="bg-white px-8 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-serif font-bold">R</div>
-                    <span className="font-bold text-gray-800">Radiance Admin</span>
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-serif font-bold">R</div>
+                        <span className="font-bold text-gray-800">Radiance Admin</span>
+                    </div>
+
+                    <nav className="hidden md:flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => setView('bookings')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'bookings' ? 'bg-white text-charcoal shadow-sm' : 'text-gray-500 hover:text-charcoal'}`}
+                        >
+                            Bookings
+                        </button>
+                        <button
+                            onClick={() => setView('orders')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'orders' ? 'bg-white text-charcoal shadow-sm' : 'text-gray-500 hover:text-charcoal'}`}
+                        >
+                            Orders
+                        </button>
+                    </nav>
                 </div>
                 <button onClick={onClose} className="flex items-center text-gray-500 hover:text-red-500 gap-2 text-sm font-medium transition-colors">
                     <LogOut size={16} /> Logout
@@ -98,7 +123,7 @@ const Dashboard = ({ onClose }) => {
                             <Users size={24} />
                         </div>
                         <div>
-                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Unique Clients</p>
+                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Clients</p>
                             <h3 className="text-2xl font-bold text-charcoal">{stats.customers}</h3>
                         </div>
                     </div>
@@ -107,18 +132,18 @@ const Dashboard = ({ onClose }) => {
                             <Clock size={24} />
                         </div>
                         <div>
-                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Pending Requests</p>
+                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Pending Tasks</p>
                             <h3 className="text-2xl font-bold text-charcoal">{stats.pending}</h3>
                         </div>
                     </div>
                 </div>
 
-                {/* Bookings Section */}
+                {/* Main Content Section */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                        <h4 className="font-bold text-lg text-charcoal">Recent Bookings</h4>
+                    <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <h4 className="font-bold text-lg text-charcoal">{view === 'bookings' ? 'Recent Bookings' : 'Recent Orders'}</h4>
                         <div className="flex gap-2">
-                            {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
+                            {['all', 'pending', view === 'bookings' ? 'confirmed' : 'paid', 'completed', 'cancelled'].map(f => (
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
@@ -134,73 +159,111 @@ const Dashboard = ({ onClose }) => {
                         <table className="w-full text-left">
                             <thead className="bg-gray-50 text-xs uppercase text-gray-400 font-bold tracking-wider">
                                 <tr>
-                                    <th className="px-6 py-3">Client</th>
-                                    <th className="px-6 py-3">Service</th>
-                                    <th className="px-6 py-3">Date & Time</th>
+                                    <th className="px-6 py-3">{view === 'bookings' ? 'Client' : 'Customer'}</th>
+                                    <th className="px-6 py-3">{view === 'bookings' ? 'Service' : 'Items'}</th>
+                                    <th className="px-6 py-3">{view === 'bookings' ? 'Date & Time' : 'Order ID'}</th>
                                     <th className="px-6 py-3">Status</th>
                                     <th className="px-6 py-3 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {filteredBookings.length > 0 ? filteredBookings.map((b) => (
-                                    <tr key={b._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <p className="font-bold text-charcoal text-sm">{b.customer?.name || 'Guest'}</p>
-                                            <p className="text-xs text-gray-400">{b.customer?.phone}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm text-gray-600">{b.service}</span>
-                                                {b.customer?.homeService && <span className="text-[10px] text-primary font-bold">Home Service</span>}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm text-gray-600">{b.date}</p>
-                                            <p className="text-xs text-gray-400">{b.time}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase
-                                                ${b.status === 'pending' ? 'bg-orange-100 text-orange-600' :
-                                                    b.status === 'confirmed' ? 'bg-blue-100 text-blue-600' :
-                                                        b.status === 'completed' ? 'bg-green-100 text-green-600' :
-                                                            'bg-red-100 text-red-600'}
-                                            `}>
-                                                {b.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                {b.status === 'pending' && (
-                                                    <>
+                                {view === 'bookings' ? (
+                                    filteredBookings.length > 0 ? filteredBookings.map((b) => (
+                                        <tr key={b._id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold text-charcoal text-sm">{b.customer?.name || 'Guest'}</p>
+                                                <p className="text-xs text-gray-400">{b.customer?.phone}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm text-gray-600">{b.service}</span>
+                                                    {b.customer?.homeService && <span className="text-[10px] text-primary font-bold">Home Service</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <p className="text-sm text-gray-600">{b.date}</p>
+                                                <p className="text-xs text-gray-400">{b.time}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase
+                                                    ${b.status === 'pending' ? 'bg-orange-100 text-orange-600' :
+                                                        b.status === 'confirmed' ? 'bg-blue-100 text-blue-600' :
+                                                            b.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                                                'bg-red-100 text-red-600'}
+                                                `}>
+                                                    {b.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {b.status === 'pending' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleStatus(b._id, 'confirmed')}
+                                                                className="p-1 rounded bg-green-50 text-green-600 hover:bg-green-100" title="Approve"
+                                                            >
+                                                                <CheckCircle size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleStatus(b._id, 'cancelled')}
+                                                                className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100" title="Reject"
+                                                            >
+                                                                <XCircle size={18} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {b.status === 'confirmed' && (
                                                         <button
-                                                            onClick={() => handleStatus(b._id, 'confirmed')}
-                                                            className="p-1 rounded bg-green-50 text-green-600 hover:bg-green-100" title="Approve"
+                                                            onClick={() => handleStatus(b._id, 'completed')}
+                                                            className="px-3 py-1 rounded-full bg-charcoal text-white text-xs font-bold hover:bg-primary transition-colors"
                                                         >
-                                                            <CheckCircle size={18} />
+                                                            Mark Done
                                                         </button>
-                                                        <button
-                                                            onClick={() => handleStatus(b._id, 'cancelled')}
-                                                            className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100" title="Reject"
-                                                        >
-                                                            <XCircle size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {b.status === 'confirmed' && (
-                                                    <button
-                                                        onClick={() => handleStatus(b._id, 'completed')}
-                                                        className="px-3 py-1 rounded-full bg-charcoal text-white text-xs font-bold hover:bg-primary transition-colors"
-                                                    >
-                                                        Mark Done
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">No bookings found.</td>
-                                    </tr>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">No bookings found.</td>
+                                        </tr>
+                                    )
+                                ) : (
+                                    filteredOrders.length > 0 ? filteredOrders.map((o) => (
+                                        <tr key={o._id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold text-charcoal text-sm">{o.delivery?.fullName || 'Guest'}</p>
+                                                <p className="text-xs text-gray-400">{o.delivery?.phone}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm text-gray-600">{o.items?.length || 0} Products</span>
+                                                    <span className="text-[10px] text-gray-400">Total: ৳ {o.total?.toLocaleString()}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <p className="text-sm font-mono text-gray-600">{o.orderId}</p>
+                                                <p className="text-xs text-gray-400">{o.paymentMethod}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase
+                                                    ${o.status === 'pending' ? 'bg-orange-100 text-orange-600' :
+                                                        o.status === 'paid' ? 'bg-green-100 text-green-600' :
+                                                            o.status === 'shipped' ? 'bg-blue-100 text-blue-600' :
+                                                                'bg-red-100 text-red-600'}
+                                                `}>
+                                                    {o.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button className="text-primary hover:underline text-xs font-bold">Details</button>
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">No orders found.</td>
+                                        </tr>
+                                    )
                                 )}
                             </tbody>
                         </table>

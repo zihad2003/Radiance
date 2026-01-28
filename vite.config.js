@@ -160,6 +160,13 @@ export default defineConfig({
     })
   ],
   build: {
+    target: 'es2015',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -168,6 +175,10 @@ export default defineConfig({
           'vendor-tf': ['@tensorflow/tfjs', '@tensorflow-models/face-landmarks-detection'],
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
   },
 })

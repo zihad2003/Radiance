@@ -2,106 +2,64 @@ import Services from '../components/Services';
 import Pricing from '../components/Pricing';
 import FadeIn from '../components/ui/FadeIn';
 import SkinHealthAnalyzer from '../components/SkinHealthAnalyzer';
-import { Clock, Award, Heart, Shield } from 'lucide-react';
+import PageBentoHeader from '../components/ui/PageBentoHeader';
+import { Clock, Award, Heart, Shield, ChevronRight } from 'lucide-react';
 
 const ServicesPage = ({ onBook }) => {
     return (
-        <div className="min-h-screen bg-pearl pt-24">
-            {/* Page Header */}
-            <section className="py-16 bg-gradient-to-br from-rose-50 via-pink-50 to-transparent">
-                <div className="container mx-auto px-6 text-center">
-                    <FadeIn>
-                        <div className="inline-block px-6 py-2 bg-white rounded-full shadow-md mb-6">
-                            <span className="text-primary font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                                <Heart size={14} fill="currentColor" />
-                                Premium Services
-                            </span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-serif italic mb-6 bg-gradient-to-r from-primary via-accent to-rose-600 bg-clip-text text-transparent">
-                            Our Services
-                        </h1>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            From luxurious facials to stunning makeovers, we offer a comprehensive range of beauty and wellness services tailored to your needs
-                        </p>
-                    </FadeIn>
+        <div className="min-h-screen bg-[#121110] text-white">
+            <PageBentoHeader
+                title={<>PREMIUM<br /><span className="text-primary">ARTISTRY</span></>}
+                badge="Boutique Excellence"
+                description="From cinematic makeup transformations to scientific skin therapy. Every service is a masterclass in radiance."
+                image="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200"
+                stats={[
+                    { label: "Expert Team", value: "20+", description: "Certified professionals with international training." },
+                    { label: "Clinics", value: "05", description: "State-of-the-art facilities across the city." },
+                    { label: "Satisfaction", value: "99%", description: "Highly rated experiences by our elite clientele." }
+                ]}
+            />
 
-                    {/* Why Choose Us */}
-                    <FadeIn delay={0.2}>
-                        <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto mt-12">
-                            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                                    <Award className="text-primary" size={24} />
-                                </div>
-                                <h3 className="font-bold mb-2 text-sm">Expert Team</h3>
-                                <p className="text-xs text-gray-500">
-                                    Certified professionals with years of experience
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                                    <Shield className="text-accent" size={24} />
-                                </div>
-                                <h3 className="font-bold mb-2 text-sm">Premium Products</h3>
-                                <p className="text-xs text-gray-500">
-                                    Only the finest, salon-grade products
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                                <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                                    <Heart className="text-gold" size={24} />
-                                </div>
-                                <h3 className="font-bold mb-2 text-sm">Personalized Care</h3>
-                                <p className="text-xs text-gray-500">
-                                    Customized treatments for your unique needs
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                                <div className="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                                    <Clock className="text-rose-500" size={24} />
-                                </div>
-                                <h3 className="font-bold mb-2 text-sm">Flexible Hours</h3>
-                                <p className="text-xs text-gray-500">
-                                    Open 7 days a week for your convenience
-                                </p>
-                            </div>
-                        </div>
-                    </FadeIn>
-                </div>
-            </section>
-
-            {/* AI Skin Analysis - NEW! */}
-            <FadeIn>
-                <SkinHealthAnalyzer />
-            </FadeIn>
+            {/* AI Skin Analysis */}
+            <div className="container mx-auto px-6 mb-24">
+                <FadeIn>
+                    <SkinHealthAnalyzer />
+                </FadeIn>
+            </div>
 
             {/* Services Grid */}
-            <FadeIn>
-                <Services onBook={onBook} />
-            </FadeIn>
+            <div className="container mx-auto px-6 mb-24 text-white">
+                <FadeIn>
+                    <div className="mb-16">
+                        <h2 className="text-4xl font-sans font-black uppercase tracking-tighter mb-4">The Selection</h2>
+                        <div className="h-1 w-20 bg-primary"></div>
+                    </div>
+                    <Services onBook={onBook} />
+                </FadeIn>
+            </div>
 
             {/* Pricing Section */}
-            <FadeIn>
-                <Pricing />
-            </FadeIn>
+            <div className="container mx-auto px-6 mb-24">
+                <FadeIn>
+                    <Pricing />
+                </FadeIn>
+            </div>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-br from-charcoal to-gray-900 text-white">
+            <section className="py-24 bg-[#1A1A1A] border-y border-white/5">
                 <div className="container mx-auto px-6 text-center">
                     <FadeIn>
-                        <h2 className="text-4xl md:text-5xl font-serif italic mb-6">
-                            Ready to Transform?
+                        <h2 className="text-5xl md:text-7xl font-sans font-black text-white mb-8 uppercase tracking-tighter">
+                            Ready to <span className="text-primary">Transform?</span>
                         </h2>
-                        <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+                        <p className="text-gray-400 text-[10px] mb-12 uppercase tracking-[0.4em] font-bold">
                             Book your appointment today and experience the Radiance difference
                         </p>
                         <button
                             onClick={() => onBook && onBook(null)}
-                            className="bg-primary text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-accent transition-all shadow-2xl hover:scale-105"
+                            className="bg-white text-black px-12 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-2xl"
                         >
-                            Book Appointment
+                            Secure Appointment
                         </button>
                     </FadeIn>
                 </div>

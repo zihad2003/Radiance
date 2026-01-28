@@ -1,103 +1,64 @@
 import ContactFooter from '../components/ContactFooter';
 import FadeIn from '../components/ui/FadeIn';
+import PageBentoHeader from '../components/ui/PageBentoHeader';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 const ContactPage = () => {
     return (
-        <div className="min-h-screen bg-pearl pt-24">
-            {/* Page Header */}
-            <section className="py-16 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent">
-                <div className="container mx-auto px-6 text-center">
-                    <FadeIn>
-                        <div className="inline-block px-6 py-2 bg-white rounded-full shadow-md mb-6">
-                            <span className="text-primary font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                                <Mail size={14} />
-                                Get In Touch
-                            </span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-serif italic mb-6 bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-transparent">
-                            Contact Us
-                        </h1>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            We'd love to hear from you. Whether you have a question, feedback, or want to book an appointment, we're here to help.
-                        </p>
-                    </FadeIn>
-                </div>
-            </section>
+        <div className="min-h-screen bg-[#121110] text-white">
+            <PageBentoHeader
+                title={<>ETHEREAL<br /><span className="text-primary">CONNECTION</span></>}
+                badge="The Concierge"
+                description="Our specialists are ready to curate your beauty journey. Reach out for bespoke consultations and priority inquiries."
+                image="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200"
+                stats={[
+                    { label: "Gulshan Studios", value: "HQ", description: "123 Beauty Street, Gulshan, Dhaka 1212." },
+                    { label: "Response Time", value: "<1hr", description: "Elite support for all digital inquiries." },
+                    { label: "Phone Line", value: "24/7", description: "Concierge booking available around the clock." }
+                ]}
+            />
 
-            {/* Contact Info Cards */}
-            <section className="py-16">
+            {/* Contact Info Bento */}
+            <section className="py-24">
                 <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-                        <FadeIn delay={0.1}>
-                            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all">
-                                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                                    <MapPin className="text-primary" size={28} />
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                        {[
+                            { icon: MapPin, title: "Location", desc: "Gulshan, Dhaka 1212", sub: "Visit HQ" },
+                            { icon: Phone, title: "Phone", desc: "+880 1234-567890", sub: "Priority Line" },
+                            { icon: Mail, title: "Email", desc: "info@radiance.salon", sub: "Official Inquiry" },
+                            { icon: Clock, title: "Hours", desc: "9 AM - 9 PM Daily", sub: "Boutique Hours" }
+                        ].map((item, idx) => (
+                            <FadeIn key={idx} delay={idx * 0.1}>
+                                <div className="bento-card p-10 h-full group">
+                                    <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-black transition-all">
+                                        <item.icon size={24} />
+                                    </div>
+                                    <span className="text-[9px] text-primary font-black uppercase tracking-[0.3em] mb-4 block">{item.sub}</span>
+                                    <h3 className="text-xl font-bold text-white mb-4 uppercase tracking-tighter">{item.title}</h3>
+                                    <p className="text-gray-500 text-[10px] leading-relaxed uppercase tracking-widest font-bold">
+                                        {item.desc}
+                                    </p>
                                 </div>
-                                <h3 className="font-bold mb-2">Visit Us</h3>
-                                <p className="text-sm text-gray-500">
-                                    123 Beauty Street<br />
-                                    Gulshan, Dhaka 1212<br />
-                                    Bangladesh
-                                </p>
-                            </div>
-                        </FadeIn>
-
-                        <FadeIn delay={0.2}>
-                            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all">
-                                <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
-                                    <Phone className="text-accent" size={28} />
-                                </div>
-                                <h3 className="font-bold mb-2">Call Us</h3>
-                                <p className="text-sm text-gray-500">
-                                    +880 1234-567890<br />
-                                    +880 1234-567891<br />
-                                    (9 AM - 9 PM)
-                                </p>
-                            </div>
-                        </FadeIn>
-
-                        <FadeIn delay={0.3}>
-                            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all">
-                                <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center mb-4">
-                                    <Mail className="text-gold" size={28} />
-                                </div>
-                                <h3 className="font-bold mb-2">Email Us</h3>
-                                <p className="text-sm text-gray-500">
-                                    info@radiance.salon<br />
-                                    booking@radiance.salon<br />
-                                    support@radiance.salon
-                                </p>
-                            </div>
-                        </FadeIn>
-
-                        <FadeIn delay={0.4}>
-                            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all">
-                                <div className="w-14 h-14 bg-rose-500/10 rounded-xl flex items-center justify-center mb-4">
-                                    <Clock className="text-rose-500" size={28} />
-                                </div>
-                                <h3 className="font-bold mb-2">Opening Hours</h3>
-                                <p className="text-sm text-gray-500">
-                                    Mon - Sat: 9 AM - 9 PM<br />
-                                    Sunday: 10 AM - 8 PM<br />
-                                    Holidays: By Appointment
-                                </p>
-                            </div>
-                        </FadeIn>
+                            </FadeIn>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Map Section */}
-            <section className="py-16 bg-white">
+            {/* Map Section - Themed */}
+            <section className="py-24 bg-[#1A1A1A] border-y border-white/5">
                 <div className="container mx-auto px-6">
                     <FadeIn>
-                        <h2 className="text-4xl font-serif italic text-center mb-12">Find Us on the Map</h2>
-                        <div className="max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl md:text-5xl font-sans font-black text-white mb-4 uppercase tracking-tighter">
+                                FIND THE <span className="text-primary italic">STUUDIO</span>
+                            </h2>
+                        </div>
+                        <div className="max-w-7xl mx-auto rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl grayscale group hover:grayscale-0 transition-all duration-1000">
                             <iframe
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.0977!2d90.4125!3d23.7808!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ2JzUwLjkiTiA5MMKwMjQnNDUuMCJF!5e0!3m2!1sen!2sbd!4v1234567890"
                                 width="100%"
-                                height="450"
+                                height="550"
                                 style={{ border: 0 }}
                                 allowFullScreen=""
                                 loading="lazy"
@@ -110,57 +71,35 @@ const ContactPage = () => {
             </section>
 
             {/* Contact Form */}
-            <FadeIn>
-                <ContactFooter />
-            </FadeIn>
+            <div className="container mx-auto px-6 py-24">
+                <FadeIn>
+                    <ContactFooter />
+                </FadeIn>
+            </div>
 
-            {/* FAQ Section */}
-            <section className="py-20 bg-gradient-to-br from-charcoal to-gray-900 text-white">
+            {/* FAQ Section - Midnight Architecture */}
+            <section className="py-24 bg-[#0A0A0A] text-white">
                 <div className="container mx-auto px-6">
                     <FadeIn>
-                        <h2 className="text-4xl md:text-5xl font-serif italic text-center mb-12">
-                            Frequently Asked Questions
+                        <h2 className="text-5xl md:text-7xl font-sans font-black text-center mb-20 uppercase tracking-tighter">
+                            THE <span className="text-primary">KNOWLEDGE</span> BASE
                         </h2>
-                        <div className="max-w-3xl mx-auto space-y-6">
-                            <details className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 group">
-                                <summary className="font-bold cursor-pointer list-none flex items-center justify-between">
-                                    <span>How do I book an appointment?</span>
-                                    <span className="text-2xl group-open:rotate-45 transition-transform">+</span>
-                                </summary>
-                                <p className="mt-4 text-white/70 leading-relaxed">
-                                    You can book an appointment through our website by clicking the "Book Now" button, calling us directly, or using our chatbot assistant. We recommend booking in advance to secure your preferred time slot.
-                                </p>
-                            </details>
-
-                            <details className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 group">
-                                <summary className="font-bold cursor-pointer list-none flex items-center justify-between">
-                                    <span>What is your cancellation policy?</span>
-                                    <span className="text-2xl group-open:rotate-45 transition-transform">+</span>
-                                </summary>
-                                <p className="mt-4 text-white/70 leading-relaxed">
-                                    We require at least 24 hours notice for cancellations or rescheduling. Late cancellations may incur a fee. Please contact us as soon as possible if you need to change your appointment.
-                                </p>
-                            </details>
-
-                            <details className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 group">
-                                <summary className="font-bold cursor-pointer list-none flex items-center justify-between">
-                                    <span>Do you offer bridal packages?</span>
-                                    <span className="text-2xl group-open:rotate-45 transition-transform">+</span>
-                                </summary>
-                                <p className="mt-4 text-white/70 leading-relaxed">
-                                    Yes! We offer comprehensive bridal packages including makeup trials, hair styling, skincare treatments, and on-location services. Contact us to discuss your special day requirements.
-                                </p>
-                            </details>
-
-                            <details className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 group">
-                                <summary className="font-bold cursor-pointer list-none flex items-center justify-between">
-                                    <span>What payment methods do you accept?</span>
-                                    <span className="text-2xl group-open:rotate-45 transition-transform">+</span>
-                                </summary>
-                                <p className="mt-4 text-white/70 leading-relaxed">
-                                    We accept cash, all major credit/debit cards, bKash, Nagad, and Rocket. Payment is due at the time of service unless you have a pre-paid package.
-                                </p>
-                            </details>
+                        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+                            {[
+                                { q: "How do I book?", a: "Book via our AI Boutique, the Virtual Studio, or our 24/7 concierge line." },
+                                { q: "Cancellation?", a: "24-hour notice required for clinical grade scheduling adjustments." },
+                                { q: "Bridal Packages?", a: "We offer bespoke cinematic bridal packages including full AI trials." },
+                                { q: "Payment?", a: "All major credit cards, bKash, and digital assets accepted." }
+                            ].map((faq, idx) => (
+                                <div key={idx} className="bento-card p-10 border border-white/5">
+                                    <h3 className="text-xl font-bold mb-6 text-white uppercase tracking-tighter flex gap-3">
+                                        <span className="text-primary">0{idx + 1}</span> {faq.q}
+                                    </h3>
+                                    <p className="text-gray-500 text-[10px] leading-relaxed uppercase tracking-widest font-bold opacity-80">
+                                        {faq.a}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
                     </FadeIn>
                 </div>

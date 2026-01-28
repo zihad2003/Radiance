@@ -8,6 +8,7 @@ import {
 import GlassCard from './ui/GlassCard';
 
 import Counter from './ui/Counter';
+import Image from './ui/Image';
 
 // Removed AnimatedCounter redundant logic to use centralized Counter component
 
@@ -160,7 +161,7 @@ const ExcellenceSection = () => {
                         ].map((t, i) => (
                             <GlassCard key={i} className="p-6 border-white/5 hover:border-white/10 transition-all group">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <img src={t.img} alt={t.name} className="w-12 h-12 rounded-full grayscale group-hover:grayscale-0 transition-all border border-white/10" />
+                                    <Image src={t.img} alt={t.name} className="w-12 h-12 rounded-full grayscale group-hover:grayscale-0 transition-all border border-white/10" />
                                     <div>
                                         <h5 className="text-sm font-bold text-white">{t.name}</h5>
                                         <p className="text-[10px] text-primary font-bold uppercase tracking-widest">{t.role}</p>
@@ -209,7 +210,7 @@ const PillarCard = ({ pillar, index, parentY }) => {
         >
             {/* Background Image with Parallax */}
             <motion.div style={{ y: imageY }} className="absolute inset-0 scale-110">
-                <img
+                <Image
                     src={`/assets/excellence/${pillar.image}`}
                     alt={pillar.title}
                     className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-1000"
