@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search, ShoppingBag, User } from 'lucide-react';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -10,13 +10,12 @@ const Navbar = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
+            setIsScrolled(window.scrollY > 20);
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location]);
@@ -27,9 +26,6 @@ const Navbar = () => {
         { name: 'Virtual Try-On', href: '/virtual-try-on' },
         { name: 'AI Makeover', href: '/ai-makeover' },
         { name: 'Gallery', href: '/gallery' },
-        { name: 'Shop', href: '/shop' },
-        { name: 'About', href: '/about' },
-        { name: 'Contact', href: '/contact' },
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -38,54 +34,53 @@ const Navbar = () => {
         <motion.nav
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] }}
-            className={`fixed top-0 left-0 right-0 z-[90] transition-all duration-500 ${isScrolled
-                ? 'py-3 bg-black/90 backdrop-blur-2xl border-b border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.8)]'
-                : 'py-5 bg-black/40 backdrop-blur-md border-b border-white/5'
-                }`}
+            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-6 md:px-12 pt-6`}
         >
-            <div className="container mx-auto px-6 flex items-center justify-between">
-                {/* Logo */}
-                <Link
-                    to="/"
-                    className="font-serif text-2xl font-bold tracking-widest text-white outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-lg p-1"
-                    aria-label="Radiance Home"
-                >
-                    RADIANCE<span className="text-gold">.</span>
+            <div className={`container mx-auto px-6 py-3 rounded-full flex items-center justify-between transition-all duration-500 ${isScrolled
+                ? 'bg-black/60 backdrop-blur-2xl border border-white/10 shadow-2xl'
+                : 'bg-transparent'
+                }`}>
+                {/* Logo Section */}
+                <Link to="/" className="flex items-center gap-2 group">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-black">R</div>
+                    <span className="font-outfit text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">RADIANCE<span className="text-primary">.</span></span>
                 </Link>
 
-                {/* Desktop Menu */}
-                <div className="hidden lg:flex items-center space-x-8" role="menubar">
+                {/* Desktop Centered Pill Menu */}
+                <div className="hidden lg:flex items-center bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-1 py-1">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
                             to={link.href}
-                            role="menuitem"
-                            className={`text-xs uppercase tracking-widest hover:text-gold transition-colors relative group outline-none focus-visible:text-gold text-white/80 ${isActive(link.href) ? 'text-gold font-bold' : ''
+                            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${isActive(link.href)
+                                ? 'bg-primary text-black'
+                                : 'text-white/60 hover:text-white'
                                 }`}
                         >
                             {link.name}
-                            <span className={`absolute -bottom-2 left-0 h-0.5 bg-gold transition-all duration-300 ${isActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'
-                                }`} />
                         </Link>
                     ))}
-                    <button
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="bg-gold text-black px-8 py-3 rounded-full hover:bg-white transition-all hover:scale-105 active:scale-95 shimmer interactive outline-none focus-visible:ring-4 focus-visible:ring-gold/30 text-xs uppercase tracking-widest font-bold"
-                    >
-                        Book Now
+                </div>
+
+                {/* Right Actions */}
+                <div className="hidden lg:flex items-center gap-3">
+                    <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white hover:text-black transition-all">
+                        <Search size={18} />
+                    </button>
+                    <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white hover:text-black transition-all">
+                        <ShoppingBag size={18} />
+                    </button>
+                    <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white hover:text-black transition-all">
+                        <User size={18} />
                     </button>
                 </div>
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="lg:hidden interactive p-2 rounded-lg outline-none focus-visible:bg-white/10 text-white"
+                    className="lg:hidden w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label={mobileMenuOpen ? "Close Menu" : "Open Menu"}
-                    aria-expanded={mobileMenuOpen}
-                    aria-controls="mobile-menu"
                 >
-                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </div>
 
@@ -93,32 +88,35 @@ const Navbar = () => {
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
-                        id="mobile-menu"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: '100vh' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="lg:hidden absolute top-full left-0 w-full bg-[#050505] backdrop-blur-xl border-t border-white/10 overflow-hidden"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="lg:hidden absolute top-full left-6 right-6 mt-4 bg-[#0D0D0D] backdrop-blur-3xl border border-white/10 rounded-[2rem] p-8 shadow-2xl z-50 overflow-hidden"
                     >
-                        <div className="flex flex-col items-center justify-center h-full space-y-6 pb-20">
+                        <div className="flex flex-col gap-4">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     to={link.href}
-                                    className={`text-2xl font-serif hover:text-gold transition-colors ${isActive(link.href) ? 'text-gold font-bold' : 'text-white'
+                                    className={`text-sm font-black uppercase tracking-widest p-4 rounded-2xl transition-all ${isActive(link.href)
+                                        ? 'bg-primary text-black'
+                                        : 'text-white/60 hover:bg-white/5'
                                         }`}
                                 >
                                     {link.name}
                                 </Link>
                             ))}
-                            <button
-                                onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
-                                className="bg-gold text-black px-10 py-4 rounded-full text-lg mt-8 shimmer interactive"
-                            >
-                                Book Appointment
-                            </button>
+                            <div className="grid grid-cols-3 gap-4 mt-4 border-t border-white/5 pt-6">
+                                <button className="flex flex-col items-center gap-2 text-white/40">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center"><Search size={20} /></div>
+                                </button>
+                                <button className="flex flex-col items-center gap-2 text-white/40">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center"><ShoppingBag size={20} /></div>
+                                </button>
+                                <button className="flex flex-col items-center gap-2 text-white/40">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center"><User size={20} /></div>
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 )}
