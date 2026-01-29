@@ -27,11 +27,14 @@ const AIPresetGenerator = () => {
 
     const processFile = (file) => {
         const reader = new FileReader();
-        reader.onloadend = () => {
-            setPreviewUrl(reader.result);
-            setSelectedImage(reader.result);
+        reader.onload = (event) => {
+            setPreviewUrl(event.target.result);
+            setSelectedImage(event.target.result);
             setGeneratedImage(null);
             setError(null);
+        };
+        reader.onerror = () => {
+            setError('Neural engine failed to scan source material.');
         };
         reader.readAsDataURL(file);
     };

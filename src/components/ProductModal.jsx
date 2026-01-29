@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';
 import Counter from './ui/Counter';
+import SafeImage from './ui/SafeImage';
 
 const ProductModal = ({ product, onClose }) => {
     const [activeImg, setActiveImg] = useState(0);
@@ -22,7 +23,7 @@ const ProductModal = ({ product, onClose }) => {
     };
 
     const images = product.images || [
-        'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800',
+        'https://images.unsplash.com/photo-1619451334792-150fd785ee7b?q=80&w=800',
         'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=800',
         'https://images.unsplash.com/photo-1522338242992-e1a5a1334641?q=80&w=800'
     ];
@@ -53,7 +54,7 @@ const ProductModal = ({ product, onClose }) => {
                 <div className="w-full md:w-1/2 p-8 md:p-12 bg-black/40 flex flex-col border-b md:border-b-0 md:border-r border-white/5">
                     <div className="relative aspect-square rounded-[3rem] overflow-hidden mb-6 bg-black shadow-inner border border-white/5">
                         <AnimatePresence mode="wait">
-                            <motion.img
+                            <SafeImage
                                 key={activeImg}
                                 src={images[activeImg]}
                                 className="w-full h-full object-cover opacity-90"
@@ -78,7 +79,7 @@ const ProductModal = ({ product, onClose }) => {
                                 onClick={() => setActiveImg(i)}
                                 className={`w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all flex-shrink-0 ${activeImg === i ? 'border-primary opacity-100' : 'border-transparent opacity-40 hover:opacity-100'}`}
                             >
-                                <img src={img} className="w-full h-full object-cover" />
+                                <SafeImage src={img} className="w-full h-full" />
                             </button>
                         ))}
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Upload, Sparkles, Palette, Download, Info, X, Sun, Gem, Heart, Flame } from 'lucide-react';
-import { analyzeSkinTone } from '../utils/skinToneAnalysis';
+import { analyzeSkinTone, loadFaceDetectionModels } from '../utils/skinToneAnalysis';
 import {
     applyARLipstick,
     applyAREyeshadow,
@@ -18,6 +18,16 @@ import { useToast } from '../context/ToastContext';
 const AIBeautyAnalyzer = () => {
     const analyzeSkinBackend = useAction(api.skinAnalysis.analyze);
     const { error: toastError, info } = useToast();
+
+    // Lazy-load models only when needed
+    useEffect(() => {
+        if (mode !== 'idle') {
+            loadFaceDetectionModels().catch(err => {
+                console.error('Failed to load face detection models:', err);
+                toastError("Neural engine initialization failed. Please refresh.");
+            });
+        }
+    }, [mode]);
     const [mode, setMode] = useState('idle'); // 'idle', 'camera', 'upload'
     const [analysis, setAnalysis] = useState(null);
     const [faceShape, setFaceShape] = useState(null);
@@ -169,12 +179,24 @@ const AIBeautyAnalyzer = () => {
             const source = mode === 'camera' ? videoRef.current : canvasRef.current;
             if (!source) throw new Error("No image source available");
 
+            // --- CAPTURE FRAME TO CANVAS (Critical for both local and backend) ---
+            const canvas = canvasRef.current;
+            if (canvas && mode === 'camera') {
+                const ctx = canvas.getContext('2d');
+                canvas.width = source.videoWidth || source.width || 640;
+                canvas.height = source.videoHeight || source.height || 480;
+                ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+            }
+
             const result = await analyzeSkinTone(source);
 
             // --- BACKEND AI ANALYSIS ---
             info("Running advanced dermatological scan...");
-            const base64Image = canvasRef.current.toDataURL('image/jpeg', 0.8);
-            const cloudAnalysis = await analyzeSkinBackend({ image: base64Image });
+            const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+            const cloudAnalysis = await analyzeSkinBackend({
+                imageUrl: "base64", // Placeholder for required string
+                imageData: base64Image
+            });
 
             // Merge results
             setAnalysis({
@@ -230,6 +252,9 @@ const AIBeautyAnalyzer = () => {
                     }
                 };
                 img.src = event.target.result;
+            };
+            reader.onerror = () => {
+                toastError("Failed to read image file. Please try another one.");
             };
             reader.readAsDataURL(file);
         }

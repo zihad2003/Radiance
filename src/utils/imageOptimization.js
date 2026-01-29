@@ -191,7 +191,7 @@ export const fixImageOrientation = (file) => {
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    // If no orientation or normal, return original
+                    // ... (rest of logic)
                     if (!orientation || orientation === 1) {
                         resolve(e.target.result);
                         return;
@@ -200,7 +200,6 @@ export const fixImageOrientation = (file) => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
 
-                    // Set proper canvas dimensions before transform & render
                     if ([5, 6, 7, 8].indexOf(orientation) > -1) {
                         canvas.width = img.height;
                         canvas.height = img.width;
@@ -209,7 +208,6 @@ export const fixImageOrientation = (file) => {
                         canvas.height = img.height;
                     }
 
-                    // transform context before drawing image
                     switch (orientation) {
                         case 2: ctx.transform(-1, 0, 0, 1, img.width, 0); break;
                         case 3: ctx.transform(-1, 0, 0, -1, img.width, img.height); break;
@@ -224,8 +222,10 @@ export const fixImageOrientation = (file) => {
                     ctx.drawImage(img, 0, 0);
                     resolve(canvas.toDataURL('image/jpeg', 0.9));
                 };
+                img.onerror = () => reject(new Error("Failed to load image"));
                 img.src = e.target.result;
             };
+            reader.onerror = () => reject(new Error("Failed to read file"));
             reader.readAsDataURL(file);
         });
     });

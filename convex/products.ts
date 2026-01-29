@@ -128,3 +128,9 @@ export const bulkAdd = mutation({
         }
     },
 });
+export const deleteProduct = mutation({
+    args: { id: v.id("products") },
+    handler: async (ctx: any, args: any) => {
+        await ctx.db.delete(args.id);
+    },
+});

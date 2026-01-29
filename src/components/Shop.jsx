@@ -361,7 +361,7 @@ const ProductCard = ({ product, index, viewMode, onClick }) => {
             {/* Image */}
             <div className={`relative overflow-hidden bg-white/5 ${viewMode === 'list' ? 'w-48 aspect-square' : 'aspect-[4/5]'}`}>
                 <Image
-                    src={product.images?.[0] || 'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800'}
+                    src={product.images?.[0] || 'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=800'}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                     alt={product.name}
                 />

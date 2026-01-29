@@ -109,6 +109,28 @@ export default defineSchema({
         timestamp: v.number(),
     }).index("by_product", ["productId"]),
 
+    services: defineTable({
+        id: v.string(),
+        name: v.string(),
+        category: v.string(),
+        price: v.number(),
+        duration: v.string(),
+        description: v.string(),
+        image: v.string(),
+        popular: v.boolean(),
+    }).index("by_category", ["category"]),
+
+    stylists: defineTable({
+        id: v.string(),
+        name: v.string(),
+        role: v.string(),
+        image: v.string(),
+        bio: v.string(),
+        specialty: v.array(v.string()),
+        rating: v.number(),
+        available: v.boolean(),
+    }),
+
     skinAnalysisResults: defineTable({
         userId: v.optional(v.string()),
         sessionId: v.string(),

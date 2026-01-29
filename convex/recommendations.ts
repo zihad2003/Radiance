@@ -18,11 +18,11 @@ export const generate = action({
             allergies: v.array(v.string()),
         }),
     },
-    handler: async (ctx: any, args: any) => {
+    handler: async (ctx: any, args: any): Promise<any> => {
         const apiKey = process.env.OPENAI_API_KEY;
 
         // Fetch all products from internal query
-        const products = await ctx.runQuery(api.products.list);
+        const products: any[] = await ctx.runQuery(api.products.list);
 
         // Generate Cache Key
         const cacheKey = JSON.stringify({
@@ -32,13 +32,13 @@ export const generate = action({
         });
 
         // Helper to hydrate product data
-        const hydrate = (list: any[]) => list.map((item: any) => {
-            const product = products.find((p: any) => p.id === item.productId);
+        const hydrate = (list: any[]): any[] => list.map((item: any) => {
+            const product: any = products.find((p: any) => p.id === item.productId);
             return { ...item, product };
         }).filter((item: any) => item.product);
 
         // 1. Check Cache
-        const cached = await ctx.runQuery(internal.aiUtils.getCache, { key: cacheKey, endpoint: "recommendations" });
+        const cached: any = await ctx.runQuery(internal.aiUtils.getCache, { key: cacheKey, endpoint: "recommendations" });
         if (cached) {
             console.log("Returning cached recommendations");
             return {

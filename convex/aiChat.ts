@@ -19,8 +19,8 @@ export const sendMessage = action({
         const apiKey = process.env.OPENAI_API_KEY;
 
         // Fetch product inventory for simple RAG
-        const products = await ctx.runQuery(api.products.list);
-        const inventoryContext = products.map(p =>
+        const products: any[] = await ctx.runQuery(api.products.list);
+        const inventoryContext: string = products.map((p: any) =>
             `- ${p.name} (${p.brand}): ${p.category} for ${p.skinType.join(', ')}. Good for ${p.concerns?.join(', ') || 'general use'}. Price: $${p.priceUSD}`
         ).join('\n');
 
@@ -53,7 +53,7 @@ export const sendMessage = action({
             5. Keep responses under 3 sentences unless asked for a detailed routine.
             `;
 
-            const response = await openai.chat.completions.create({
+            const response: any = await openai.chat.completions.create({
                 model: "gpt-4o",
                 messages: [
                     { role: "system", content: systemPrompt },
@@ -63,7 +63,7 @@ export const sendMessage = action({
                 max_tokens: 300,
             });
 
-            return response.choices[0].message.content;
+            return response.choices[0].message.content as string;
 
         } catch (error) {
             console.error("AI Chat Error:", error);

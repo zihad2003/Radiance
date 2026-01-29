@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search, ShoppingBag, User } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';
 import { useAuth } from '../context/AuthContext';
+import Logo from './ui/Logo';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -54,16 +55,7 @@ const Navbar = () => {
             >
                 {/* Logo Section */}
                 <Link to="/" className="flex items-center gap-4 group shrink-0">
-                    <motion.div
-                        layout
-                        className="relative w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden bg-transparent border border-white/10 group-hover:border-primary/50 transition-all shadow-2xl"
-                    >
-                        <img
-                            src="/logo.png"
-                            alt="Radiance Logo"
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                        />
-                    </motion.div>
+                    <Logo className="group-hover:border-primary/50" />
                     <motion.span
                         layout
                         className="font-outfit text-lg md:text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors hidden xl:block"

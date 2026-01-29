@@ -11,7 +11,7 @@ const getCategoryImage = (category, brand) => {
         ],
         face: [
             'https://images.unsplash.com/photo-1522338242992-e1a5a1334641?q=80&w=800',
-            'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800',
+            'https://images.unsplash.com/photo-1619451334792-150fd785ee7b?q=80&w=800',
             'https://images.unsplash.com/photo-1617319034895-835399564756?q=80&w=800'
         ],
         eyes: [
@@ -20,7 +20,7 @@ const getCategoryImage = (category, brand) => {
         ],
         cheeks: [
             'https://images.unsplash.com/photo-1457913347322-3a187d601fa9?q=80&w=800',
-            'https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800'
+            'https://images.unsplash.com/photo-1619451334792-150fd785ee7b?q=80&w=800'
         ],
         skincare: [
             'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=800',

@@ -233,6 +233,27 @@ export const resetAndSeed = mutation({
             await ctx.db.insert("products", p as any);
         }
 
+        // Add Makeup Samples
+        const makeupSamples = [
+            { id: "mac-01", name: "Retro Matte Lipstick - Ruby Woo", brand: "MAC", category: "lips", type: "lipstick", hex: "#990000", finish: "matte", priceUSD: 24, description: "The iconic vivid blue-red.", image: "https://images.unsplash.com/photo-1586776108066-135d02167302?q=80&w=800" },
+            { id: "fenty-01", name: "Gloss Bomb - Fenty Glow", brand: "Fenty Beauty", category: "lips", type: "lipstick", hex: "#C77F70", finish: "glossy", priceUSD: 28, description: "Universal rose nude.", image: "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?q=80&w=800" }
+        ];
+
+        for (const m of makeupSamples) {
+            await ctx.db.insert("products", {
+                ...m,
+                price: m.priceUSD * 110,
+                currency: "BDT",
+                ingredients: ["Vitamin E", "Aloe Vera", "Pigments"],
+                skinType: ["all"],
+                texture: "cream",
+                rating: 4.8,
+                reviews: 120,
+                inStock: true,
+                architecture: {}
+            } as any);
+        }
+
         // 3. Seed test user
         const existingUser = await ctx.db.query("users").filter((q: any) => q.eq(q.field("phone"), "01700000000")).first();
         if (!existingUser) {

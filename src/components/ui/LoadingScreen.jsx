@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Logo from './Logo';
 
 export default function LoadingScreen({ onComplete }) {
     const [progress, setProgress] = useState(0);
@@ -22,10 +23,8 @@ export default function LoadingScreen({ onComplete }) {
         <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-[9999]">
             <div className="text-center">
                 {/* Elegant Logo */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-serif italic text-[#F5E6C8] tracking-widest">
-                        RADIANCE
-                    </h1>
+                <div className="mb-8 flex flex-col items-center">
+                    <Logo size="lg" className="mb-4" />
                     <p className="text-white/40 text-xs uppercase tracking-[0.3em] mt-3">AI Beauty Studio</p>
                 </div>
 

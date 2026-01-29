@@ -105,6 +105,9 @@ const HairstyleFinder = () => {
                 setMode('studio');
                 processImage(ev.target.result);
             };
+            reader.onerror = () => {
+                alert("Failed to read image file.");
+            };
             reader.readAsDataURL(file);
         }
     };

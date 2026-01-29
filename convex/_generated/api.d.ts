@@ -20,7 +20,10 @@ import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as recommendations from "../recommendations.js";
 import type * as seed from "../seed.js";
+import type * as seedExtended from "../seedExtended.js";
+import type * as services from "../services.js";
 import type * as skinAnalysis from "../skinAnalysis.js";
+import type * as stylists from "../stylists.js";
 import type * as tutorials from "../tutorials.js";
 import type * as users from "../users.js";
 
@@ -43,7 +46,10 @@ declare const fullApi: ApiFromModules<{
   products: typeof products;
   recommendations: typeof recommendations;
   seed: typeof seed;
+  seedExtended: typeof seedExtended;
+  services: typeof services;
   skinAnalysis: typeof skinAnalysis;
+  stylists: typeof stylists;
   tutorials: typeof tutorials;
   users: typeof users;
 }>;

@@ -206,7 +206,7 @@ export const BOUTIQUE_PRODUCTS = [
         sku: 'RAD-BS-001',
         description: 'A curated collection of 12 essential synthetic brushes for face and eyes. Includes a luxury travel pouch.',
         benefits: ['High-density bristles', 'Cruelty-free', 'Ergonomic handles'],
-        images: ['https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=800']
+        images: ['https://images.unsplash.com/photo-1619451334792-150fd785ee7b?q=80&w=800']
     },
     {
         id: 'acc_002',

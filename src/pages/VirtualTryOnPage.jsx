@@ -4,6 +4,7 @@ import SEO from '../components/SEO';
 import PageBentoHeader from '../components/ui/PageBentoHeader';
 import { Sparkles, Zap, Shield, Award, Camera, Layers, Wand2 } from 'lucide-react';
 import AIBeautyAnalyzer from '../components/AIBeautyAnalyzer';
+import SafeImage from '../components/ui/SafeImage';
 
 const VirtualTryOn = lazy(() => import('../components/VirtualTryOn'));
 const HairstyleAI = lazy(() => import('../components/HairstyleAI'));
@@ -112,7 +113,7 @@ const VirtualTryOnPage = () => {
             <section className="pb-32 container mx-auto px-6">
                 <div className="bento-card p-20 text-center relative overflow-hidden group">
                     <div className="absolute inset-0 opacity-20">
-                        <img src="https://images.unsplash.com/photo-1596462502278-27bfaf433393?q=80&w=1200" className="w-full h-full object-cover grayscale" alt="CTA" />
+                        <SafeImage src="https://images.unsplash.com/photo-1619451334792-150fd785ee7b?q=80&w=1200" className="w-full h-full grayscale" alt="CTA" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#121110] via-transparent to-[#121110]" />
                     </div>
                     <FadeIn>

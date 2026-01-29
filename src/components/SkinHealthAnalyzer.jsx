@@ -145,9 +145,11 @@ const SkinHealthAnalyzer = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onload = (event) => {
+            const result = event.target.result;
+            if (!result) return;
+
             const img = new Image();
-            img.src = reader.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -165,6 +167,11 @@ const SkinHealthAnalyzer = () => {
                 setImage(resizedDataUrl);
                 handleAnalysis(resizedDataUrl);
             };
+            img.src = result;
+        };
+        reader.onerror = (error) => {
+            console.error('File read failed:', error);
+            setError('Failed to read image file. Please try again.');
         };
         reader.readAsDataURL(file);
     };
