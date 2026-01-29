@@ -1,4 +1,4 @@
-"use node";
+
 import { action, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import OpenAI from "openai";

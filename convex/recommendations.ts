@@ -1,6 +1,6 @@
-"use node";
+
 import { action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import OpenAI from "openai";
 
@@ -18,14 +18,38 @@ export const generate = action({
             allergies: v.array(v.string()),
         }),
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx: any, args: any) => {
         const apiKey = process.env.OPENAI_API_KEY;
 
         // Fetch all products from internal query
         const products = await ctx.runQuery(api.products.list);
 
+        // Generate Cache Key
+        const cacheKey = JSON.stringify({
+            type: args.skinProfile.skinType,
+            concerns: Object.keys(args.skinProfile.concerns).sort(),
+            goals: args.preferences.goals.sort()
+        });
+
+        // Helper to hydrate product data
+        const hydrate = (list: any[]) => list.map((item: any) => {
+            const product = products.find((p: any) => p.id === item.productId);
+            return { ...item, product };
+        }).filter((item: any) => item.product);
+
+        // 1. Check Cache
+        const cached = await ctx.runQuery(internal.aiUtils.getCache, { key: cacheKey, endpoint: "recommendations" });
+        if (cached) {
+            console.log("Returning cached recommendations");
+            return {
+                morning: hydrate(cached.morning || []),
+                evening: hydrate(cached.evening || []),
+                treatments: hydrate(cached.treatments || [])
+            };
+        }
+
         // Optimize product list for prompt (reduce token usage)
-        const inventoryContext = products.map(p => ({
+        const inventoryContext = products.map((p: any) => ({
             id: p.id,
             name: p.name,
             brand: p.brand,
@@ -40,8 +64,8 @@ export const generate = action({
             console.log("No API Key. Returning mock recommendations.");
             // Simple mock logic
             return {
-                morning: products.slice(0, 3).map(p => ({ product: p, reason: "Good for daily use." })),
-                evening: products.slice(3, 6).map(p => ({ product: p, reason: "Repairing at night." })),
+                morning: products.slice(0, 3).map((p: any) => ({ product: p, reason: "Good for daily use." })),
+                evening: products.slice(3, 6).map((p: any) => ({ product: p, reason: "Repairing at night." })),
                 treatments: []
             };
         }
@@ -87,12 +111,14 @@ export const generate = action({
 
             const recommendations = JSON.parse(content);
 
-            // Hydrate product IDs back to full product objects
-            const hydrate = (list) => list.map(item => {
-                const product = products.find(p => p.id === item.productId);
-                return { ...item, product };
-            }).filter(item => item.product);
+            // Save to Cache
+            await ctx.runMutation(internal.aiUtils.setCache, {
+                key: cacheKey,
+                endpoint: "recommendations",
+                data: recommendations
+            });
 
+            // Hydrate product IDs back to full product objects
             return {
                 morning: hydrate(recommendations.morning || []),
                 evening: hydrate(recommendations.evening || []),

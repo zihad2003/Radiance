@@ -1,7 +1,7 @@
-"use node";
+
 import { action, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import Replicate from "replicate";
 
 // 1. Caching Helpers (must be exported for internal use)
@@ -38,22 +38,9 @@ export const generateMakeover = action({
         strength: v.optional(v.number())
     },
     handler: async (ctx, args) => {
-        // A. Check Cache
-        // Note: Data URI caching is tricky if base64 is huge. 
-        // Ideally, we hash it or use a stored file ID. 
-        // For this demo, we assume the client might send the same Data URI or URL.
-        // Length check to avoid massive keys? Convex limits? 
-        // Let's rely on prompt matching mostly or assume inputs are stable URLs in prod.
-        // If it's a Data URI, it might be too large to index efficiently or use as key if not careful.
-        // But let's try.
-
-        // Extract preset name/style from prompt if possible, or pass it as arg. 
-        // args.prompt is the full prompt. Let's use it as the 'preset' key for now or a shortened version.
-        // Actually, let's just use the prompt as the preset key.
-
         const cached = await ctx.runQuery(internal.ai.getCachedImage, {
             inputImageUrl: args.imageUrl,
-            preset: args.prompt // Using prompt as unique identifier for the style
+            preset: args.prompt
         });
 
         if (cached) {
@@ -79,8 +66,6 @@ export const generateMakeover = action({
                 }
             });
 
-            // B. Save to Cache
-            // Replicate returns array of strings (URLs)
             if (Array.isArray(output) && output.length > 0) {
                 await ctx.runMutation(internal.ai.saveGeneratedImage, {
                     inputImageUrl: args.imageUrl,
@@ -94,6 +79,45 @@ export const generateMakeover = action({
         } catch (error) {
             console.error("Replicate Error:", error);
             throw new Error("Failed to generate makeover. Please check API configuration.");
+        }
+    },
+});
+
+export const analyzeSkin = action({
+    args: { imageUrl: v.string() },
+    handler: async (_ctx, args) => {
+        const replicate = new Replicate({
+            auth: process.env.REPLICATE_API_TOKEN,
+        });
+
+        // Use a Vision model (e.g., BLIP or LLaVA) to analyze the face
+        const model = "salesforce/blip:2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746";
+
+        try {
+            const output = await replicate.run(model, {
+                input: {
+                    image: args.imageUrl,
+                    task: "visual_question_answering",
+                    question: "Analyze the skin condition of the person in this photo. Describe skin type, hydration, acne, wrinkles, and texture in detail."
+                }
+            });
+
+            // Parse the text output efficiently in production. 
+            // For now we return the raw text analysis and some mocked metrics based on it.
+            return {
+                analysisText: output,
+                metrics: {
+                    hydration: Math.floor(Math.random() * 30) + 70, // Mock
+                    roughness: Math.floor(Math.random() * 20),
+                    acne: Math.floor(Math.random() * 10),
+                    wrinkles: Math.floor(Math.random() * 10),
+                },
+                skinType: "Combination", // Simplified
+                score: 85
+            };
+        } catch (error) {
+            console.error("Skin Analysis Error:", error);
+            throw new Error("Failed to analyze skin.");
         }
     },
 });

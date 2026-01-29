@@ -31,7 +31,7 @@ const PresetGallery = ({ presets, onApply, onDetail }) => {
             </div>
 
             {/* Presets Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                 <AnimatePresence mode="popLayout">
                     {filtered.map((preset, index) => (
                         <motion.div

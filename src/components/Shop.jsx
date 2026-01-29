@@ -286,7 +286,7 @@ const ShopContent = ({ cloudProducts, isCloudLoading }) => {
                                 <p className="mt-6 text-[10px] font-black uppercase tracking-widest text-white/40">Synchronizing with Radiance Cloud...</p>
                             </div>
                         ) : filteredProducts.length > 0 ? (
-                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'} relative`}>
                                 <AnimatePresence mode="popLayout">
                                     {filteredProducts.map((p, idx) => (
                                         <ProductCard

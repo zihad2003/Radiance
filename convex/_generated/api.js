@@ -1,24 +1,23 @@
-export const api = {
-    chat: {
-        sendMessage: "chat:sendMessage",
-    },
-    bookings: {
-        getBookings: "bookings:getBookings",
-        updateStatus: "bookings:updateStatus",
-        createBooking: "bookings:createBooking",
-    },
-    products: {
-        list: "products:list",
-        bulkAdd: "products:bulkAdd",
-    },
-    skinAnalysis: {
-        analyze: "skinAnalysis:analyze",
-    },
-    ai: {
-        generateMakeover: "ai:generateMakeover",
-    },
-    tutorials: {
-        generate: "tutorials:generate",
-    },
-};
-export const internal = {};
+/* eslint-disable */
+/**
+ * Generated `api` utility.
+ *
+ * THIS CODE IS AUTOMATICALLY GENERATED.
+ *
+ * To regenerate, run `npx convex dev`.
+ * @module
+ */
+
+import { anyApi, componentsGeneric } from "convex/server";
+
+/**
+ * A utility for referencing Convex functions in your app's API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
+export const api = anyApi;
+export const internal = anyApi;
+export const components = componentsGeneric();

@@ -332,7 +332,7 @@ const AIPresetGenerator = () => {
                             </h2>
 
                             {/* Category Filter */}
-                            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 custom-scrollbar">
+                            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 custom-scrollbar-gold">
                                 {categories.map(category => (
                                     <button
                                         key={category}
@@ -348,7 +348,7 @@ const AIPresetGenerator = () => {
                             </div>
 
                             {/* Presets Grid */}
-                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-2 custom-scrollbar flex-grow max-h-[400px]">
+                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-2 custom-scrollbar-gold flex-grow max-h-[400px]">
                                 {filteredPresets.map(preset => (
                                     <motion.button
                                         key={preset.id}
@@ -516,23 +516,7 @@ const AIPresetGenerator = () => {
             </div>
 
             {/* Custom Scrollbar Styles */}
-            <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                    height: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(245, 230, 200, 0.3);
-                    border-radius: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(245, 230, 200, 0.5);
-                }
-            `}</style>
+
         </div>
     );
 };

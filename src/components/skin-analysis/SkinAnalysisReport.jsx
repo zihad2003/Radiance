@@ -2,9 +2,9 @@ import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Share2, Save, X, Calendar, ArrowRight, Droplets, Sun, Activity, Scan, Moon } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { useAuth } from '../../../context/AuthContext';
-import { useToast } from '../../../context/ToastContext';
+import { api } from '../../../convex/_generated/api';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import RoutineBuilder from './RoutineBuilder';
 
 const SkinAnalysisReport = ({ result, onClose }) => {
@@ -25,6 +25,25 @@ const SkinAnalysisReport = ({ result, onClose }) => {
 
     const overallScore = calculateOverallScore();
     const previousResult = history && history.length > 0 ? history[0] : null;
+
+    // --- DEBUG LOGGING for Testing Steps ---
+    React.useEffect(() => {
+        if (result) {
+            console.group("🧪 Skin Analysis Report Debug");
+            console.log("Timestamp:", new Date().toLocaleTimeString());
+            console.log("Analysis Result Object:", result);
+            console.log("Computed Overall Score:", overallScore);
+            console.log("Detected Concerns:", result.concerns);
+            console.log("Face Regional Map:", result.faceMap);
+            console.log("AI Recommended Routine:", result.routine);
+
+            // Log for Performance/Accuracy checks
+            if (result.metrics) {
+                console.log("Skin Metrics (Hydration/Radiance):", result.metrics);
+            }
+            console.groupEnd();
+        }
+    }, [result, overallScore]);
 
     const handleSave = async () => {
         if (!user) {

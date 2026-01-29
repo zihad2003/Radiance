@@ -310,8 +310,8 @@ export const safeStorage = {
         try {
             return localStorage.getItem(key);
         } catch (e) {
-            console.warn('localStorage not available:', e);
-            return null;
+            console.warn('localStorage not available, using in-memory fallback:', e);
+            return window.tempStorage?.[key] || null;
         }
     },
     setItem: (key, value) => {
@@ -319,7 +319,9 @@ export const safeStorage = {
             localStorage.setItem(key, value);
             return true;
         } catch (e) {
-            console.warn('localStorage not available:', e);
+            console.warn('localStorage not available, using in-memory fallback:', e);
+            window.tempStorage = window.tempStorage || {};
+            window.tempStorage[key] = value;
             return false;
         }
     },
@@ -329,6 +331,7 @@ export const safeStorage = {
             return true;
         } catch (e) {
             console.warn('localStorage not available:', e);
+            if (window.tempStorage) delete window.tempStorage[key];
             return false;
         }
     },

@@ -17,8 +17,8 @@ export default defineConfig({
         name: 'Radiance Beauty Salon',
         short_name: 'Radiance',
         description: 'AI-Powered Virtual Makeup & Hairstyling Experience',
-        theme_color: '#B76E79',
-        background_color: '#FFF5F7',
+        theme_color: '#C5A059',
+        background_color: '#121110',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
@@ -180,5 +180,12 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
+  },
+  server: {
+    host: true,
+    https: false, // Force HTTP to prevent SSL errors on local network
+    hmr: {
+      protocol: 'ws',
+    }
   },
 })

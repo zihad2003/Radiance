@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAction, useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { Sparkles, Sun, Moon, Beaker, Check, DollarSign, AlertCircle, Loader2, Database } from 'lucide-react';
+import { Sparkles, Sun, Moon, Beaker, Check, DollarSign, AlertCircle, Loader2, Database, Save } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 const RoutineBuilder = ({ analysisResult }) => {
     const generate = useAction(api.recommendations.generate);
     const products = useQuery(api.products.list);
     const seed = useMutation(api.seed.resetAndSeed);
+    const saveRoutine = useMutation(api.users.saveRoutine);
+    const { user } = useAuth();
+    const { toast } = useToast();
 
     const [loading, setLoading] = useState(false);
     const [routine, setRoutine] = useState(null);
@@ -18,6 +23,24 @@ const RoutineBuilder = ({ analysisResult }) => {
         allergies: [],
         goals: ['Anti-Aging', 'Hydration']
     });
+
+    const handleSave = async () => {
+        if (!user) {
+            toast.error("Please login to save your routine.");
+            return;
+        }
+        try {
+            await saveRoutine({
+                userId: user._id,
+                routine: routine,
+                name: `Routine ${new Date().toLocaleDateString()}`
+            });
+            toast.success("Routine saved successfully!");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save routine.");
+        }
+    };
 
     const handleSeed = async () => {
         if (!confirm("Reset and seed database with demo products?")) return;
@@ -35,9 +58,14 @@ const RoutineBuilder = ({ analysisResult }) => {
 
 
     const handleGenerate = async () => {
+        console.group("🛍️ Routine Generation");
+        console.log("1. Preferences:", preferences);
+        console.log("2. Skin Profile:", analysisResult.skinType, analysisResult.concerns);
+
         setLoading(true);
         setStep(2);
         try {
+            console.time("Recommendation API");
             const result = await generate({
                 skinProfile: {
                     skinType: analysisResult.skinType,
@@ -54,21 +82,25 @@ const RoutineBuilder = ({ analysisResult }) => {
                     goals: preferences.goals
                 }
             });
+            console.timeEnd("Recommendation API");
+            console.log("3. Generated Routine:", result);
+
             setRoutine(result);
             setStep(3);
         } catch (err) {
-            console.error(err);
+            console.error("❌ Generation Failed:", err);
             // Handle error (maybe toast)
             setStep(1);
         } finally {
             setLoading(false);
+            console.groupEnd();
         }
     };
 
     const ProductCard = ({ item }) => (
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-4 hover:bg-white/10 transition-colors">
             {item.product.image ? (
-                <img src={item.product.image} alt={item.product.name} className="w-16 h-16 object-cover rounded-lg bg-white" />
+                <img src={item.product.image} alt={item.product.name} className="w-16 h-16 object-cover rounded-lg bg-white" loading="lazy" />
             ) : (
                 <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
                     <Beaker size={24} />
@@ -218,8 +250,11 @@ const RoutineBuilder = ({ analysisResult }) => {
                 )}
             </div>
 
-            <div className="p-4 bg-black/20 text-center">
-                <button onClick={() => setStep(1)} className="text-xs text-gray-500 hover:text-white transition-colors">
+            <div className="p-4 bg-black/20 text-center flex flex-col gap-2">
+                <button onClick={handleSave} className="flex items-center justify-center gap-2 text-primary text-sm font-bold uppercase tracking-widest hover:text-white transition-colors mb-2">
+                    <Save size={16} /> Save to Profile
+                </button>
+                <button onClick={() => setStep(1)} className="text-[10px] text-gray-500 hover:text-white transition-colors">
                     Adjust Preferences & Regenerate
                 </button>
             </div>

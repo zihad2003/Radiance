@@ -27,6 +27,12 @@ const SkincareAiChat = ({ analysisResult }) => {
         if (!input.trim() || loading) return;
 
         const userMsg = { role: 'user', content: input };
+
+        // --- DEBUG LOGGING ---
+        console.group("🤖 AI Chat Interaction");
+        console.log("Timestamp:", new Date().toLocaleTimeString());
+        console.log("User Message:", input);
+
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setLoading(true);
@@ -42,7 +48,9 @@ const SkincareAiChat = ({ analysisResult }) => {
                 }
             } : undefined;
 
-            // Format history for API (excluding the initial welcome if it's not a real 'assistant' role in your schema, but here we just pass it)
+            console.log("AI Context (Skin Profile):", skinContext);
+
+            // Format history for API
             const history = messages.map(m => ({
                 role: m.role,
                 content: m.content
@@ -54,9 +62,13 @@ const SkincareAiChat = ({ analysisResult }) => {
                 skinContext
             });
 
+            console.log("AI Response Content:", response);
+            console.groupEnd();
+
             setMessages(prev => [...prev, { role: 'assistant', content: response }]);
         } catch (err) {
-            console.error(err);
+            console.error("❌ Chat Error:", err);
+            console.groupEnd();
             setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting right now. Please try again." }]);
         } finally {
             setLoading(false);
@@ -107,8 +119,8 @@ const SkincareAiChat = ({ analysisResult }) => {
                                         {msg.role === 'user' ? <User size={14} className="text-white" /> : <Sparkles size={14} className="text-primary" />}
                                     </div>
                                     <div className={`p-3 rounded-2xl text-xs leading-relaxed max-w-[80%] ${msg.role === 'user'
-                                            ? 'bg-white text-black rounded-tr-sm'
-                                            : 'bg-white/5 text-gray-200 border border-white/5 rounded-tl-sm'
+                                        ? 'bg-white text-black rounded-tr-sm'
+                                        : 'bg-white/5 text-gray-200 border border-white/5 rounded-tl-sm'
                                         }`}>
                                         {msg.content}
                                     </div>

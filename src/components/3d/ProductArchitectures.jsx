@@ -283,9 +283,33 @@ export const MascaraHero = ({
 // ========== PRODUCT VIEW STAGE ==========
 
 export const BeautyProductStage = ({ children, title, subtitle, price }) => {
+    // WebGL Context Handling
+    const handleContextLost = (event) => {
+        event.preventDefault();
+        console.warn('WebGL context lost. Attempting to restore...');
+    };
+
+    const handleContextRestored = () => {
+        console.log('WebGL context restored');
+    };
+
     return (
         <div className="w-full h-[500px] relative bg-gradient-to-br from-neutral-900 to-black rounded-3xl overflow-hidden shadow-2xl">
-            <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 1.5, 4], fov: 35 }}>
+            <Canvas
+                shadows
+                dpr={[1, 1.5]}
+                gl={{
+                    powerPreference: "default", // Changed from high-performance to avoid aggressive context loss
+                    preserveDrawingBuffer: true,
+                    antialias: true,
+                    alpha: true
+                }}
+                onCreated={({ gl }) => {
+                    gl.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+                    gl.domElement.addEventListener('webglcontextrestored', handleContextRestored, false);
+                }}
+                camera={{ position: [0, 1.5, 4], fov: 35 }}
+            >
                 <ambientLight intensity={0.5} />
                 <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
                 <Environment preset="city" />
@@ -301,7 +325,16 @@ export const BeautyProductStage = ({ children, title, subtitle, price }) => {
                         {children}
                     </Float>
                 </PresentationControls>
-                <ContactShadows position={[0, -1.5, 0]} opacity={0.4} scale={10} blur={2} far={4.5} />
+                <ContactShadows
+                    position={[0, -1.5, 0]}
+                    opacity={0.4}
+                    scale={10}
+                    blur={2}
+                    far={4.5}
+                    resolution={256}
+                    frames={1}
+                    color="#000000"
+                />
             </Canvas>
 
             {/* Overlays */}

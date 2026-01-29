@@ -137,11 +137,7 @@ function AppContent() {
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/shop" element={<ShopPage />} />
                   <Route path="/about" element={<AboutPage />} />
-                  <Route path="/ai-makeover" element={
-                    <ProtectedRoute>
-                      <AIMakeoverPage />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/ai-makeover" element={<AIMakeoverPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/account" element={

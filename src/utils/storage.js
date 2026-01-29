@@ -1,9 +1,61 @@
 // IndexedDB wrapper for Radiance Beauty Salon
-// Stores saved makeup looks locally
+// Stores saved makeup looks and bookings locally
+// Also handles LocalStorage with fallback for privacy-conscious browsers
 
 const DB_NAME = 'RadianceDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'looks';
+
+// --- LocalStorage Wrapper (Privacy Protection) ---
+
+/**
+ * Saves a value to localStorage with fallback to in-memory storage if blocked.
+ * @param {string} key 
+ * @param {any} value 
+ * @returns {boolean} True if saved to localStorage, False if fallback used
+ */
+export const saveToStorage = (key, value) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (error) {
+        console.warn(`localStorage blocked for key "${key}", using in-memory storage`);
+        // Fallback to in-memory storage
+        window.tempStorage = window.tempStorage || {};
+        window.tempStorage[key] = value;
+        return false;
+    }
+};
+
+/**
+ * Retrieves a value from localStorage with fallback checking.
+ * @param {string} key 
+ * @returns {any | null}
+ */
+export const getFromStorage = (key) => {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+    } catch (error) {
+        console.warn(`localStorage blocked for key "${key}", using in-memory storage`);
+        return window.tempStorage?.[key] || null;
+    }
+};
+
+/**
+ * Removes a key from storage
+ * @param {string} key 
+ */
+export const removeFromStorage = (key) => {
+    try {
+        localStorage.removeItem(key);
+    } catch (error) {
+        if (window.tempStorage) delete window.tempStorage[key];
+    }
+}
+
+
+// --- IndexedDB Logic ---
 
 const openDB = () => {
     return new Promise((resolve, reject) => {

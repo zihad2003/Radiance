@@ -139,7 +139,27 @@ const BeautyScene = () => {
                     toneMapping: THREE.ACESFilmicToneMapping,
                     toneMappingExposure: 1.2,
                     outputEncoding: THREE.sRGBEncoding,
-                    shadowMapType: THREE.PCFSoftShadowMap
+                    shadowMapType: THREE.PCFSoftShadowMap,
+                    powerPreference: "high-performance"
+                }}
+                onCreated={({ gl, scene }) => {
+                    const handleContextLost = (event) => {
+                        event.preventDefault();
+                        console.warn('WebGL Context Lost');
+                    };
+                    const handleContextRestored = () => {
+                        console.log('WebGL Context Restored');
+                    };
+
+                    gl.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+                    gl.domElement.addEventListener('webglcontextrestored', handleContextRestored, false);
+
+                    // Cleanup function attached to the canvas element for convenience or handled in useEffect
+                    return () => {
+                        gl.domElement.removeEventListener('webglcontextlost', handleContextLost);
+                        gl.domElement.removeEventListener('webglcontextrestored', handleContextRestored);
+                        gl.dispose();
+                    };
                 }}
             >
                 <Suspense fallback={null}>

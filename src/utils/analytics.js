@@ -28,12 +28,27 @@ export const trackPageView = (path) => {
 
 // Track Specific Events
 export const trackEvent = (category, action, label = null, value = null) => {
-    ReactGA.event({
-        category: category,
-        action: action,
-        label: label, // optional
-        value: value, // optional, must be number
-    });
+    const eventParams = {
+        category,
+        action,
+        label,
+    };
+
+    // Ensure value is a strictly a number (GA4 requirement)
+    if (value !== null && value !== undefined) {
+        if (typeof value === 'number') {
+            eventParams.value = value;
+        } else {
+            const parsed = parseFloat(value);
+            if (!isNaN(parsed)) {
+                eventParams.value = parsed;
+            } else {
+                console.warn(`[Analytics] Ignored non-numeric value for ${action}:`, value);
+            }
+        }
+    }
+
+    ReactGA.event(eventParams);
     console.log(`[Event Tracked] ${category}: ${action}`);
 };
 

@@ -171,17 +171,29 @@ const SkinHealthAnalyzer = () => {
 
     // Trigger Analysis
     const handleAnalysis = async (imageData) => {
+        console.group("🔍 Skin Analysis Process");
+        console.time("Analysis Duration");
+        console.log("1. Image Captured. Size:", (imageData.length / 1024).toFixed(2), "KB");
+
         setAnalyzing(true);
         setError(null);
         try {
+            console.log("2. Sending to Convex API...");
             const data = await analyzeSkin({ image: imageData });
+            console.log("3. API Response Received:", data);
+
+            if (!data) throw new Error("Empty response from analysis");
+
             setResult(data);
             setShowReport(true);
+            console.log("4. Report Generated Successfully");
         } catch (err) {
-            console.error("Analysis Failed:", err);
+            console.error("❌ Analysis Failed:", err);
             setError("Analysis failed. Please try again or use a clearer photo.");
         } finally {
             setAnalyzing(false);
+            console.timeEnd("Analysis Duration");
+            console.groupEnd();
         }
     };
 

@@ -12,6 +12,7 @@ import PinkButton from '../ui/PinkButton';
 import HairOverlay from './HairOverlay';
 import './HairStudio.css';
 import html2canvas from 'html2canvas';
+import { getFromStorage, saveToStorage } from '../../utils/storage';
 
 const HairstyleFinder = () => {
     // Mode & Interaction State
@@ -44,8 +45,8 @@ const HairstyleFinder = () => {
     useEffect(() => {
         initFaceDetection().then(setDetector);
         // Load favorites from local storage
-        const saved = localStorage.getItem('radiance_fav_hair');
-        if (saved) setFavorites(JSON.parse(saved));
+        const saved = getFromStorage('radiance_fav_hair');
+        if (saved) setFavorites(saved);
     }, []);
 
     // --- CAMERA ACTIONS ---
@@ -162,7 +163,7 @@ const HairstyleFinder = () => {
             ? favorites.filter(id => id !== styleId)
             : [...favorites, styleId];
         setFavorites(newFavs);
-        localStorage.setItem('radiance_fav_hair', JSON.stringify(newFavs));
+        saveToStorage('radiance_fav_hair', newFavs);
     };
 
 

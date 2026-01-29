@@ -25,7 +25,7 @@ export default defineSchema({
         inStock: v.boolean(),
         architecture: v.any(),
         image: v.optional(v.union(v.string(), v.null())),
-    }).index("by_id", ["id"]).index("by_category", ["category"]).index("by_brand", ["brand"]),
+    }).index("by_product_id", ["id"]).index("by_category", ["category"]).index("by_brand", ["brand"]),
 
 
 
@@ -58,6 +58,13 @@ export default defineSchema({
         timestamp: v.number(),
     }).index("by_orderId", ["orderId"]).index("by_user", ["userId"]),
 
+    ai_cache: defineTable({
+        key: v.string(), // Hash of input params
+        endpoint: v.string(), // "skinAnalysis" | "recommendations" | "chat"
+        data: v.any(),
+        timestamp: v.number(),
+    }).index("by_key", ["key", "endpoint"]),
+
     users: defineTable({
         phone: v.optional(v.string()),
         name: v.optional(v.string()),
@@ -71,6 +78,12 @@ export default defineSchema({
             type: v.string(),
             timestamp: v.number(),
         })),
+        routines: v.optional(v.array(v.object({
+            id: v.string(),
+            name: v.string(),
+            data: v.any(),
+            createdAt: v.number()
+        }))),
         createdAt: v.number(),
     }).index("by_phone", ["phone"]).index("by_email", ["email"]),
 

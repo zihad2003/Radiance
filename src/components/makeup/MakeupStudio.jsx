@@ -114,9 +114,44 @@ const MakeupStudio = () => {
         };
     }, []);
 
+    // Helper to show permission instructions
+    const showCameraPermissionInstructions = () => {
+        const instructions = `
+    To enable camera access:
+    
+    Chrome/Edge:
+    1. Click the lock icon in the address bar
+    2. Find Camera and select "Allow"
+    3. Refresh the page
+    
+    Firefox:
+    1. Click the camera icon in the address bar
+    2. Select "Allow" and click "Remember this decision"
+    3. Refresh the page
+    
+    Safari:
+    1. Go to Safari > Settings > Websites > Camera
+    2. Find this website and select "Allow"
+    3. Refresh the page
+        `;
+        alert(instructions);
+    };
+
     const startCamera = async () => {
         setCameraError(null);
         try {
+            // Permission Check
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                if (permissionStatus.state === 'denied') {
+                    setCameraError("Camera blocked. Please enable browser permissions.");
+                    showCameraPermissionInstructions();
+                    return;
+                }
+            } catch (e) {
+                // Ignore if not supported
+            }
+
             const constraints = {
                 video: {
                     width: { ideal: 1280 },
@@ -125,20 +160,28 @@ const MakeupStudio = () => {
                     frameRate: { ideal: 30, max: 30 }
                 }
             };
-            const stream = await getCompatibleUserMedia(constraints);
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                const track = stream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                setCameraRes({ w: settings.width, h: settings.height });
-                videoRef.current.play();
+                videoRef.current.onloadedmetadata = () => {
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    setCameraRes({ w: settings.width, h: settings.height });
+                    videoRef.current.play();
+                };
                 setIsCameraActive(true);
                 trackEvent('Virtual Try-On', AnalyticsEvents.VIRTUAL_TRY_ON.OPENED, 'HD Studio Camera');
             }
         } catch (err) {
             console.error(err);
-            if (err.name === 'NotAllowedError') setCameraError("Camera blocked. Please enable browser permissions.");
-            else setCameraError("Camera not detected or 1080p resolution not supported.");
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setCameraError("Camera permission denied. Please allow access.");
+                showCameraPermissionInstructions();
+            } else if (err.name === 'NotFoundError') {
+                setCameraError("No camera detected on this device.");
+            } else {
+                setCameraError("Camera error: " + err.message);
+            }
         }
     };
 
@@ -422,9 +465,23 @@ const MakeupStudio = () => {
                             </p>
 
                             {cameraError && (
-                                <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200 text-xs text-left">
-                                    <AlertCircle size={16} className="shrink-0" />
-                                    <span>{cameraError}</span>
+                                <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-3 text-red-200 text-xs text-left">
+                                    <div className="flex items-center gap-3">
+                                        <AlertCircle size={16} className="shrink-0" />
+                                        <span>{cameraError}</span>
+                                    </div>
+                                    <button
+                                        onClick={showCameraPermissionInstructions}
+                                        className="text-white/60 hover:text-white underline self-start ml-7"
+                                    >
+                                        How to fix this?
+                                    </button>
+                                    <button
+                                        onClick={startCamera}
+                                        className="text-white/60 hover:text-white underline self-start ml-7"
+                                    >
+                                        Retry Camera
+                                    </button>
                                 </div>
                             )}
 
@@ -553,7 +610,7 @@ const MakeupStudio = () => {
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 relative">
                     {activeTab === 'bag' && (
                         <div className="space-y-6">
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">

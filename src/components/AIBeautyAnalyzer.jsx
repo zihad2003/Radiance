@@ -10,6 +10,7 @@ import {
     applyARHighlighter,
     analyzeFaceShape
 } from '../utils/arFilters';
+import { fixImageOrientation } from '../utils/imageOptimization';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { useToast } from '../context/ToastContext';
@@ -77,24 +78,79 @@ const AIBeautyAnalyzer = () => {
     ];
 
     // Start camera
+    // Helper to show permission instructions
+    const showCameraPermissionInstructions = () => {
+        const instructions = `
+    To enable camera access:
+    
+    Chrome/Edge:
+    1. Click the lock icon in the address bar
+    2. Find Camera and select "Allow"
+    3. Refresh the page
+    
+    Firefox:
+    1. Click the camera icon in the address bar
+    2. Select "Allow" and click "Remember this decision"
+    3. Refresh the page
+    
+    Safari:
+    1. Go to Safari > Settings > Websites > Camera
+    2. Find this website and select "Allow"
+    3. Refresh the page
+        `;
+        alert(instructions);
+    };
+
+    // Start camera
     const startCamera = async () => {
         setCameraError(null);
         try {
+            // First check if permission is denied
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                if (permissionStatus.state === 'denied') {
+                    setCameraError('Camera access is blocked. Please enable camera in your browser settings.');
+                    showCameraPermissionInstructions();
+                    return;
+                }
+            } catch (e) {
+                // Permissions API might not be supported in all browsers, proceed to try getUserMedia
+            }
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                     frameRate: { ideal: 30, max: 30 },
                     facingMode: 'user'
-                }
+                },
+                audio: false
             });
+
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
+                // Ensure we call any state setters if needed, though previously we just set srcObject
             }
         } catch (error) {
             console.error('Camera access denied:', error);
-            setCameraError('Permission missing. Click the lock icon in your URL bar to allow camera access.');
-            setMode('idle');
+
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                setCameraError('Camera permission denied. Please allow access to use this feature.');
+                showCameraPermissionInstructions();
+                // Don't revert mode here immediately if we want to show error UI in camera mode container
+            } else if (error.name === 'NotFoundError') {
+                setCameraError('No camera found on this device.');
+            } else if (error.name === 'NotReadableError') {
+                setCameraError('Camera is already in use by another application.');
+            } else {
+                setCameraError('Failed to access camera: ' + error.message);
+            }
+            // Keep mode as 'camera' or 'idle'? 
+            // The UI shows error view if cameraError is set, so keeping 'camera' might create weird state if we depend on 'idle' for initial view.
+            // But let's look at UI. 
+            // If mode === 'idle' && !cameraError shows "Ready...". 
+            // If cameraError is set, we need to show error.
+            // The UI code handles `cameraError` check inside the camera container.
         }
     };
 
@@ -135,13 +191,16 @@ const AIBeautyAnalyzer = () => {
     };
 
     // Handle file upload
-    const handleFileUpload = (e) => {
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         setMode('upload');
-        const reader = new FileReader();
-        reader.onload = (event) => {
+
+        try {
+            // Fix rotation for mobile uploads
+            const correctedDataUrl = await fixImageOrientation(file);
+
             const img = new Image();
             img.onload = () => {
                 const canvas = canvasRef.current;
@@ -153,9 +212,27 @@ const AIBeautyAnalyzer = () => {
                     analyzeSkin();
                 }
             };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
+            img.src = correctedDataUrl;
+        } catch (err) {
+            console.error("Image processing error:", err);
+            // Fallback to standard load
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = canvasRef.current;
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        analyzeSkin();
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     // Apply AR filters (placeholder - would integrate with MediaPipe)
@@ -307,10 +384,16 @@ const AIBeautyAnalyzer = () => {
                                     <h3 className="text-white font-bold uppercase tracking-widest mb-2">Access Denied</h3>
                                     <p className="text-white/40 text-sm max-w-md text-center mb-8">{cameraError}</p>
                                     <button
-                                        onClick={() => setMode('camera')}
+                                        onClick={() => startCamera()}
                                         className="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all text-xs font-bold uppercase tracking-widest"
                                     >
                                         Try Again
+                                    </button>
+                                    <button
+                                        onClick={showCameraPermissionInstructions}
+                                        className="mt-4 text-white/40 hover:text-white underline text-xs"
+                                    >
+                                        Show Permission Help
                                     </button>
                                 </div>
                             )}

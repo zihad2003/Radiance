@@ -1,5 +1,31 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage } from 'zustand/middleware';
+
+// Custom storage adapter to handle blocked localStorage
+const storageAdapter = {
+    getItem: (name) => {
+        try {
+            return localStorage.getItem(name);
+        } catch (e) {
+            console.warn('localStorage blocked, using memory');
+            return window.tempStorage?.[name] || null;
+        }
+    },
+    setItem: (name, value) => {
+        try {
+            localStorage.setItem(name, value);
+        } catch (e) {
+            window.tempStorage = window.tempStorage || {};
+            window.tempStorage[name] = value;
+        }
+    },
+    removeItem: (name) => {
+        try {
+            localStorage.removeItem(name);
+        } catch (e) {
+            if (window.tempStorage) delete window.tempStorage[name];
+        }
+    },
+};
 
 export const useMakeupStore = create(
     persist(
@@ -48,6 +74,7 @@ export const useMakeupStore = create(
         }),
         {
             name: 'radiance-makeup-storage', // Key for localStorage persistence
+            storage: createJSONStorage(() => storageAdapter),
         }
     )
 );

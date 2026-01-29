@@ -56,7 +56,7 @@ const Navbar = () => {
                 <Link to="/" className="flex items-center gap-4 group shrink-0">
                     <motion.div
                         layout
-                        className="relative w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden bg-black border border-white/10 group-hover:border-primary/50 transition-all shadow-2xl"
+                        className="relative w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden bg-transparent border border-white/10 group-hover:border-primary/50 transition-all shadow-2xl"
                     >
                         <img
                             src="/logo.png"
@@ -75,12 +75,12 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center bg-white/5 backdrop-blur-md border border-white/5 rounded-full px-1 py-1 mx-4 relative">
                     {navLinks.map((link) => (
                         <motion.div
+                            key={link.name}
                             whileHover={{ y: -2 }}
                             whileTap={{ y: 0 }}
                             className="relative z-10"
                         >
                             <Link
-                                key={link.name}
                                 to={link.href}
                                 className={`px-3.5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all relative block whitespace-nowrap ${isActive(link.href) ? 'text-black' : 'text-white/50 hover:text-white'
                                     }`}

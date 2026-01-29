@@ -173,3 +173,60 @@ export const getLoadingProps = (isAboveFold = false) => {
         decoding: isAboveFold ? 'sync' : 'async',
     };
 };
+
+import EXIF from 'exif-js';
+
+/**
+ * Reads EXIF orientation and returns a new Image/Canvas with corrected orientation
+ * @param {File} file - The image file
+ * @returns {Promise<string>} Data URL of the corrected image
+ */
+export const fixImageOrientation = (file) => {
+    return new Promise((resolve, reject) => {
+        // EXIF.getData side-effects the file/image object, so we pass the file directly.
+        EXIF.getData(file, function () {
+            const orientation = EXIF.getTag(this, "Orientation");
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    // If no orientation or normal, return original
+                    if (!orientation || orientation === 1) {
+                        resolve(e.target.result);
+                        return;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Set proper canvas dimensions before transform & render
+                    if ([5, 6, 7, 8].indexOf(orientation) > -1) {
+                        canvas.width = img.height;
+                        canvas.height = img.width;
+                    } else {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                    }
+
+                    // transform context before drawing image
+                    switch (orientation) {
+                        case 2: ctx.transform(-1, 0, 0, 1, img.width, 0); break;
+                        case 3: ctx.transform(-1, 0, 0, -1, img.width, img.height); break;
+                        case 4: ctx.transform(1, 0, 0, -1, 0, img.height); break;
+                        case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
+                        case 6: ctx.transform(0, 1, -1, 0, img.height, 0); break;
+                        case 7: ctx.transform(0, -1, -1, 0, img.height, img.width); break;
+                        case 8: ctx.transform(0, -1, 1, 0, 0, img.width); break;
+                        default: break;
+                    }
+
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', 0.9));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+};

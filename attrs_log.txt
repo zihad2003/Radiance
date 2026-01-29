@@ -1,0 +1,5 @@
+[jsx] D:\Radiance\src\components\AIPresetGenerator.jsx:519
+[jsx] D:\Radiance\src\components\AITaggedGallery.jsx:428
+[text-white] D:\Radiance\src\components\Pricing.jsx:228
+[text-white] D:\Radiance\src\components\Pricing.jsx:239
+[text-white] D:\Radiance\src\components\ui\PinkButton.jsx:11

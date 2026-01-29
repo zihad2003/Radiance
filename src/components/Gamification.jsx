@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, X, Star, Trophy, Sparkles, TrendingUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useRewards } from '../context/RewardsContext';
+import { getFromStorage, saveToStorage } from '../utils/storage';
 
 const prizes = [
     { label: "10% Off", color: "#B76E79" },
@@ -158,7 +159,7 @@ const Gamification = () => {
 
     useEffect(() => {
         // Daily login bonus simulation
-        const lastVisit = localStorage.getItem('last_visit_date');
+        const lastVisit = getFromStorage('last_visit_date');
         const today = new Date().toDateString();
 
         if (lastVisit !== today) {
@@ -166,7 +167,7 @@ const Gamification = () => {
                 earnPoints(50, 'Daily Login');
                 // Could trigger a special toast here
             }, 2000);
-            localStorage.setItem('last_visit_date', today);
+            saveToStorage('last_visit_date', today);
         }
 
         // Auto-open spinner after 30 seconds

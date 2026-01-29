@@ -353,7 +353,7 @@ const AITaggedGallery = () => {
                                 </div>
 
                                 {/* Content Section (Right/Bottom) */}
-                                <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col overflow-y-auto custom-scrollbar bg-[#0A0A0A]">
+                                <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col overflow-y-auto custom-scrollbar-white bg-[#0A0A0A]">
                                     <div className="mb-12">
                                         <div className="flex items-center gap-4 mb-6">
                                             <div className="h-px bg-white/10 w-12" />
@@ -425,12 +425,7 @@ const AITaggedGallery = () => {
                 </AnimatePresence>
             </div>
 
-            <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
-            `}</style>
+
         </section>
     );
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Smartphone } from 'lucide-react';
+import { getFromStorage, saveToStorage } from '../utils/storage';
 
 /**
  * PWA Install Prompt Component
@@ -19,7 +20,7 @@ const PWAInstallPrompt = () => {
         }
 
         // Check if user previously dismissed
-        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        const dismissed = getFromStorage('pwa-install-dismissed');
         const dismissedTime = dismissed ? parseInt(dismissed, 10) : 0;
         const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
 
@@ -74,7 +75,7 @@ const PWAInstallPrompt = () => {
 
     const handleDismiss = () => {
         setShowPrompt(false);
-        localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+        saveToStorage('pwa-install-dismissed', Date.now().toString());
     };
 
     if (isInstalled || !showPrompt) {

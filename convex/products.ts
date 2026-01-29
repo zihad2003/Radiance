@@ -33,7 +33,7 @@ export const getById = query({
     handler: async (ctx: any, args: any) => {
         return await ctx.db
             .query("products")
-            .withIndex("by_id", (q: any) => q.eq("id", args.id))
+            .withIndex("by_product_id", (q: any) => q.eq("id", args.id))
             .unique();
     },
 });
@@ -99,7 +99,7 @@ export const addProduct = mutation({
     handler: async (ctx: any, args: any) => {
         const existing = await ctx.db
             .query("products")
-            .withIndex("by_id", (q: any) => q.eq("id", args.id))
+            .withIndex("by_product_id", (q: any) => q.eq("id", args.id))
             .first();
 
         if (existing) {
@@ -117,7 +117,7 @@ export const bulkAdd = mutation({
         for (const product of args.products) {
             const existing = await ctx.db
                 .query("products")
-                .withIndex("by_id", (q: any) => q.eq("id", product.id))
+                .withIndex("by_product_id", (q: any) => q.eq("id", product.id))
                 .first();
 
             if (existing) {

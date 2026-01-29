@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getFromStorage, saveToStorage } from '../utils/storage';
 
 const RewardsContext = createContext();
 
@@ -6,7 +7,7 @@ export const useRewards = () => useContext(RewardsContext);
 
 export const RewardsProvider = ({ children }) => {
     const [points, setPoints] = useState(() => {
-        const saved = localStorage.getItem('radiance_points');
+        const saved = getFromStorage('radiance_points');
         return saved ? parseInt(saved) : 0;
     });
 
@@ -21,7 +22,7 @@ export const RewardsProvider = ({ children }) => {
     ];
 
     useEffect(() => {
-        localStorage.setItem('radiance_points', points.toString());
+        saveToStorage('radiance_points', points.toString());
 
         // Update level based on points
         const newLevel = [...levels].reverse().find(l => points >= l.min);
