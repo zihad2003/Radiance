@@ -2,38 +2,24 @@ import Gallery from '../components/Gallery';
 import TransformationCompare from '../components/TransformationCompare';
 import AITaggedGallery from '../components/AITaggedGallery';
 import FadeIn from '../components/ui/FadeIn';
-import PageBentoHeader from '../components/ui/PageBentoHeader';
 import { Camera, Star, TrendingUp } from 'lucide-react';
 
 const GalleryPage = () => {
     return (
         <div className="min-h-screen bg-[#121110] text-white selection:bg-primary selection:text-black">
-            <PageBentoHeader
-                title={<>VISIONARY<br /><span className="text-primary">RESULTS</span></>}
-                badge="The Portfolio"
-                description="Witness the cinematic transformations that define the Radiance aesthetic. Our work is where precision meets poetry."
-                image="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200"
-                disableImageFilter={true}
-                stats={[
-                    { label: "Elite Clients", value: "5000+", description: "Satisfied individuals across Bangladesh." },
-                    { label: "Recognition", value: "12", description: "Awards for bridal and avant-garde artistry." },
-                    { label: "Success Rate", value: "98%", description: "Client retention and satisfaction benchmark." }
-                ]}
-            />
+            {/* Curated Gallery - The "Vibe" / Editorial - MOVED TO TOP */}
+            <div className="relative z-20 border-b border-white/5">
+                <Gallery />
+            </div>
 
             {/* Transformation Compare - The "Wow" Factor */}
-            <div className="relative z-20">
+            <div className="relative z-10">
                 <TransformationCompare />
             </div>
 
             {/* AI-Tagged Gallery - The "Utility" / functional exploration */}
             <div className="relative z-10 border-t border-white/5">
                 <AITaggedGallery />
-            </div>
-
-            {/* Curated Gallery - The "Vibe" / Editorial */}
-            <div className="relative z-10 border-t border-white/5">
-                <Gallery />
             </div>
 
             {/* CTA Section */}

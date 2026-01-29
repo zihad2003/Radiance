@@ -16,58 +16,116 @@ const Gallery = () => {
     const [selectedImage, setSelectedImage] = useState(null);
 
     return (
-        <section id="gallery" className="py-24 bg-[#121110] relative">
+        <section id="gallery" className="pt-32 pb-24 bg-[#121110] relative min-h-screen">
             <div className="container mx-auto px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8"
-                >
-                    <div className="max-w-2xl">
-                        <div className="bento-ribbon mb-6 text-primary w-fit">
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">The Collection</span>
+
+                {/* Hero Grid Section */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[minmax(280px,auto)]">
+
+                    {/* 1. Header Text Block (Top Left) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="md:col-span-2 md:row-span-1 flex flex-col justify-center items-start p-4"
+                    >
+                        <div className="bento-ribbon mb-6 text-primary w-fit border border-primary/20 bg-primary/5 px-4 py-1.5 rounded-full">
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">The Portfolio</span>
                         </div>
-                        <h3 className="text-5xl md:text-7xl font-sans font-black text-white uppercase tracking-tighter leading-[0.9]">
-                            Visuals of <span className="text-primary italic font-serif">Excellence</span>
-                        </h3>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">Curated Moments of Radiance</p>
-                    </div>
-                </motion.div>
+                        <h1 className="text-6xl md:text-8xl font-sans font-black text-white uppercase tracking-tighter leading-[0.8] mb-6">
+                            Visionary<br /><span className="text-primary italic font-serif">Results</span>
+                        </h1>
+                        <p className="text-gray-400 text-sm font-bold uppercase tracking-[0.2em] max-w-md leading-relaxed">
+                            Witness the cinematic transformations that define the Radiance aesthetic.
+                        </p>
+                    </motion.div>
 
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-                    {galleryImages.map((image, index) => (
-                        <motion.div
-                            key={image.id}
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            viewport={{ once: true }}
-                            onClick={() => setSelectedImage(image)}
-                            className="relative group break-inside-avoid bento-card p-0 overflow-hidden cursor-pointer rounded-[2.5rem] bg-[#0A0A0A] border border-white/5 hover:border-primary/50 transition-all duration-500"
-                        >
-                            <Image
-                                src={image.src}
-                                alt={image.title}
-                                className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
-                            />
+                    {/* 2. Middle Stack Top (Small) - Gaye Holud */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="md:col-span-1 relative group bento-card rounded-[2rem] overflow-hidden cursor-pointer"
+                        onClick={() => setSelectedImage(galleryImages[2])}
+                    >
+                        <Image src={galleryImages[2].src} alt={galleryImages[2].title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                            <span className="text-[10px] text-white font-bold uppercase tracking-widest">{galleryImages[2].title}</span>
+                        </div>
+                    </motion.div>
 
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500"></div>
+                    {/* 3. Tall Right (Full Height) - Snigdho */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 }}
+                        className="md:col-span-1 md:row-span-2 relative group bento-card rounded-[2.5rem] rounded-tr-[1rem] overflow-hidden cursor-pointer" // Mapped from Snigdho
+                        onClick={() => setSelectedImage(galleryImages[1])}
+                    >
+                        <div className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 group-hover:bg-primary group-hover:text-black transition-all">
+                            <ArrowUpRight size={18} />
+                        </div>
+                        <Image src={galleryImages[1].src} alt={galleryImages[1].title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                    </motion.div>
 
-                            <div className="absolute bottom-0 left-0 w-full p-8 flex justify-between items-end translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                <div>
-                                    <h4 className="text-white font-sans font-black text-xl uppercase tracking-wider mb-2">{image.title}</h4>
-                                    <div className="h-0.5 w-0 bg-primary group-hover:w-full transition-all duration-700 delay-100" />
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-primary group-hover:text-black transition-all">
-                                    <ArrowUpRight size={18} />
+                    {/* 4. Bottom Left (Large Image) - Bridal */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 }}
+                        className="md:col-span-2 md:row-span-1 relative group bento-card rounded-[2.5rem] overflow-hidden cursor-pointer h-[350px]"
+                        onClick={() => setSelectedImage(galleryImages[0])}
+                    >
+                        <Image src={galleryImages[0].src} alt={galleryImages[0].title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+
+                        {/* Floating Price/Info Tag Style from Reference */}
+                        <div className="absolute top-0 right-0 p-6">
+                            <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col items-start gap-1 shadow-2xl transform group-hover:-translate-y-2 transition-transform">
+                                <span className="text-xs text-white/50 uppercase tracking-widest">Style</span>
+                                <span className="text-lg font-serif italic text-white">Bridal Exclusive</span>
+                                <div className="flex gap-1 mt-2">
+                                    <Star size={10} className="fill-primary text-primary" />
+                                    <Star size={10} className="fill-primary text-primary" />
+                                    <Star size={10} className="fill-primary text-primary" />
                                 </div>
                             </div>
-                        </motion.div>
-                    ))}
+                        </div>
+
+                        <div className="absolute bottom-6 left-8">
+                            <h3 className="text-2xl font-sans font-black text-white uppercase tracking-tighter">{galleryImages[0].title}</h3>
+                        </div>
+                    </motion.div>
+
+                    {/* 5. Middle Bottom (Small) - Party Hair */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 }}
+                        className="md:col-span-1 relative group bento-card rounded-[2rem] overflow-hidden cursor-pointer"
+                        onClick={() => setSelectedImage(galleryImages[3])}
+                    >
+                        <Image src={galleryImages[3].src} alt={galleryImages[3].title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute bottom-4 left-4">
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wide">{galleryImages[3].title}</h4>
+                        </div>
+                    </motion.div>
+
+                    {/* Extra Row: Wide Items */}
+                    <motion.div className="md:col-span-2 h-[250px] relative group bento-card rounded-[2rem] overflow-hidden cursor-pointer bg-[#1A1A1A] flex items-center" onClick={() => setSelectedImage(galleryImages[4])}>
+                        <div className="w-1/2 h-full relative overflow-hidden"><Image src={galleryImages[4].src} className="w-full h-full object-cover" /></div>
+                        <div className="w-1/2 p-8"><h4 className="text-2xl font-bold text-white uppercase">{galleryImages[4].title}</h4></div>
+                    </motion.div>
+
+                    <motion.div className="md:col-span-2 h-[250px] relative group bento-card rounded-[2rem] overflow-hidden cursor-pointer" onClick={() => setSelectedImage(galleryImages[5])}>
+                        <Image src={galleryImages[5].src} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute bottom-6 right-6 bg-black/50 px-6 py-2 rounded-full border border-white/10 text-white text-xs font-bold uppercase">{galleryImages[5].title}</div>
+                    </motion.div>
+
                 </div>
             </div>
 
