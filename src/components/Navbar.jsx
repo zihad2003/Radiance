@@ -26,6 +26,9 @@ const Navbar = () => {
         { name: 'Virtual Try-On', href: '/virtual-try-on' },
         { name: 'AI Makeover', href: '/ai-makeover' },
         { name: 'Gallery', href: '/gallery' },
+        { name: 'Shop', href: '/shop' },
+        { name: 'About', href: '/about' },
+        { name: 'Contact', href: '/contact' },
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -41,8 +44,8 @@ const Navbar = () => {
                 : 'bg-transparent'
                 }`}>
                 {/* Logo Section */}
-                <Link to="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-black">R</div>
+                <Link to="/" className="flex items-center gap-3 group">
+                    <img src="/logo.png" alt="Radiance Logo" className="w-10 h-10 rounded-full object-cover border border-primary/20 group-hover:border-primary transition-all shadow-lg" />
                     <span className="font-outfit text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">RADIANCE<span className="text-primary">.</span></span>
                 </Link>
 
@@ -52,7 +55,7 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             to={link.href}
-                            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${isActive(link.href)
+                            className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${isActive(link.href)
                                 ? 'bg-primary text-black'
                                 : 'text-white/60 hover:text-white'
                                 }`}
