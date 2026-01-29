@@ -1,6 +1,5 @@
 // Comprehensive Hairstyle Database for Radiance
 import femaleWaves from '../assets/hairstyles/female_long_waves.png';
-import maleUndercut from '../assets/hairstyles/male_undercut.png';
 
 export const faceShapesData = {
     oval: {
