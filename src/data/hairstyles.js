@@ -1,5 +1,5 @@
 // Comprehensive Hairstyle Database for Radiance
-import femaleWaves from '../assets/hairstyles/female_long_waves.png';
+const femaleWaves = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=600";
 
 export const faceShapesData = {
     oval: {
