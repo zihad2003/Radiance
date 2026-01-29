@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, X, Tag, Sparkles, ChevronDown, Upload } from 'lucide-react';
+import { Search, Filter, X, Tag, Sparkles, ChevronDown, Upload, ArrowRight } from 'lucide-react';
 import { autoTagPhoto, searchPhotosByTags, getPopularTags } from '../utils/photoTagging';
 import Image from './ui/Image';
 
@@ -24,8 +24,8 @@ const AITaggedGallery = () => {
     const samplePhotos = [
         {
             id: 'photo-1',
-            beforeImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-            afterImage: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400',
+            beforeImage: '/assets/gallery/makeover_1.png',
+            afterImage: '/assets/gallery/makeover_1.png',
             skinTone: { category: 'medium', undertone: 'warm', hex: '#D2B4A0' },
             makeup: {
                 styles: ['Glamorous', 'Evening', 'Smokey Eye'],
@@ -39,8 +39,8 @@ const AITaggedGallery = () => {
         },
         {
             id: 'photo-2',
-            beforeImage: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
-            afterImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+            beforeImage: '/assets/gallery/bridal_1.png',
+            afterImage: '/assets/gallery/bridal_1.png',
             skinTone: { category: 'light', undertone: 'cool', hex: '#F5E6D3' },
             makeup: {
                 styles: ['Bridal', 'Romantic', 'Soft Glam'],
@@ -54,8 +54,8 @@ const AITaggedGallery = () => {
         },
         {
             id: 'photo-3',
-            beforeImage: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400',
-            afterImage: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
+            beforeImage: '/assets/gallery/facial_1.png',
+            afterImage: '/assets/gallery/facial_1.png',
             skinTone: { category: 'medium-deep', undertone: 'neutral', hex: '#A67C52' },
             makeup: {
                 styles: ['Natural', 'Everyday', 'No-Makeup Makeup'],
@@ -118,57 +118,31 @@ const AITaggedGallery = () => {
     };
 
     return (
-        <section className="py-24 bg-[#050505] relative overflow-hidden min-h-screen">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-900/10 rounded-full blur-[150px]" />
-            </div>
-
+        <section className="py-24 bg-[#121110] relative overflow-hidden min-h-screen">
             <div className="container mx-auto px-6 relative z-10">
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-block px-6 py-2 bg-white/5 border border-white/10 backdrop-blur-md rounded-full shadow-lg mb-6"
-                    >
-                        <span className="text-gold font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                            <Sparkles size={14} fill="currentColor" />
-                            AI-Tagged Gallery
-                        </span>
-                    </motion.div>
-                    <h2 className="text-4xl md:text-5xl font-serif italic mb-6 text-white">
-                        Before & After <span className="text-gradient-gold">Transformations</span>
-                    </h2>
-                    <p className="text-white/40 max-w-2xl mx-auto font-light tracking-wide">
-                        Explore our stunning transformations, automatically tagged by AI for easy discovery
-                    </p>
-                </div>
-
                 {/* Search & Filter Bar */}
                 <div className="max-w-4xl mx-auto mb-16 relative z-20">
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Search */}
                         <div className="flex-1 relative group">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-gold transition-colors" size={20} />
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search by style, product, occasion..."
+                                placeholder="SEARCH ARCHIVE..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-gold/30 focus:bg-white/10 outline-none transition-all"
+                                className="w-full pl-16 pr-6 py-5 bg-[#0A0A0A] border border-white/5 rounded-2xl text-white placeholder:text-gray-600 text-[10px] font-black uppercase tracking-widest outline-none focus:border-primary/50 transition-all shadow-lg"
                             />
                         </div>
 
                         {/* Filter Button */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`px-8 py-4 border rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center gap-3 justify-center transition-all ${showFilters
-                                ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-glow'
-                                : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30'}`}
+                            className={`px-8 py-5 border rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 justify-center transition-all ${showFilters
+                                ? 'bg-primary text-black border-primary shadow-glow'
+                                : 'bg-[#0A0A0A] text-white border-white/5 hover:bg-white/5'}`}
                         >
-                            <Filter size={16} />
+                            <Filter size={14} />
                             Filters
                             <ChevronDown size={14} className={`transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} />
                         </button>
@@ -177,26 +151,26 @@ const AITaggedGallery = () => {
                     {/* Active Filters */}
                     {Object.values(selectedFilters).some(arr => arr.length > 0) && (
                         <div className="mt-6 flex flex-wrap gap-2">
-                            <span className="text-xs text-white/40 py-1.5 uppercase tracking-wide mr-2">Active:</span>
+                            <div className="px-3 py-1 bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-widest rounded-full flex items-center">Active:</div>
                             {Object.entries(selectedFilters).map(([category, values]) =>
                                 values.map(value => (
                                     <span
                                         key={`${category}-${value}`}
-                                        className="px-3 py-1 bg-gold/10 border border-gold/20 text-gold rounded-full text-xs font-bold flex items-center gap-2 group hover:bg-gold/20 transition-colors"
+                                        className="px-4 py-1.5 bg-primary/10 border border-primary/20 text-primary rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 group hover:bg-primary/20 transition-colors"
                                     >
                                         {value}
                                         <button
                                             onClick={() => toggleFilter(category, value)}
-                                            className="hover:bg-gold/20 rounded-full p-0.5 text-gold/70 group-hover:text-gold"
+                                            className="hover:bg-primary/20 rounded-full p-0.5 text-primary/70 group-hover:text-primary"
                                         >
-                                            <X size={12} />
+                                            <X size={10} />
                                         </button>
                                     </span>
                                 ))
                             )}
                             <button
                                 onClick={clearFilters}
-                                className="px-3 py-1 text-white/40 hover:text-white text-xs font-medium transition-colors"
+                                className="px-4 py-1.5 text-white/40 hover:text-white text-[9px] font-black uppercase tracking-widest transition-colors"
                             >
                                 Clear All
                             </button>
@@ -207,15 +181,15 @@ const AITaggedGallery = () => {
                     <AnimatePresence>
                         {showFilters && (
                             <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="mt-4 bg-[#0A0A0A] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden backdrop-blur-xl"
+                                initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                animate={{ height: 'auto', opacity: 1, marginTop: 16 }}
+                                exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden backdrop-blur-xl"
                             >
                                 <div className="p-8 space-y-8">
                                     {Object.entries(filterOptions).map(([category, options]) => (
                                         <div key={category}>
-                                            <h3 className="font-bold capitalize mb-4 text-xs uppercase tracking-widest text-white/40 border-b border-white/5 pb-2">
+                                            <h3 className="font-black capitalize mb-4 text-[9px] uppercase tracking-[0.3em] text-white/40 border-b border-white/5 pb-2">
                                                 {category.replace(/([A-Z])/g, ' $1').trim()}
                                             </h3>
                                             <div className="flex flex-wrap gap-2">
@@ -223,9 +197,9 @@ const AITaggedGallery = () => {
                                                     <button
                                                         key={option}
                                                         onClick={() => toggleFilter(category, option)}
-                                                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${selectedFilters[category].includes(option)
-                                                            ? 'bg-white text-black border-white shadow-lg scale-105'
-                                                            : 'bg-white/5 text-white/60 border-transparent hover:bg-white/10 hover:text-white hover:border-white/10'
+                                                        className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${selectedFilters[category].includes(option)
+                                                            ? 'bg-primary text-black border-primary shadow-lg scale-105'
+                                                            : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white'
                                                             }`}
                                                     >
                                                         {option}
@@ -238,9 +212,9 @@ const AITaggedGallery = () => {
                                     <div className="pt-4 flex justify-end">
                                         <button
                                             onClick={() => setShowFilters(false)}
-                                            className="text-xs text-gold font-bold uppercase tracking-widest hover:text-white transition-colors"
+                                            className="text-[10px] text-primary font-black uppercase tracking-widest hover:text-white transition-colors flex items-center gap-2"
                                         >
-                                            Close Filters
+                                            Close Filters <X size={14} />
                                         </button>
                                     </div>
                                 </div>
@@ -250,11 +224,12 @@ const AITaggedGallery = () => {
                 </div>
 
                 {/* Results Count */}
-                <div className="text-center mb-8">
-                    <p className="text-white/40 text-sm tracking-wide">
-                        Showing <span className="font-bold text-white">{filteredPhotos.length}</span> of{' '}
-                        <span className="font-bold text-white">{photos.length}</span> transformations
-                    </p>
+                <div className="text-center mb-12">
+                    <div className="inline-block px-6 py-2 bg-white/5 rounded-full border border-white/5">
+                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                            Displaying <span className="text-white">{filteredPhotos.length}</span> curated <span className="text-primary">Masterpieces</span>
+                        </p>
+                    </div>
                 </div>
 
                 {/* Photo Grid */}
@@ -262,76 +237,60 @@ const AITaggedGallery = () => {
                     {filteredPhotos.map((photo, index) => (
                         <motion.div
                             key={photo.id}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
+                            transition={{ delay: index * 0.1, duration: 0.5 }}
                             onClick={() => setSelectedPhoto(photo)}
                             className="group cursor-pointer"
                         >
-                            <div className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-500 hover:border-gold/30 hover:-translate-y-2">
-                                {/* Before/After Images */}
-                                <div className="relative aspect-[4/3] overflow-hidden group-hover:scale-[1.02] transition-transform duration-700">
+                            <div className="bento-card p-0 flex flex-col h-full bg-[#0A0A0A] border border-white/5 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+                                {/* Before/After Images - Bento Style Split */}
+                                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                                    {/* Split Layout */}
                                     <div className="absolute inset-0 grid grid-cols-2">
-                                        <div className="relative border-r border-white/20">
-                                            <Image
-                                                src={photo.beforeImage}
-                                                alt="Before"
-                                                className="w-full h-full object-cover"
-                                            />
-                                            <div className="absolute top-3 left-3 px-3 py-1 bg-black/60 backdrop-blur-md text-white/80 text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/10">
-                                                Before
-                                            </div>
+                                        <div className="relative border-r border-white/5 overflow-hidden">
+                                            <Image src={photo.beforeImage} alt="Before" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-110 origin-left" />
+                                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-white/70 text-[8px] font-black uppercase tracking-widest rounded-full">Before</div>
                                         </div>
-                                        <div className="relative">
-                                            <Image
-                                                src={photo.afterImage}
-                                                alt="After"
-                                                className="w-full h-full object-cover"
-                                            />
-                                            <div className="absolute top-3 right-3 px-3 py-1 bg-gold/90 backdrop-blur-md text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">
-                                                After
-                                            </div>
+                                        <div className="relative overflow-hidden">
+                                            <Image src={photo.afterImage} alt="After" className="w-full h-full object-cover group-hover:saturate-150 transition-all duration-700 scale-105 group-hover:scale-110 origin-right" />
+                                            <div className="absolute top-4 right-4 px-3 py-1 bg-primary/90 text-black text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">After</div>
                                         </div>
                                     </div>
-                                    {/* Center Divider Gradient */}
-                                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/50 shadow-[0_0_10px_rgba(255,255,255,0.5)] z-10 opacity-50"></div>
+
+                                    {/* Center Divider with Glow */}
+                                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/10 z-10 overflow-visible">
+                                        <div className="absolute inset-0 bg-primary blur-[4px] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
                                 </div>
 
-                                {/* Tags */}
-                                <div className="p-6">
-                                    {/* Skin Tone */}
-                                    <div className="flex items-center gap-3 mb-4 p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <div
-                                            className="w-8 h-8 rounded-full border border-white/20 shadow-sm"
-                                            style={{ backgroundColor: photo.skinTone.hex }}
-                                        />
+                                {/* Content */}
+                                <div className="p-8 flex flex-col flex-1">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-10 h-10 rounded-full border-2 border-white/10 p-0.5">
+                                            <div className="w-full h-full rounded-full" style={{ backgroundColor: photo.skinTone.hex }} />
+                                        </div>
                                         <div>
-                                            <p className="text-xs text-white font-bold capitalize">{photo.skinTone.category}</p>
-                                            <p className="text-[10px] text-white/50 capitalize">{photo.skinTone.undertone} undertone</p>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">{photo.makeup.styles[0]}</p>
+                                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wide">by {photo.metadata.customerName}</p>
                                         </div>
                                     </div>
 
-                                    {/* Style Tags */}
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {photo.makeup.styles.slice(0, 3).map(style => (
-                                            <span
-                                                key={style}
-                                                className="px-3 py-1 bg-white/5 border border-white/10 text-white/80 rounded-full text-[10px] font-bold uppercase tracking-wide group-hover:border-gold/30 group-hover:text-gold transition-colors"
-                                            >
+                                    {/* Tags */}
+                                    <div className="flex flex-wrap gap-2 mb-6 mt-auto">
+                                        {photo.makeup.styles.slice(1, 3).map(style => (
+                                            <span key={style} className="px-3 py-1 bg-white/5 text-gray-400 rounded-lg text-[9px] font-bold uppercase tracking-wide border border-white/5">
                                                 {style}
                                             </span>
                                         ))}
+                                        <span className="px-3 py-1 bg-white/5 text-primary rounded-lg text-[9px] font-bold uppercase tracking-wide border border-white/5 flex items-center gap-1">
+                                            <Sparkles size={8} /> {photo.products.length} Products
+                                        </span>
                                     </div>
 
-                                    {/* Products Count */}
-                                    <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-2">
-                                        <div className="text-xs text-white/40 flex items-center gap-1.5">
-                                            <Tag size={12} />
-                                            {photo.products.length} products used
-                                        </div>
-                                        <div className="text-gold text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
-                                            View Details →
-                                        </div>
+                                    <div className="pt-6 border-t border-white/5 w-full flex justify-between items-center group/link">
+                                        <span className="text-[9px] file:font-black text-white/20 uppercase tracking-[0.3em] group-hover:text-primary transition-colors">Analyze Look</span>
+                                        <ArrowRight size={14} className="text-white/20 group-hover:text-primary transition-colors group-hover:translate-x-1" />
                                     </div>
                                 </div>
                             </div>
@@ -341,15 +300,17 @@ const AITaggedGallery = () => {
 
                 {/* Empty State */}
                 {filteredPhotos.length === 0 && (
-                    <div className="text-center py-32 bg-white/5 border border-white/10 rounded-[3rem]">
-                        <div className="text-6xl mb-6 opacity-50">🔍</div>
-                        <h3 className="text-2xl font-serif italic text-white mb-2">No Results Found</h3>
-                        <p className="text-white/40 mb-8 max-w-md mx-auto">We couldn't find any transformations matching your current filters. Try adjusting your search.</p>
+                    <div className="bento-card p-20 flex flex-col items-center justify-center text-center bg-[#0A0A0A] border-dashed border-2 border-white/5">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-8 text-white/20">
+                            <Search size={32} />
+                        </div>
+                        <h3 className="text-2xl font-serif italic text-white mb-4">No Matches Discovered</h3>
+                        <p className="text-white/40 mb-8 max-w-md mx-auto text-xs font-bold uppercase tracking-widest">Adjust your filters to reveal more transformations.</p>
                         <button
                             onClick={clearFilters}
-                            className="bg-[#F5E6C8] text-black px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all shadow-glow"
+                            className="bg-primary text-black px-8 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-white transition-all shadow-glow"
                         >
-                            Clear Filters
+                            Reset Filters
                         </button>
                     </div>
                 )}
@@ -361,124 +322,101 @@ const AITaggedGallery = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
+                            className="fixed inset-0 z-[200] flex items-center justify-center bg-[#121110]/95 backdrop-blur-3xl p-4 md:p-8 overflow-y-auto"
                             onClick={() => setSelectedPhoto(null)}
                         >
                             <motion.div
-                                initial={{ scale: 0.9, y: 20 }}
+                                initial={{ scale: 0.95, y: 30 }}
                                 animate={{ scale: 1, y: 0 }}
-                                exit={{ scale: 0.9, y: 20 }}
+                                exit={{ scale: 0.95, y: 30 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] max-w-5xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative"
+                                className="w-full max-w-7xl bg-[#0A0A0A] border border-white/10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row min-h-[80vh]"
                             >
                                 {/* Close Button */}
                                 <button
                                     onClick={() => setSelectedPhoto(null)}
-                                    className="absolute top-6 right-6 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-red-500/80 hover:text-white text-white/70 transition-colors z-20 border border-white/10"
+                                    className="absolute top-8 right-8 w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:bg-primary hover:text-black transition-all z-50 border border-white/10 z-[100]"
                                 >
-                                    <X size={18} />
+                                    <X size={20} />
                                 </button>
 
-                                {/* Images */}
-                                <div className="grid md:grid-cols-2 gap-2 p-2 bg-black/20">
-                                    <div className="relative group overflow-hidden rounded-[2rem]">
-                                        <div className="absolute top-4 left-4 px-4 py-1.5 bg-black/60 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest rounded-full z-10 border border-white/10">Before</div>
-                                        <Image
-                                            src={selectedPhoto.beforeImage}
-                                            alt="Before"
-                                            className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
+                                {/* Images Section (Left/Top) */}
+                                <div className="w-full md:w-1/2 bg-[#1A1A1A] relative flex flex-col">
+                                    <div className="flex-1 reltive overflow-hidden border-b border-white/5">
+                                        <Image src={selectedPhoto.beforeImage} alt="Before" className="w-full h-full object-cover" />
+                                        <div className="absolute top-6 left-6 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 text-white text-[9px] font-black uppercase tracking-widest rounded-full">Before</div>
                                     </div>
-                                    <div className="relative group overflow-hidden rounded-[2rem]">
-                                        <div className="absolute top-4 right-4 px-4 py-1.5 bg-gold/90 backdrop-blur-md text-black text-xs font-bold uppercase tracking-widest rounded-full z-10 shadow-lg">After</div>
-                                        <Image
-                                            src={selectedPhoto.afterImage}
-                                            alt="After"
-                                            className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
+                                    <div className="flex-1 relative overflow-hidden">
+                                        <Image src={selectedPhoto.afterImage} alt="After" className="w-full h-full object-cover" />
+                                        <div className="absolute top-6 left-6 px-4 py-2 bg-primary text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">After</div>
                                     </div>
                                 </div>
 
-                                {/* Details */}
-                                <div className="p-10 border-t border-white/5">
-                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                                        <div>
-                                            <h3 className="text-3xl font-serif italic text-white mb-2">Transformation Details</h3>
-                                            <p className="text-white/40 text-sm">Performed by <span className="text-gold font-bold">{selectedPhoto.metadata.customerName || 'Expert Artist'}</span> • {selectedPhoto.metadata.date}</p>
+                                {/* Content Section (Right/Bottom) */}
+                                <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col overflow-y-auto custom-scrollbar bg-[#0A0A0A]">
+                                    <div className="mb-12">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="h-px bg-white/10 w-12" />
+                                            <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Transformation Analysis</span>
                                         </div>
-                                        <button className="bg-[#F5E6C8] text-black px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all shadow-[0_0_20px_rgba(245,230,200,0.3)] hover:scale-105 w-full md:w-auto">
-                                            Book This Look
-                                        </button>
+                                        <h3 className="text-4xl md:text-5xl font-serif italic text-white mb-4">
+                                            The <span className="text-primary">{selectedPhoto.makeup.styles[0]}</span> Look
+                                        </h3>
+                                        <p className="text-white/40 text-xs font-bold uppercase tracking-widest">
+                                            Executed by <span className="text-white">{selectedPhoto.metadata.customerName}</span> on {selectedPhoto.metadata.date}
+                                        </p>
                                     </div>
 
-                                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                        {/* Skin Analysis */}
-                                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                                            <h4 className="font-bold mb-4 text-xs uppercase tracking-widest text-white/40 flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-gold rounded-full" /> Skin Profile
+                                    <div className="space-y-12">
+                                        {/* Skin Profile */}
+                                        <div>
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Complexion Profile
                                             </h4>
-                                            <div className="flex items-center gap-4">
-                                                <div
-                                                    className="w-14 h-14 rounded-full border-2 border-white/20 shadow-lg ring-2 ring-black/50"
-                                                    style={{ backgroundColor: selectedPhoto.skinTone.hex }}
-                                                />
+                                            <div className="bg-white/5 p-6 rounded-3xl border border-white/5 flex items-center gap-6">
+                                                <div className="w-16 h-16 rounded-full border-2 border-white/10 p-1">
+                                                    <div className="w-full h-full rounded-full" style={{ backgroundColor: selectedPhoto.skinTone.hex }} />
+                                                </div>
                                                 <div>
-                                                    <p className="font-bold text-white text-lg capitalize">{selectedPhoto.skinTone.category}</p>
-                                                    <p className="text-xs text-white/50 capitalize font-mono bg-white/5 px-2 py-0.5 rounded mt-1 inline-block">{selectedPhoto.skinTone.undertone}</p>
+                                                    <p className="text-lg font-serif italic text-white capitalize mb-1">{selectedPhoto.skinTone.category}</p>
+                                                    <p className="text-[9px] text-primary font-black uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full inline-block">{selectedPhoto.skinTone.undertone} undertone</p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Makeup Styles */}
-                                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                                            <h4 className="font-bold mb-4 text-xs uppercase tracking-widest text-white/40 flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-gold rounded-full" /> Styles
-                                            </h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {selectedPhoto.makeup.styles.map(style => (
-                                                    <span
-                                                        key={style}
-                                                        className="px-3 py-1 bg-white/10 text-white rounded-lg text-xs font-bold border border-white/5"
-                                                    >
-                                                        {style}
-                                                    </span>
-                                                ))}
+                                        {/* Breakdown Grid */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                            {/* Products */}
+                                            <div>
+                                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 border-b border-white/5 pb-2">Arsenal</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedPhoto.products.map(product => (
+                                                        <span key={product} className="px-3 py-1.5 bg-white/5 text-gray-300 rounded-lg text-[9px] font-bold uppercase tracking-wide border border-white/5 hover:border-primary/30 transition-colors cursor-default">
+                                                            {product}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* Products Used */}
-                                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                                            <h4 className="font-bold mb-4 text-xs uppercase tracking-widest text-white/40 flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-gold rounded-full" /> Products
-                                            </h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {selectedPhoto.products.map(product => (
-                                                    <span
-                                                        key={product}
-                                                        className="px-3 py-1 bg-white/5 text-white/70 rounded-lg text-xs border border-white/5"
-                                                    >
-                                                        {product}
-                                                    </span>
-                                                ))}
+                                            {/* Styles */}
+                                            <div>
+                                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 border-b border-white/5 pb-2">Techniques</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedPhoto.makeup.styles.map(style => (
+                                                        <span key={style} className="px-3 py-1.5 bg-white/5 text-gray-300 rounded-lg text-[9px] font-bold uppercase tracking-wide border border-white/5">
+                                                            {style}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Occasions */}
-                                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                                            <h4 className="font-bold mb-4 text-xs uppercase tracking-widest text-white/40 flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-gold rounded-full" /> Perfect For
-                                            </h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {selectedPhoto.occasions.map(occasion => (
-                                                    <span
-                                                        key={occasion}
-                                                        className="px-3 py-1 bg-gold/10 text-gold rounded-lg text-xs font-bold border border-gold/10"
-                                                    >
-                                                        {occasion}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
+                                    <div className="mt-auto pt-16">
+                                        <button className="w-full bg-white text-black py-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary transition-all shadow-xl group flex items-center justify-center gap-4">
+                                            Recreate This Look
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -486,21 +424,12 @@ const AITaggedGallery = () => {
                     )}
                 </AnimatePresence>
             </div>
-            {/* Custom Scrollbar Styles for Modal */}
+
             <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: rgba(255, 255, 255, 0.05);
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(255, 255, 255, 0.4);
-                }
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
             `}</style>
         </section>
     );

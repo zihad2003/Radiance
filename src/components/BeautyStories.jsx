@@ -1,16 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Star, Play, X, ChevronRight, Filter, Search,
-    Camera, Video, User, MapPin, Quote, ArrowRight,
+    Star, Play, X, Filter, Search,
+    Camera, Sparkles, ArrowRight,
     Share2, Facebook, Instagram, MessageCircle, Heart,
-    Clock, Sparkles, Sliders, Info, ShieldCheck, Download
+    Download, Info
 } from 'lucide-react';
 import {
-    BEAUTY_STORIES, STORY_CATEGORIES, SKIN_TONES, BUDGET_RANGES
+    BEAUTY_STORIES, STORY_CATEGORIES, SKIN_TONES
 } from '../data/beautyStories';
 import { ReactCompareSlider, ReactCompareSliderHandle } from 'react-compare-slider';
-import GlassCard from './ui/GlassCard';
 import Image from './ui/Image';
 
 const BeautyStories = () => {
@@ -48,43 +47,42 @@ const BeautyStories = () => {
     }, [activeFilter, searchQuery, filters]);
 
     return (
-        <section id="stories" className="py-20 bg-[#050505] text-white relative overflow-hidden">
+        <section id="stories" className="py-32 bg-[#121110] text-white relative overflow-hidden">
             {/* Background Decor */}
-            <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
+            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
-                {/* Header - More Compact */}
-                <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
-                    <div className="max-w-xl">
-                        <motion.span
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            className="text-gold font-bold tracking-[0.4em] uppercase text-[10px] mb-3 block"
-                        >
-                            Authentic Journeys
-                        </motion.span>
-                        <h2 className="text-4xl md:text-6xl font-serif text-white italic">
-                            Bangladesh <span className="text-gradient-gold">Beauty</span> Stories
+                {/* Header */}
+                <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+                    <div className="max-w-2xl">
+                        <div className="bento-ribbon mb-8 text-primary">
+                            <Camera size={14} fill="currentColor" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Real Stories</span>
+                        </div>
+                        <h2 className="text-6xl md:text-8xl font-sans font-black text-white uppercase tracking-tighter leading-[0.9]">
+                            AUTHENTIC <br />
+                            <span className="text-primary italic">JOURNEYS</span>
                         </h2>
                     </div>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
-                        >
-                            <Filter size={14} /> Filters
-                        </button>
-                        <div className="hidden md:flex gap-2">
+
+                    <div className="flex flex-col items-end gap-6">
+                        <div className="hidden md:flex gap-2 p-1 bg-white/5 rounded-full border border-white/5">
                             {STORY_CATEGORIES.slice(0, 4).map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setActiveFilter(cat)}
-                                    className={`px-5 py-3 rounded-full text-[9px] font-bold uppercase transition-all ${activeFilter === cat ? 'bg-gold text-black' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'}`}
+                                    className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeFilter === cat ? 'bg-primary text-black' : 'text-white/40 hover:text-white'}`}
                                 >
                                     {cat}
                                 </button>
                             ))}
                         </div>
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all"
+                        >
+                            <Filter size={14} /> FILTER & SORT
+                        </button>
                     </div>
                 </div>
 
@@ -95,38 +93,38 @@ const BeautyStories = () => {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden mb-8"
+                            className="overflow-hidden mb-12"
                         >
-                            <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 backdrop-blur-xl">
+                            <div className="bento-card p-8 bg-[#0A0A0A]">
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <div className="md:col-span-2 relative">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/30" size={16} />
                                         <input
                                             type="text"
-                                            placeholder="Search by name or occasion..."
+                                            placeholder="SEARCH STORIES..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3 bg-white/5 rounded-xl border border-white/10 outline-none text-[11px] font-bold uppercase tracking-widest placeholder:text-white/20 text-white"
+                                            className="w-full pl-14 pr-6 py-4 bg-white/5 rounded-2xl border border-white/5 outline-none text-[11px] font-black uppercase tracking-widest placeholder:text-white/20 text-white focus:border-primary/50 transition-colors"
                                         />
                                     </div>
-                                    <div>
+                                    <div className="relative">
                                         <select
                                             value={filters.sortBy}
                                             onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none text-white"
+                                            className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none text-white appearance-none cursor-pointer"
                                         >
-                                            <option className="bg-[#050505]">Most Recent</option>
-                                            <option className="bg-[#050505]">Most Popular</option>
-                                            <option className="bg-[#050505]">Highest Rated</option>
+                                            <option className="bg-[#0A0A0A]">Most Recent</option>
+                                            <option className="bg-[#0A0A0A]">Most Popular</option>
+                                            <option className="bg-[#0A0A0A]">Highest Rated</option>
                                         </select>
                                     </div>
-                                    <div>
+                                    <div className="relative">
                                         <select
                                             value={filters.skinTone}
                                             onChange={(e) => setFilters({ ...filters, skinTone: e.target.value })}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none text-white"
+                                            className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none text-white appearance-none cursor-pointer"
                                         >
-                                            {SKIN_TONES.map(t => <option key={t} className="bg-[#050505]" value={t}>{t} Tone</option>)}
+                                            {SKIN_TONES.map(t => <option key={t} className="bg-[#0A0A0A]" value={t}>{t} Tone</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -138,11 +136,11 @@ const BeautyStories = () => {
                 {/* Horizontal Scrolling Stories */}
                 <div className="relative group">
                     <motion.div
-                        className="flex gap-6 overflow-x-auto pb-8 snap-x no-scrollbar"
+                        className="flex gap-8 overflow-x-auto pb-12 snap-x hide-scrollbar"
                         style={{ scrollBehavior: 'smooth' }}
                     >
                         {filteredStories.map((story, idx) => (
-                            <div key={story.id} className="min-w-[300px] md:min-w-[400px] snap-center">
+                            <div key={story.id} className="min-w-[320px] md:min-w-[420px] snap-center">
                                 <StoryCard
                                     story={story}
                                     index={idx}
@@ -152,24 +150,25 @@ const BeautyStories = () => {
                         ))}
 
                         {/* UGC Card Integrated into Slider */}
-                        <div className="min-w-[300px] md:min-w-[400px] snap-center">
+                        <div className="min-w-[320px] md:min-w-[420px] snap-center">
                             <motion.div
                                 whileHover={{ y: -10 }}
-                                className="h-full rounded-[2.5rem] bg-gradient-to-br from-gold/20 to-primary/20 border border-white/10 p-10 flex flex-col justify-center items-center text-center relative overflow-hidden group/ugc"
+                                className="h-full bento-card p-12 flex flex-col justify-center items-center text-center relative overflow-hidden group/ugc bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A]"
                             >
-                                <Camera size={120} className="text-white/5 absolute -bottom-4 -right-4 rotate-12 group-hover/ugc:scale-110 transition-transform" />
-                                <div className="mb-6 w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center">
-                                    <Sparkles className="text-gold" />
+                                <div className="mb-8 w-20 h-20 bg-white/5 rounded-[2rem] flex items-center justify-center border border-white/5">
+                                    <Sparkles size={32} className="text-primary" />
                                 </div>
-                                <h3 className="text-2xl font-serif italic mb-4">Be Our Next <span className="text-gold">Cover Bride</span></h3>
-                                <p className="text-xs text-white/40 mb-8 leading-relaxed">Share your transformation with #RadianceStory for a chance to be featured.</p>
-                                <button className="px-8 py-3 bg-white text-black rounded-full font-black uppercase tracking-widest text-[9px]">Apply Now</button>
+                                <h3 className="text-3xl font-sans font-black uppercase tracking-tighter text-white mb-6">BE THE <br /><span className="text-primary italic">NEXT ICON</span></h3>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 mb-10 leading-relaxed max-w-[200px]">
+                                    Share your transformation with #RadianceStory for a chance to be featured.
+                                </p>
+                                <button className="px-10 py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] hover:bg-primary hover:text-white transition-all">Submit Now</button>
                             </motion.div>
                         </div>
                     </motion.div>
 
                     {/* Gradient Fades for Scroll */}
-                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#050505] to-transparent pointer-events-none md:opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-[#121110] to-transparent pointer-events-none" />
                 </div>
             </div>
 
@@ -198,40 +197,43 @@ const StoryCard = ({ story, index, onClick }) => (
         onClick={onClick}
         className="group cursor-pointer h-full"
     >
-        <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/5 border border-white/5 h-full">
-            <Image
-                src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"}
-                alt={story.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
+        <div className="bento-card h-[600px] relative overflow-hidden p-8 flex flex-col justify-end">
+            {/* Background Image */}
+            <div className="absolute inset-0">
+                <Image
+                    src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"}
+                    alt={story.name}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#121110] via-[#121110]/40 to-transparent" />
+            </div>
 
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-
-            {/* Category Badge & Star */}
-            <div className="absolute top-6 left-6 flex flex-col gap-2">
-                <span className="px-4 py-1.5 bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-xl border border-white/10">
-                    {story.category}
-                </span>
-                <div className="flex items-center gap-1 bg-gold/90 backdrop-blur-md px-3 py-1 rounded-full text-black text-[10px] font-bold border border-gold/20 shadow-lg">
-                    <Star size={10} fill="currentColor" /> {story.rating || 5}.0
+            {/* Badges */}
+            <div className="absolute top-8 left-8 flex flex-col gap-3 z-20">
+                <div className="bento-ribbon bg-black/40 backdrop-blur-md border-white/10 text-white">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">{story.category}</span>
+                </div>
+            </div>
+            <div className="absolute top-8 right-8 z-20">
+                <div className="w-10 h-10 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-primary/20 font-black text-[10px] text-primary">
+                    {story.rating}
                 </div>
             </div>
 
-            {/* Bottom Content */}
-            <div className="absolute bottom-10 left-10 right-10 text-left">
-                <div className="mb-4">
-                    <h4 className="text-3xl font-serif text-white italic leading-tight mb-2">{story.name}{story.age ? `, ${story.age}` : ''}</h4>
-                    <p className="text-gold font-bold text-[10px] uppercase tracking-widest flex items-center gap-2">
-                        <Sparkles size={12} /> {story.occasion}
-                    </p>
+            {/* Content */}
+            <div className="relative z-20">
+                <div className="flex items-center gap-3 mb-4 text-primary">
+                    <Sparkles size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">{story.occasion}</span>
                 </div>
+                <h4 className="text-4xl font-sans font-black text-white uppercase tracking-tighter leading-none mb-2">{story.name}</h4>
+                {story.age && <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.4em] mb-8">{story.age} Years Old / Dhaka</p>}
 
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <button className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 group-hover:gap-5 transition-all text-white hover:text-gold">
-                        Read Story <ArrowRight size={14} className="text-gold" />
-                    </button>
-                    {story.video && <div className="p-3 bg-white/10 backdrop-blur-md rounded-full hover:bg-gold hover:text-black transition-colors"><Play size={12} fill="currentColor" /></div>}
+                <div className="pt-8 border-t border-white/10 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-white uppercase tracking-[0.4em] group-hover:text-primary transition-colors">Read Story</span>
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all">
+                        <ArrowRight size={14} />
+                    </div>
                 </div>
             </div>
         </div>
@@ -247,140 +249,78 @@ const StoryDetailModal = ({ story, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-4 md:p-8 xl:p-12 overflow-y-auto"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-[#121110]/95 backdrop-blur-3xl p-4 md:p-12 overflow-y-auto"
         >
             <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
-                className="bg-[#0A0A0A] w-full max-w-7xl min-h-[80vh] rounded-[3rem] overflow-hidden border border-white/10 relative shadow-2xl flex flex-col md:flex-row"
+                className="w-full max-w-7xl min-h-[80vh] bento-card p-0 relative flex flex-col md:flex-row overflow-hidden border-2 border-white/5"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-8 right-8 z-50 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-md border border-white/10"
+                    className="absolute top-8 right-8 z-50 p-4 bg-black/40 hover:bg-black/60 rounded-2xl text-white transition-all backdrop-blur-xl border border-white/10"
                 >
-                    <X size={24} />
+                    <X size={20} />
                 </button>
 
                 {/* Left: Visual Storytelling */}
-                <div className="w-full md:w-1/2 relative bg-black flex flex-col">
+                <div className="w-full md:w-1/2 relative bg-black flex flex-col h-[50vh] md:h-auto">
                     <div className="flex-1 relative overflow-hidden">
-                        <AnimatePresence mode="wait">
-                            {activeTab === "Journey" ? (
-                                <motion.div key="journey" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                                    <ReactCompareSlider
-                                        itemOne={<div className="h-full relative"><Image src={story.images?.before || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800"} className="w-full h-full object-cover grayscale opacity-60" /><div className="absolute top-10 left-10 px-6 py-2 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">Natural Canvas</div></div>}
-                                        itemTwo={<div className="h-full relative"><Image src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"} className="w-full h-full object-cover" /><div className="absolute top-10 right-10 px-6 py-2 bg-gold/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-black shadow-lg">The Radiance Result</div></div>}
-                                        handle={<ReactCompareSliderHandle buttonStyle={{ backdropFilter: 'blur(8px)', backgroundColor: 'rgba(245, 230, 200, 0.4)', color: '#fff' }} />}
-                                    />
-                                </motion.div>
-                            ) : (
-                                <motion.div key="gallery" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full grid grid-cols-2 grid-rows-2">
-                                    {(story.images?.after || [story.images?.hero]).slice(0, 4).map((img, i) => (
-                                        <div key={i} className="relative overflow-hidden group">
-                                            <Image src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                        </div>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        <div className="absolute inset-0 bg-[#121110]" />
+                        <ReactCompareSlider
+                            itemOne={<div className="h-full relative"><Image src={story.images?.before || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800"} className="w-full h-full object-cover grayscale opacity-60" /><div className="absolute top-10 left-10 px-6 py-3 bg-black/60 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-white border border-white/10">Base Canvas</div></div>}
+                            itemTwo={<div className="h-full relative"><Image src={story.images?.hero || "https://images.unsplash.com/photo-1594462255122-217f0dbdf24b?q=80&w=800"} className="w-full h-full object-cover" /><div className="absolute top-10 right-10 px-6 py-3 bg-primary/90 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-[0.3em] text-black shadow-lg">Final Form</div></div>}
+                            handle={<ReactCompareSliderHandle buttonStyle={{ backdropFilter: 'blur(8px)', backgroundColor: 'rgba(255, 255, 255, 0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }} />}
+                        />
                     </div>
                 </div>
 
                 {/* Right: Emotional Core */}
-                <div className="w-full md:w-1/2 p-12 md:p-16 flex flex-col h-full bg-[#0A0A0A] overflow-y-auto">
-                    <div className="flex flex-wrap gap-3 mb-8">
-                        {["Radiance Artist Choice", story.category, story.location || "Dhaka"].map(tag => (
-                            <span key={tag} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest text-gold/80">{tag}</span>
+                <div className="w-full md:w-1/2 p-12 md:p-20 flex flex-col h-full bg-[#0A0A0A] overflow-y-auto custom-scrollbar">
+                    <div className="flex flex-wrap gap-3 mb-12">
+                        {["Radiance Choice", story.category, story.location || "Dhaka"].map(tag => (
+                            <span key={tag} className="px-5 py-2 bg-white/5 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] text-primary/80">{tag}</span>
                         ))}
                     </div>
 
-                    <h3 className="text-5xl md:text-6xl font-serif text-white italic leading-tight mb-4">{story.name}</h3>
-                    <p className="text-white/40 font-light text-lg mb-10 leading-relaxed font-serif italic">"{story.quote}"</p>
+                    <h3 className="text-5xl md:text-7xl font-sans font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">{story.name}</h3>
 
-                    <div className="flex gap-4 mb-12 border-b border-white/10 pb-8">
-                        {["Journey", "Process", "Products"].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`text-[10px] font-black uppercase tracking-[0.3em] pb-2 transition-all relative ${activeTab === tab ? 'text-gold' : 'text-white/20 hover:text-white'}`}
-                            >
-                                {tab}
-                                {activeTab === tab && <motion.div layoutId="tabLine" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
-                            </button>
-                        ))}
+                    <div className="mb-12 relative">
+                        <span className="text-6xl text-white/5 absolute -top-6 -left-4">"</span>
+                        <p className="text-gray-400 font-bold text-sm leading-relaxed uppercase tracking-widest relative z-10 pl-6 border-l-2 border-primary">
+                            {story.quote}
+                        </p>
                     </div>
 
                     <div className="flex-1 space-y-12">
-                        {activeTab === "Journey" && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                                <div className="grid grid-cols-2 gap-8 mb-12">
-                                    <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-3">Professional</p>
-                                        <p className="text-sm text-white font-medium">{story.profession || "Fashion Enthusiast"}</p>
-                                    </div>
-                                    <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-3">Service Package</p>
-                                        <p className="text-sm text-white font-medium">{story.package}</p>
-                                    </div>
-                                </div>
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-6">Her Transformation Story</h4>
-                                <p className="text-white/60 leading-relaxed font-light text-sm mb-8">{story.story}</p>
-                            </motion.div>
-                        )}
+                        <div>
+                            <h4 className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/60 mb-8 w-full border-b border-white/10 pb-4">
+                                <Info size={14} /> Transformation Brief
+                            </h4>
+                            <p className="text-white/80 leading-loose text-xs font-medium">{story.story}</p>
+                        </div>
 
-                        {activeTab === "Process" && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
-                                <div className="flex items-center gap-6 p-8 bg-white/5 border border-white/5 rounded-[2.5rem]">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/40">
-                                        <Image src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200" className="w-full h-full object-cover" />
-                                    </div>
-                                    <div>
-                                        <h5 className="text-xl font-serif italic mb-1">Styled by Master Artistry Team</h5>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">Senior Creative Directors</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-12">
-                                    <div className="space-y-6">
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Techniques Used</h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            {["Airbrush Foundation", "HD Sculpting", "Waterproof Setting", "Cultural Jewelry Integration", "Luxury Lash layering"].map(t => (
-                                                <span key={t} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold uppercase tracking-widest">{t}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-6">
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">The Curator's Note</h4>
-                                        <p className="text-white/60 text-sm leading-relaxed font-light italic border-l-4 border-gold pl-6">
-                                            {story.stylistNote || "The goal for this transformation was to preserve the natural radiance of the client while incorporating the grandeur of classical Bangladeshi bridal aesthetics."}
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </div>
-
-                    {/* Social Share Footer */}
-                    <div className="pt-12 mt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="flex items-center gap-6">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Share Story</p>
-                            <div className="flex gap-4">
-                                <button className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all text-white/60 hover:text-white"><Facebook size={18} /></button>
-                                <button className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all text-white/60 hover:text-white"><Instagram size={18} /></button>
-                                <button className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all text-white/60 hover:text-white"><MessageCircle size={18} /></button>
-                                <button className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all text-white/60 hover:text-white"><Share2 size={18} /></button>
+                        <div>
+                            <h4 className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/60 mb-8 w-full border-b border-white/10 pb-4">
+                                <Sparkles size={14} /> Technical Execution
+                            </h4>
+                            <div className="flex flex-wrap gap-3">
+                                {["HD Sculpting", "Airbrush Base", "Lash Architecture", "Color Grading"].map(t => (
+                                    <span key={t} className="px-5 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white/70">{t}</span>
+                                ))}
                             </div>
                         </div>
-                        <div className="flex gap-4">
-                            <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">
-                                <Heart size={16} /> Heart this Look
-                            </button>
-                            <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">
-                                <Download size={16} /> Save to Collection
-                            </button>
+
+                        <div>
+                            <h4 className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/60 mb-8 w-full border-b border-white/10 pb-4">
+                                <Star size={14} /> Artistic Direction
+                            </h4>
+                            <p className="text-xs text-white/60 italic leading-relaxed">
+                                "{story.stylistNote || "Preserving the client's natural anatomical baseline while amplifying high-frequency textures for cinematic output."}"
+                            </p>
                         </div>
                     </div>
                 </div>

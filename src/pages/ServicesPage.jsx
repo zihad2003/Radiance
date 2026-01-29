@@ -7,7 +7,7 @@ import { Clock, Award, Heart, Shield, ChevronRight } from 'lucide-react';
 
 const ServicesPage = ({ onBook }) => {
     return (
-        <div className="min-h-screen bg-[#121110] text-white">
+        <div className="min-h-screen bg-[#121110] text-white selection:bg-primary selection:text-black">
             <PageBentoHeader
                 title={<>PREMIUM<br /><span className="text-primary">ARTISTRY</span></>}
                 badge="Boutique Excellence"
@@ -20,46 +20,31 @@ const ServicesPage = ({ onBook }) => {
                 ]}
             />
 
-            {/* AI Skin Analysis */}
-            <div className="container mx-auto px-6 mb-24">
-                <FadeIn>
-                    <SkinHealthAnalyzer />
-                </FadeIn>
-            </div>
+            {/* AI Skin Analysis Section */}
+            <SkinHealthAnalyzer />
 
-            {/* Services Grid */}
-            <div className="container mx-auto px-6 mb-24 text-white">
-                <FadeIn>
-                    <div className="mb-16">
-                        <h2 className="text-4xl font-sans font-black uppercase tracking-tighter mb-4">The Selection</h2>
-                        <div className="h-1 w-20 bg-primary"></div>
-                    </div>
-                    <Services onBook={onBook} />
-                </FadeIn>
-            </div>
+            {/* Services Selection Section */}
+            <Services onBook={onBook} />
 
             {/* Pricing Section */}
-            <div className="container mx-auto px-6 mb-24">
-                <FadeIn>
-                    <Pricing />
-                </FadeIn>
-            </div>
+            <Pricing />
 
             {/* CTA Section */}
-            <section className="py-24 bg-[#1A1A1A] border-y border-white/5">
-                <div className="container mx-auto px-6 text-center">
+            <section className="py-32 bg-[#0A0A0A] border-t border-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+                <div className="container mx-auto px-6 text-center relative z-10">
                     <FadeIn>
-                        <h2 className="text-5xl md:text-7xl font-sans font-black text-white mb-8 uppercase tracking-tighter">
-                            Ready to <span className="text-primary">Transform?</span>
+                        <h2 className="text-5xl md:text-8xl font-sans font-black text-white mb-8 uppercase tracking-tighter leading-[0.9]">
+                            Ready to <span className="text-primary italic font-serif">Transform?</span>
                         </h2>
-                        <p className="text-gray-400 text-[10px] mb-12 uppercase tracking-[0.4em] font-bold">
-                            Book your appointment today and experience the Radiance difference
+                        <p className="text-gray-500 text-[10px] mb-12 uppercase tracking-[0.4em] font-bold max-w-lg mx-auto leading-relaxed">
+                            Book your exclusive appointment today and experience the Radiance difference.
                         </p>
                         <button
                             onClick={() => onBook && onBook(null)}
-                            className="bg-white text-black px-12 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-2xl"
+                            className="bg-white text-black px-12 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-2xl flex items-center gap-3 mx-auto"
                         >
-                            Secure Appointment
+                            Secure Appointment <ChevronRight size={14} />
                         </button>
                     </FadeIn>
                 </div>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Sparkles, Palette, Download, Info, X } from 'lucide-react';
+import { Camera, Upload, Sparkles, Palette, Download, Info, X, Sun, Gem, Heart, Flame } from 'lucide-react';
 import { analyzeSkinTone } from '../utils/skinToneAnalysis';
 import {
     applyARLipstick,
@@ -12,12 +12,13 @@ import {
 } from '../utils/arFilters';
 
 const AIBeautyAnalyzer = () => {
-    const [mode, setMode] = useState('camera'); // 'camera' or 'upload'
+    const [mode, setMode] = useState('idle'); // 'idle', 'camera', 'upload'
     const [analysis, setAnalysis] = useState(null);
     const [faceShape, setFaceShape] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [selectedFilter, setSelectedFilter] = useState(null);
+    const [cameraError, setCameraError] = useState(null);
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -28,7 +29,7 @@ const AIBeautyAnalyzer = () => {
         {
             id: 'natural',
             name: 'Natural Glow',
-            icon: '✨',
+            icon: <Sun strokeWidth={1.5} />,
             filters: {
                 lipstick: { color: '#FFB6C1', opacity: 0.5, finish: 'satin' },
                 blush: { color: '#FFB6C1', opacity: 0.4 },
@@ -38,7 +39,7 @@ const AIBeautyAnalyzer = () => {
         {
             id: 'glam',
             name: 'Glamorous',
-            icon: '💄',
+            icon: <Gem strokeWidth={1.5} />,
             filters: {
                 lipstick: { color: '#DC143C', opacity: 0.8, finish: 'glossy' },
                 eyeshadow: { color: '#8B4513', opacity: 0.7, finish: 'shimmer' },
@@ -50,7 +51,7 @@ const AIBeautyAnalyzer = () => {
         {
             id: 'soft',
             name: 'Soft & Sweet',
-            icon: '🌸',
+            icon: <Heart strokeWidth={1.5} />,
             filters: {
                 lipstick: { color: '#FFB6C1', opacity: 0.6, finish: 'matte' },
                 eyeshadow: { color: '#DDA0DD', opacity: 0.5, finish: 'matte' },
@@ -60,7 +61,7 @@ const AIBeautyAnalyzer = () => {
         {
             id: 'bold',
             name: 'Bold & Fierce',
-            icon: '🔥',
+            icon: <Flame strokeWidth={1.5} />,
             filters: {
                 lipstick: { color: '#8B0000', opacity: 0.9, finish: 'matte' },
                 eyeshadow: { color: '#000000', opacity: 0.8, finish: 'metallic' },
@@ -72,6 +73,7 @@ const AIBeautyAnalyzer = () => {
 
     // Start camera
     const startCamera = async () => {
+        setCameraError(null);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
@@ -86,7 +88,8 @@ const AIBeautyAnalyzer = () => {
             }
         } catch (error) {
             console.error('Camera access denied:', error);
-            alert('Please allow camera access to use this feature');
+            setCameraError('Permission missing. Click the lock icon in your URL bar to allow camera access.');
+            setMode('idle');
         }
     };
 
@@ -103,12 +106,14 @@ const AIBeautyAnalyzer = () => {
         setLoading(true);
         try {
             const source = mode === 'camera' ? videoRef.current : canvasRef.current;
+            if (!source) throw new Error("No image source available");
+
             const result = await analyzeSkinTone(source);
             setAnalysis(result);
             setShowResults(true);
         } catch (error) {
             console.error('Analysis error:', error);
-            alert(error.message || 'Failed to analyze skin tone');
+            // alert(error.message || 'Failed to analyze skin tone'); // Removed alert
         } finally {
             setLoading(false);
         }
@@ -119,16 +124,19 @@ const AIBeautyAnalyzer = () => {
         const file = e.target.files[0];
         if (!file) return;
 
+        setMode('upload');
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
                 const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                analyzeSkin();
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    analyzeSkin();
+                }
             };
             img.src = event.target.result;
         };
@@ -165,9 +173,23 @@ const AIBeautyAnalyzer = () => {
     useEffect(() => {
         if (mode === 'camera') {
             startCamera();
+        } else {
+            stopCamera();
         }
         return () => stopCamera();
     }, [mode]);
+
+    useEffect(() => {
+        if (showResults) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+            // Also ensure Lenis (smooth scroll) is paused if global accessible, but basic overflow hidden usually catches it.
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [showResults]);
 
     return (
         <section className="py-20 bg-[#050505] relative overflow-hidden min-h-screen">
@@ -175,116 +197,177 @@ const AIBeautyAnalyzer = () => {
             <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
-                {/* Header */}
-                <div className="text-center mb-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-block px-6 py-2 bg-white/5 border border-white/10 backdrop-blur-md rounded-full shadow-lg mb-6"
-                    >
-                        <span className="text-gold font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                            <Sparkles size={14} fill="currentColor" />
-                            AI Beauty Analyzer
-                        </span>
-                    </motion.div>
-                    <h2 className="text-4xl md:text-5xl font-serif italic mb-4 text-white">
-                        Discover Your <span className="text-gradient-gold">Perfect Colors</span>
-                    </h2>
-                    <p className="text-white/40 max-w-2xl mx-auto font-light tracking-wide">
-                        Our AI analyzes your skin tone and face shape to recommend the perfect makeup shades and techniques just for you
-                    </p>
-                </div>
+                <div className="grid lg:grid-cols-3 gap-8 items-start">
 
-                {/* Mode Selector */}
-                <div className="flex justify-center gap-4 mb-8">
-                    <button
-                        onClick={() => setMode('camera')}
-                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all flex items-center gap-3 border ${mode === 'camera'
-                            ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-[0_0_20px_rgba(245,230,200,0.3)]'
-                            : 'bg-transparent text-white/50 border-white/10 hover:border-gold/50 hover:text-white'
-                            }`}
-                    >
-                        <Camera size={16} />
-                        Use Camera
-                    </button>
-                    <button
-                        onClick={() => {
-                            setMode('upload');
-                            fileInputRef.current?.click();
-                        }}
-                        className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all flex items-center gap-3 border ${mode === 'upload'
-                            ? 'bg-[#F5E6C8] text-black border-[#F5E6C8] shadow-[0_0_20px_rgba(245,230,200,0.3)]'
-                            : 'bg-transparent text-white/50 border-white/10 hover:border-gold/50 hover:text-white'
-                            }`}
-                    >
-                        <Upload size={16} />
-                        Upload Photo
-                    </button>
-                </div>
+                    {/* Left Column: Controls & Filters */}
+                    <div className="lg:col-span-1 space-y-8">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gold text-[10px] font-bold uppercase tracking-widest mb-4">
+                                <Sparkles size={12} />
+                                Skin Intelligence
+                            </div>
+                            <h2 className="text-3xl font-serif text-white mb-2">
+                                AI Beauty Analyzer
+                            </h2>
+                            <p className="text-white/40 text-sm leading-relaxed mb-6">
+                                Advanced computer vision analyzes your unique skin metrics to create a hyper-personalized beauty profile.
+                            </p>
 
-                {/* Camera/Canvas Area */}
-                <div className="max-w-4xl mx-auto">
-                    <div className="relative bg-black/40 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl aspect-video backdrop-blur-sm group">
-                        {mode === 'camera' ? (
+                            <div className="flex flex-wrap gap-3">
+                                <button
+                                    onClick={() => setMode('camera')}
+                                    className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border flex items-center gap-2 ${mode === 'camera'
+                                        ? 'bg-white text-black border-white'
+                                        : 'bg-transparent text-white border-white/20 hover:border-white'
+                                        }`}
+                                >
+                                    <Camera size={14} /> Live Cam
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setMode('upload');
+                                        fileInputRef.current?.click();
+                                    }}
+                                    className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border flex items-center gap-2 ${mode === 'upload'
+                                        ? 'bg-white text-black border-white'
+                                        : 'bg-transparent text-white border-white/20 hover:border-white'
+                                        }`}
+                                >
+                                    <Upload size={14} /> Upload
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Filter Presets Vertical List */}
+                        <div>
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-white/50 mb-4 border-b border-white/10 pb-2">AR Filters</h3>
+                            <div className="space-y-3">
+                                {filterPresets.map(preset => (
+                                    <button
+                                        key={preset.id}
+                                        onClick={() => setSelectedFilter(preset.id)}
+                                        className={`w-full p-4 rounded-xl border transition-all flex items-center gap-4 group ${selectedFilter === preset.id
+                                            ? 'bg-white/10 border-gold/50'
+                                            : 'bg-transparent border-white/5 hover:bg-white/5 hover:border-white/20'
+                                            }`}
+                                    >
+                                        <div className={`p-2 rounded-full ${selectedFilter === preset.id ? 'bg-gold text-black' : 'bg-white/5 text-white group-hover:bg-white/10'}`}>
+                                            {preset.icon}
+                                        </div>
+                                        <div className="text-left">
+                                            <div className={`text-sm font-medium ${selectedFilter === preset.id ? 'text-white' : 'text-white/70'}`}>{preset.name}</div>
+                                            <div className="text-[10px] text-white/30 uppercase tracking-wider">Tap to apply</div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Camera/Canvas Area */}
+                    <div className="lg:col-span-2">
+                        <div className="relative bg-black/40 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/3] backdrop-blur-sm group">
+
+                            {/* Idle State - "Turn on Camera" */}
+                            {mode === 'idle' && !cameraError && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0A]/80 z-30">
+                                    <div className="p-8 rounded-full bg-white/5 mb-6 border border-white/10">
+                                        <Camera size={48} className="text-white/20" />
+                                    </div>
+                                    <h3 className="text-white font-serif italic text-2xl mb-2">Ready to Visualize?</h3>
+                                    <p className="text-white/40 text-sm mb-8 max-w-sm text-center">Enable your camera to experience our real-time AI beauty analysis engine.</p>
+                                    <button
+                                        onClick={() => setMode('camera')}
+                                        className="px-10 py-4 bg-primary text-black rounded-full font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-glow"
+                                    >
+                                        Activate Mirror
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Error State */}
+                            {cameraError && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0A]/90 z-30">
+                                    <Info size={48} className="text-red-500 mb-6" />
+                                    <h3 className="text-white font-bold uppercase tracking-widest mb-2">Access Denied</h3>
+                                    <p className="text-white/40 text-sm max-w-md text-center mb-8">{cameraError}</p>
+                                    <button
+                                        onClick={() => setMode('camera')}
+                                        className="px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all text-xs font-bold uppercase tracking-widest"
+                                    >
+                                        Try Again
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Video Element */}
                             <video
                                 ref={videoRef}
                                 autoPlay
                                 playsInline
                                 muted
-                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                                className={`w-full h-full object-cover transition-opacity duration-700 ${mode === 'camera' ? 'opacity-100' : 'opacity-0 hidden'}`}
                             />
-                        ) : (
+
+                            {/* Upload Canvas */}
                             <canvas
                                 ref={canvasRef}
-                                className="w-full h-full object-contain"
+                                className={`w-full h-full object-contain ${mode === 'upload' ? 'block' : 'hidden'}`}
                             />
-                        )}
 
-                        {/* Scanning Overlay Effect */}
-                        <div className="absolute inset-0 pointer-events-none bg-scan-line opacity-10" />
+                            {/* Scanning Overlay Effect (Only when active) */}
+                            {mode !== 'idle' && !cameraError && (
+                                <div className="absolute inset-0 pointer-events-none bg-scan-line opacity-10" />
+                            )}
 
-                        {/* Overlay Controls */}
-                        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 z-20">
-                            <button
-                                onClick={analyzeSkin}
-                                disabled={loading}
-                                className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-gold hover:text-black hover:border-gold transition-all shadow-glow hover:scale-105 disabled:opacity-50 flex items-center gap-3"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Palette size={16} />
-                                        Analyze Skin Tone
-                                    </>
-                                )}
-                            </button>
+                            {/* Overlay Controls */}
+                            {mode !== 'idle' && !cameraError && (
+                                <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 z-20">
+                                    <button
+                                        onClick={analyzeSkin}
+                                        disabled={loading}
+                                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-gold hover:text-black hover:border-gold transition-all shadow-glow hover:scale-105 disabled:opacity-50 flex items-center gap-3"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                                                Analyzing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Palette size={16} />
+                                                Analyze Skin Tone
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* AR Filter Presets */}
+                        <div className="mt-12">
+                            <h3 className="text-xl font-serif italic mb-6 text-center text-white">Try AR Filters</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {filterPresets.map(preset => (
+                                    <button
+                                        key={preset.id}
+                                        onClick={() => setSelectedFilter(preset.id)}
+                                        className={`p-6 rounded-2xl transition-all border group relative overflow-hidden ${selectedFilter === preset.id
+                                            ? 'bg-gold/10 border-gold text-white shadow-[0_0_30px_rgba(245,230,200,0.1)]'
+                                            : 'bg-white/5 border-white/5 text-white/60 hover:border-gold/30 hover:bg-white/10'
+                                            }`}
+                                    >
+                                        <div className={`text-4xl mb-4 transition-transform duration-300 ${selectedFilter === preset.id ? 'scale-110' : 'group-hover:scale-110'}`}>{preset.icon}</div>
+                                        <div className={`font-bold text-xs uppercase tracking-widest ${selectedFilter === preset.id ? 'text-gold' : 'text-white/80'}`}>{preset.name}</div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
+                    {/* End Right Column */}
 
-                    {/* AR Filter Presets */}
-                    <div className="mt-12">
-                        <h3 className="text-xl font-serif italic mb-6 text-center text-white">Try AR Filters</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {filterPresets.map(preset => (
-                                <button
-                                    key={preset.id}
-                                    onClick={() => setSelectedFilter(preset.id)}
-                                    className={`p-6 rounded-2xl transition-all border group relative overflow-hidden ${selectedFilter === preset.id
-                                        ? 'bg-gold/10 border-gold text-white shadow-[0_0_30px_rgba(245,230,200,0.1)]'
-                                        : 'bg-white/5 border-white/5 text-white/60 hover:border-gold/30 hover:bg-white/10'
-                                        }`}
-                                >
-                                    <div className={`text-4xl mb-4 transition-transform duration-300 ${selectedFilter === preset.id ? 'scale-110' : 'group-hover:scale-110'}`}>{preset.icon}</div>
-                                    <div className={`font-bold text-xs uppercase tracking-widest ${selectedFilter === preset.id ? 'text-gold' : 'text-white/80'}`}>{preset.name}</div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
                 </div>
+                {/* End Grid */}
 
                 {/* Hidden file input */}
                 <input
@@ -302,7 +385,7 @@ const AIBeautyAnalyzer = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
+                            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
                             onClick={() => setShowResults(false)}
                         >
                             <motion.div

@@ -9,7 +9,8 @@ const PageBentoHeader = ({
     description,
     image,
     badge,
-    stats = []
+    stats = [],
+    disableImageFilter = false
 }) => {
     return (
         <section className="bg-[#121110] pt-32 pb-16">
@@ -44,7 +45,7 @@ const PageBentoHeader = ({
                                 <img
                                     src={image}
                                     alt={title}
-                                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-all duration-1000 ease-out grayscale group-hover:grayscale-0"
+                                    className={`w-full h-full object-cover transition-all duration-1000 ease-out group-hover:scale-105 ${disableImageFilter ? 'opacity-100 grayscale-0' : 'opacity-60 grayscale group-hover:grayscale-0'}`}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-[#121110] via-[#121110]/40 to-transparent" />
                             </div>

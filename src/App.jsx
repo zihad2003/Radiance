@@ -103,7 +103,7 @@ function AppContent() {
           <ScrollToTop />
 
           <SmoothScroll>
-            <div className="relative min-h-screen bg-pearl selection:bg-rose-200">
+            <div className="relative min-h-screen bg-[#121110] selection:bg-primary selection:text-black">
               <Gamification />
               <ScrollProgress />
               <BackToTop />

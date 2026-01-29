@@ -1,187 +1,158 @@
 import { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Scissors, Sparkles, Droplets, Palette, Flower2, Zap } from 'lucide-react';
+import { Scissors, Sparkles, Droplets, Palette, Flower2, Zap, ArrowRight, Star } from 'lucide-react';
 
 const services = [
     {
         id: 1,
-        title: "Hair Styling",
+        title: "Hair Architecture",
         price: "৳4,000+",
         icon: Scissors,
-        color: "from-pink-500 to-rose-500",
         image: "/assets/services/hair.png",
-        description: "Expert cuts, coloring, and styling tailored to your unique look."
+        description: "Expert cuts, cinematic coloring, and structural styling tailored to your unique anatomical baseline."
     },
     {
         id: 2,
         title: "Makeup Artistry",
         price: "৳8,000+",
         icon: Sparkles,
-        color: "from-purple-500 to-indigo-500",
         image: "/assets/services/makeup.png",
-        description: "Radiant looks for your special day or any occasion."
+        description: "High-definition, camera-ready aesthetics for your special legacy or high-profile appearances."
     },
     {
         id: 3,
-        title: "Skin Treatment",
+        title: "Skin Intelligence",
         price: "৳4,500+",
         icon: Droplets,
-        color: "from-blue-400 to-cyan-500",
         image: "/assets/services/skin.png",
-        description: "Rejuvenating facials and treatments for glowing skin."
+        description: "Rejuvenating cellular treatments and dermatological protocols for a luminous, healthy glow."
     },
     {
         id: 4,
         title: "Nail Studio",
         price: "৳2,000+",
         icon: Palette,
-        color: "from-teal-400 to-emerald-500",
         image: "/assets/services/nails.png",
-        description: "Creative designs and premium care for your hands and feet."
+        description: "Structural nail engineering and bespoke artisanal designs for hands and feet."
     },
     {
         id: 5,
-        title: "Brows & Lashes",
+        title: "Eye Contour",
         price: "৳800+",
         icon: Zap,
-        color: "from-orange-400 to-amber-500",
         image: "/assets/services/threading.png",
-        description: "Precise threading and styling for the perfect arch."
+        description: "Precision lash architecture and brow sculpting to frame your visual identity."
     },
     {
         id: 6,
-        title: "Spa Therapy",
+        title: "Spa Protocol",
         price: "৳6,000+",
         icon: Flower2,
-        color: "from-rose-400 to-pink-600",
         image: "/assets/services/spa.png",
-        description: "Relaxing massages and body therapies to unwind."
+        description: "Deep tissue realignment and sensory restoration bodies in high-performance environments."
     }
 ];
 
 import Image from './ui/Image';
 
 const ServiceCard = ({ service, onBook }) => {
-    // ... (rest of hook logic)
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
-
-    const mouseXSpring = useSpring(x);
-    const mouseYSpring = useSpring(y);
-
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
-
-    const handleMouseMove = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const xPct = mouseX / width - 0.5;
-        const yPct = mouseY / height - 0.5;
-
-        x.set(xPct);
-        y.set(yPct);
-    };
-
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
-    };
-
     const Icon = service.icon;
 
     return (
         <motion.div
-            style={{
-                rotateX,
-                rotateY,
-                transformStyle: "preserve-3d",
-            }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            className="relative min-w-[300px] h-[450px] rounded-3xl overflow-hidden cursor-pointer group perspective-1000 snap-center mx-4 border border-white/10 shadow-3xl bg-[#0A0A0A]"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bento-card min-w-[350px] md:min-w-[400px] h-[550px] flex flex-col justify-end p-10 group cursor-pointer snap-center relative mx-4"
         >
-            {/* Background Image & Overlay */}
-            <div className="absolute inset-0">
-                <Image
+            {/* Background Visual */}
+            <div className="absolute inset-0 overflow-hidden">
+                <img
                     src={service.image}
                     alt={service.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60"
+                    className="w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#121110] via-[#121110]/20 to-transparent" />
+            </div>
+
+            {/* Corner Icon */}
+            <div className="absolute top-0 right-0 bento-notch rounded-tl-none rounded-br-none rounded-bl-[4rem]">
+                <div className="w-12 h-12 bg-white/5 backdrop-blur-2xl rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
+                    <Icon size={24} />
+                </div>
             </div>
 
             {/* Content */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-between z-10 transform-style-3d">
-                <div className="transform translate-z-20">
-                    <div className="w-16 h-16 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-glow border border-white/5 group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="text-white w-8 h-8 group-hover:animate-pulse" />
-                    </div>
-                    <h3 className="text-3xl font-serif font-bold text-white mb-2 leading-tight drop-shadow-md">
-                        {service.title}
-                    </h3>
-                    <p className="text-white/60 text-sm font-light leading-relaxed">
-                        {service.description}
-                    </p>
+            <div className="relative z-10">
+                <div className="bento-ribbon mb-6 text-primary">
+                    <Star size={12} fill="currentColor" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em]">{service.price} BASE</span>
                 </div>
+                <h3 className="text-4xl font-sans font-black text-white mb-6 uppercase tracking-tighter leading-[0.9]">
+                    {service.title}
+                </h3>
+                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-10 leading-relaxed max-w-[280px]">
+                    {service.description}
+                </p>
 
-                <div className="transform translate-z-30">
-                    <div className="overflow-hidden">
-                        <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                            <span className="block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-[#F5E6C8] mb-4 drop-shadow-sm">
-                                {service.price}
-                            </span>
-                            <button
-                                onClick={() => onBook && onBook(service.title)}
-                                className="w-full py-3 bg-white text-black rounded-xl font-semibold hover:bg-gold hover:text-white transition-all shadow-lg interactive uppercase tracking-wider text-xs"
-                            >
-                                Book Appointment
-                            </button>
-                        </div>
-                        <div className="transform group-hover:-translate-y-full transition-transform duration-500 absolute bottom-0 left-0">
-                            <span className="text-white/40 text-xs tracking-[0.2em] uppercase border-b border-white/10 pb-1">Tap to Explore</span>
-                        </div>
+                <button
+                    onClick={() => onBook && onBook(service.title)}
+                    className="flex items-center gap-4 group/btn"
+                >
+                    <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] group-hover/btn:text-primary transition-colors">INITIATE SESSION</span>
+                    <div className="w-10 h-10 border border-white/10 rounded-xl flex items-center justify-center group-hover/btn:border-primary transition-all">
+                        <ArrowRight size={16} className="text-white group-hover/btn:text-primary group-hover/btn:translate-x-1 transition-all" />
                     </div>
-                </div>
+                </button>
             </div>
-
-            {/* Premium Sparkle Overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-soft-light bg-gradient-to-tr from-gold/10 to-transparent"></div>
         </motion.div>
     );
 };
 
 const Services = ({ onBook }) => {
     return (
-        <section id="services" className="py-20 bg-[#050505] relative overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-20 left-0 w-64 h-64 bg-gold/10 rounded-full blur-[120px] -z-10" />
-            <div className="absolute bottom-20 right-0 w-96 h-96 bg-white/5 rounded-full blur-[120px] -z-10" />
+        <section id="services" className="py-32 bg-[#121110] relative overflow-hidden">
+            {/* Subtle Texture/Grain Overlay */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
 
-            <div className="container mx-auto px-6 mb-12">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
-                    className="text-center"
-                >
-                    <h2 className="text-sm font-sans uppercase tracking-[0.3em] text-gold mb-4">Our Expertise</h2>
-                    <h3 className="text-4xl md:text-5xl font-serif text-white mb-6">Curated Beauty Services</h3>
-                    <div className="w-20 h-1 bg-gradient-to-r from-gold to-white/20 mx-auto rounded-full" />
-                </motion.div>
+            <div className="container mx-auto px-6 mb-20">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div className="max-w-2xl">
+                        <div className="bento-ribbon mb-8 text-primary">
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Expertise Matrix</span>
+                        </div>
+                        <h2 className="text-6xl md:text-8xl font-sans font-black text-white uppercase tracking-tighter leading-[0.8] mb-8">
+                            SURGICAL <br />
+                            <span className="text-primary italic">PRECISION</span>
+                        </h2>
+                        <p className="text-gray-500 text-[12px] font-bold uppercase tracking-[0.4em] leading-relaxed max-w-lg">
+                            Each procedure is calibrated to your individual biometric profile using high-performance international artistry.
+                        </p>
+                    </div>
+                    <div className="hidden lg:block">
+                        <div className="p-8 bento-card border-primary/20 bg-primary/5">
+                            <span className="text-primary font-black text-5xl tracking-tighter">06</span>
+                            <p className="text-white text-[9px] font-black uppercase tracking-[0.3em] mt-2">Specialized Pillars</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Horizontal Scroll Container */}
-            <div className="overflow-x-auto pb-12 pt-8 hide-scrollbar cursor-grab active:cursor-grabbing px-6">
-                <div className="flex space-x-8 w-max px-6">
+            {/* Horizontal Carousel */}
+            <div className="overflow-x-auto pb-16 pt-4 hide-scrollbar cursor-grab active:cursor-grabbing">
+                <div className="flex space-x-0 w-max px-6">
                     {services.map((service) => (
                         <ServiceCard key={service.id} service={service} onBook={onBook} />
                     ))}
+                </div>
+            </div>
+
+            {/* Scroll Indicator Notch */}
+            <div className="container mx-auto px-6">
+                <div className="flex items-center gap-4 opacity-20">
+                    <div className="h-px flex-1 bg-white" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.5em] text-white">Slide to Analyze</span>
+                    <div className="h-px flex-1 bg-white" />
                 </div>
             </div>
         </section>
