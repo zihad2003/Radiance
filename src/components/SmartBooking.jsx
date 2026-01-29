@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Mic, MessageCircle, Calendar, User, Clock, Loader2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useToast } from '../context/ToastContext';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 const SmartBooking = ({ initialService }) => {
-    const { info } = useToast();
+    const { info, error: toastError, success } = useToast();
+    const createBooking = useMutation(api.bookings.createBooking);
     const [messages, setMessages] = useState([
         { id: 1, text: "Hi! I'm Radiance AI. I can help you book an appointment or suggest a look. What can I do for you today?", sender: 'bot' }
     ]);
@@ -41,7 +44,7 @@ const SmartBooking = ({ initialService }) => {
         setIsTyping(true);
 
         // Simulated AI Response Logic (Mocking Claude/NLP)
-        setTimeout(() => {
+        setTimeout(async () => {
             let botResponse = "I'm not sure about that. Can you specify a service?";
             const lowerInput = input.toLowerCase();
 
@@ -75,6 +78,27 @@ const SmartBooking = ({ initialService }) => {
                 }]);
 
                 info("Redirecting to WhatsApp for secure confirmation...");
+
+                // --- PERSIST TO BACKEND ---
+                try {
+                    await createBooking({
+                        service: bookingState.service || 'AI Consultation',
+                        date: new Date().toISOString().split('T')[0], // Default to today or parse from input
+                        time: bookingState.time || 'TBD',
+                        customer: {
+                            name: bookingState.name || 'AI User',
+                            phone: '01700000000', // Mock or prompt for it
+                            address: 'Online',
+                            email: '',
+                            homeService: false
+                        },
+                        status: "pending"
+                    });
+                    success("Booking draft saved to your account.");
+                } catch (err) {
+                    console.error("Cloud Save Failed:", err);
+                    toastError("Failed to sync booking to cloud, but opening WhatsApp regardless.");
+                }
 
                 // Simulate WhatsApp Redirect
                 setTimeout(() => {

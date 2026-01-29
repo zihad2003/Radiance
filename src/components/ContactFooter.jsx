@@ -1,7 +1,74 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin, Send, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin, Send, ArrowRight, Loader2 } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useToast } from '../context/ToastContext';
+import { logError, getErrorMessage } from '../utils/errors';
 
 const ContactFooter = () => {
+    const toast = useToast();
+    const submitContact = useMutation(api.forms.submitContact);
+    const subscribeNewsletter = useMutation(api.forms.subscribeNewsletter);
+
+    const [contactForm, setContactForm] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: 'General Inquiry',
+        message: ''
+    });
+
+    const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+    const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false);
+
+    const handleContactSubmit = async (e) => {
+        e.preventDefault();
+        if (!contactForm.firstName || !contactForm.lastName || !contactForm.email || !contactForm.message) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+
+        setIsSubmittingContact(true);
+        try {
+            await submitContact(contactForm);
+            toast.success("Message sent! Our concierge will reach out soon. ✨");
+            setContactForm({
+                firstName: '',
+                lastName: '',
+                email: '',
+                subject: 'General Inquiry',
+                message: ''
+            });
+        } catch (err) {
+            logError(err, 'Contact Form');
+            toast.error(getErrorMessage(err));
+        } finally {
+            setIsSubmittingContact(false);
+        }
+    };
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        if (!newsletterEmail || !/^\S+@\S+\.\S+$/.test(newsletterEmail)) {
+            toast.error("Please enter a valid email address.");
+            return;
+        }
+
+        setIsSubmittingNewsletter(true);
+        try {
+            await subscribeNewsletter({ email: newsletterEmail });
+            toast.success("Welcome to the Inner Circle! 🥂");
+            setNewsletterEmail('');
+        } catch (err) {
+            logError(err, 'Newsletter Subscription');
+            toast.error(getErrorMessage(err));
+        } finally {
+            setIsSubmittingNewsletter(false);
+        }
+    };
+
     return (
         <>
             {/* Contact Section */}
@@ -64,24 +131,49 @@ const ContactFooter = () => {
                         >
                             <div className="bg-white/5 border border-white/10 p-8 md:p-12 rounded-[2rem] shadow-xl backdrop-blur-sm">
                                 <h3 className="text-3xl font-serif mb-6 text-white">Send a Message</h3>
-                                <form className="space-y-6">
+                                <form onSubmit={handleContactSubmit} className="space-y-6">
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">First Name</label>
-                                            <input type="text" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="Jane" />
+                                            <input
+                                                type="text"
+                                                value={contactForm.firstName}
+                                                onChange={(e) => setContactForm({ ...contactForm, firstName: e.target.value })}
+                                                className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20"
+                                                placeholder="Jane"
+                                                required
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Last Name</label>
-                                            <input type="text" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="Doe" />
+                                            <input
+                                                type="text"
+                                                value={contactForm.lastName}
+                                                onChange={(e) => setContactForm({ ...contactForm, lastName: e.target.value })}
+                                                className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20"
+                                                placeholder="Doe"
+                                                required
+                                            />
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Email Address</label>
-                                        <input type="email" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="jane@example.com" />
+                                        <input
+                                            type="email"
+                                            value={contactForm.email}
+                                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                                            className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20"
+                                            placeholder="jane@example.com"
+                                            required
+                                        />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Subject</label>
-                                        <select className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20">
+                                        <select
+                                            value={contactForm.subject}
+                                            onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                                            className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20"
+                                        >
                                             <option className="bg-black">General Inquiry</option>
                                             <option className="bg-black">Feedback</option>
                                             <option className="bg-black">Partnership</option>
@@ -89,10 +181,24 @@ const ContactFooter = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Message</label>
-                                        <textarea rows="4" className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20" placeholder="How can we help you?"></textarea>
+                                        <textarea
+                                            rows="4"
+                                            value={contactForm.message}
+                                            onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                                            className="w-full bg-black/20 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all border border-white/10 focus:border-gold/20"
+                                            placeholder="How can we help you?"
+                                            required
+                                        ></textarea>
                                     </div>
-                                    <button className="w-full bg-[#F5E6C8] text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors duration-300 shadow-lg interactive flex items-center justify-center">
-                                        Send Message <Send className="ml-2 w-4 h-4" />
+                                    <button
+                                        disabled={isSubmittingContact}
+                                        className="w-full bg-[#F5E6C8] text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-colors duration-300 shadow-lg interactive flex items-center justify-center disabled:opacity-50"
+                                    >
+                                        {isSubmittingContact ? (
+                                            <Loader2 className="animate-spin" size={20} />
+                                        ) : (
+                                            <>Send Message <Send className="ml-2 w-4 h-4" /></>
+                                        )}
                                     </button>
                                 </form>
                             </div>
@@ -155,14 +261,24 @@ const ContactFooter = () => {
                         <div>
                             <h4 className="font-serif text-lg mb-6 text-gold">Stay Updated</h4>
                             <p className="text-white/60 mb-4 text-sm">Join our exclusive list for beauty tips and VIP offers.</p>
-                            <form className="relative">
+                            <form onSubmit={handleNewsletterSubmit} className="relative">
                                 <input
                                     type="email"
+                                    value={newsletterEmail}
+                                    onChange={(e) => setNewsletterEmail(e.target.value)}
                                     placeholder="Enter your email"
                                     className="w-full bg-white/10 border border-white/20 rounded-full py-3 px-4 focus:outline-none focus:border-gold transition-colors text-white placeholder:text-white/40"
+                                    required
                                 />
-                                <button className="absolute right-1 top-1 bg-gold text-charcoal w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                                    <ArrowRight size={18} />
+                                <button
+                                    disabled={isSubmittingNewsletter}
+                                    className="absolute right-1 top-1 bg-gold text-charcoal w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors disabled:opacity-50"
+                                >
+                                    {isSubmittingNewsletter ? (
+                                        <Loader2 className="animate-spin" size={18} />
+                                    ) : (
+                                        <ArrowRight size={18} />
+                                    )}
                                 </button>
                             </form>
                         </div>

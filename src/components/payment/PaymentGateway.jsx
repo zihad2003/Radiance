@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CreditCard, Smartphone, Building2, Truck, CheckCircle2,
@@ -9,8 +9,14 @@ import {
 import { useShopStore } from '../../store/useShopStore';
 import { validatePromoCode } from '../../data/promoCodes';
 import Counter from '../ui/Counter';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { logError, getErrorMessage } from '../../utils/errors';
 
 const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuccess }) => {
+    const { user } = useAuth();
     const { cart: storeCart, getCartTotal, clearCart } = useShopStore();
     const cart = externalCart || storeCart;
     const [step, setStep] = useState(1);
@@ -31,12 +37,24 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
         saveAddress: true
     });
 
+    useEffect(() => {
+        if (user) {
+            setDeliveryInfo(prev => ({
+                ...prev,
+                fullName: user.name || '',
+                phone: user.phone || '',
+                email: user.email || ''
+            }));
+        }
+    }, [user]);
+
     const [shippingMethod, setShippingMethod] = useState('standard');
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [orderId] = useState(`RBS${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`);
 
     // --- CALCULATIONS ---
     const subtotal = getCartTotal();
+    const activePromo = appliedPromo;
 
     const shippingFee = useMemo(() => {
         if (activePromo?.type === 'shipping') return 0;
@@ -44,16 +62,15 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
         if (shippingMethod === 'same-day') return 250;
         if (shippingMethod === 'express') return 150;
         return subtotal > 2000 ? 0 : 60; // Standard Dhaka
-    }, [shippingMethod, subtotal]);
+    }, [shippingMethod, subtotal, activePromo]);
 
     const discountAmount = useMemo(() => {
-        if (!appliedPromo) return 0;
-        if (appliedPromo.type === 'percentage') return subtotal * appliedPromo.discount;
-        if (appliedPromo.type === 'fixed') return appliedPromo.discount;
+        if (!activePromo) return 0;
+        if (activePromo.type === 'percentage') return subtotal * activePromo.discount;
+        if (activePromo.type === 'fixed') return activePromo.discount;
         return 0;
-    }, [appliedPromo, subtotal]);
+    }, [activePromo, subtotal]);
 
-    const activePromo = appliedPromo;
     const codFee = paymentMethod === 'cod' ? 50 : 0;
     const finalTotal = subtotal - discountAmount + shippingFee + codFee;
 
@@ -72,21 +89,36 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
     const nextStep = () => setStep(s => s + 1);
     const prevStep = () => setStep(s => s - 1);
 
-    const handleFinalizeOrder = () => {
+    const createOrder = useMutation(api.orders.createOrder);
+    const toast = useToast();
+
+    const handleFinalizeOrder = async () => {
         setStep(5); // Processing
-        setTimeout(() => {
-            const orderData = {
+        try {
+            await createOrder({
                 orderId,
                 total: finalTotal,
-                items: cart,
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    brand: item.brand
+                })),
                 delivery: deliveryInfo,
                 method: paymentMethod,
-                timestamp: new Date().toISOString()
-            };
-            if (onSuccess) onSuccess(orderData);
+                status: paymentMethod === 'cod' ? 'pending' : 'paid',
+                userId: user?._id
+            });
+
+            if (onSuccess) onSuccess();
             setStep(6); // Success
-            // In a real app, send to API here
-        }, 3000);
+            toast.success("Order confirmed successfully!");
+        } catch (err) {
+            logError(err, 'Payment/Order Creation');
+            setStep(4); // Go back to payment step
+            toast.error(getErrorMessage(err));
+        }
     };
 
     return (
@@ -107,13 +139,18 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
                     <div className="flex items-center gap-4 mb-12 overflow-x-auto hide-scrollbar pb-2">
                         {[1, 2, 3, 4].map(i => (
                             <React.Fragment key={i}>
-                                <div className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${step === i ? 'bg-charcoal text-white shadow-xl scale-105' : step > i ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-300'}`}>
+                                <div className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${step === i
+                                    ? 'bg-charcoal text-white shadow-xl scale-105'
+                                    : step > i
+                                        ? 'bg-green-100 text-green-700 font-bold'
+                                        : 'bg-gray-100 text-gray-500'
+                                    }`}>
                                     {step > i ? <CheckCircle2 size={14} /> : <span className="text-[10px] font-black">{i}</span>}
                                     <span className="text-[10px] font-black uppercase tracking-widest">
                                         {i === 1 ? 'Review' : i === 2 ? 'Delivery' : i === 3 ? 'Shipping' : 'Payment'}
                                     </span>
                                 </div>
-                                {i < 4 && <div className="h-px w-8 bg-gray-100" />}
+                                {i < 4 && <div className={`h-px w-8 ${step > i ? 'bg-green-200' : 'bg-gray-200'}`} />}
                             </React.Fragment>
                         ))}
                     </div>
@@ -131,7 +168,7 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
                 {/* Right Side: Order Summary (Sticky on Desktop) */}
                 {step < 6 && (
                     <div className="w-full md:w-[400px] bg-gray-50 p-8 md:p-12 flex flex-col border-l border-gray-100">
-                        <h3 className="text-xl font-serif italic mb-8">Order Summary</h3>
+                        <h3 className="text-xl font-serif italic mb-8 text-charcoal">Order Summary</h3>
 
                         <div className="flex-1 space-y-4 mb-8 overflow-y-auto hide-scrollbar">
                             {cart.map((item, i) => (
@@ -141,9 +178,9 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-[10px] font-bold text-charcoal leading-tight line-clamp-1">{item.name}</p>
-                                        <p className="text-[9px] text-gray-400 uppercase tracking-widest">{item.brand} x{item.quantity}</p>
+                                        <p className="text-[9px] text-gray-500 uppercase tracking-widest">{item.brand} x{item.quantity}</p>
                                     </div>
-                                    <span className="text-[10px] font-black">৳{(item.price * item.quantity).toLocaleString()}</span>
+                                    <span className="text-[10px] font-black text-charcoal">৳{(item.price * item.quantity).toLocaleString()}</span>
                                 </div>
                             ))}
                         </div>
@@ -170,7 +207,7 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
                                 </div>
                             )}
                             <div className="pt-4 border-t border-gray-200 flex justify-between items-end">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Investment</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-500">Total Investment</div>
                                 <div className="text-3xl font-black text-charcoal">৳<Counter from={0} to={finalTotal} duration={1} /></div>
                             </div>
 
@@ -193,8 +230,8 @@ const CheckoutFlow = ({ cart: externalCart, total: externalTotal, onClose, onSuc
 
 const StepReview = ({ cart, next, promoCode, setPromoCode, applyPromo, appliedPromo, promoError }) => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-        <h2 className="text-4xl font-serif italic mb-2">Review Your Bag</h2>
-        <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">One last look before the beauty arrives</p>
+        <h2 className="text-4xl font-serif italic mb-2 text-charcoal">Review Your Bag</h2>
+        <p className="text-gray-600 text-sm mb-10 tracking-widest uppercase">One last look before the beauty arrives</p>
 
         <div className="space-y-6 mb-12">
             <div className="flex items-center gap-4 p-6 bg-gray-50 rounded-3xl border border-gray-100">
@@ -225,48 +262,48 @@ const StepReview = ({ cart, next, promoCode, setPromoCode, applyPromo, appliedPr
 
 const StepDelivery = ({ data, setData, next, back }) => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-        <h2 className="text-4xl font-serif italic mb-2">Delivery Details</h2>
-        <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">Where shall we send your radiance?</p>
+        <h2 className="text-4xl font-serif italic mb-2 text-charcoal">Delivery Details</h2>
+        <p className="text-gray-600 text-sm mb-10 tracking-widest uppercase">Where shall we send your radiance?</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Recipient Name</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 px-2">Recipient Name</label>
                 <input
                     type="text" placeholder="Full legal name"
                     value={data.fullName} onChange={(e) => setData({ ...data, fullName: e.target.value })}
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm text-charcoal placeholder:text-gray-300"
                 />
             </div>
             <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Phone Number</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 px-2">Phone Number</label>
                 <input
                     type="tel" placeholder="01XXXXXXXXX"
                     value={data.phone} onChange={(e) => setData({ ...data, phone: e.target.value })}
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm text-charcoal placeholder:text-gray-300"
                 />
             </div>
             <div className="md:col-span-2 space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Detailed Address</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 px-2">Detailed Address</label>
                 <textarea
                     placeholder="House, Flat, Road, Area..."
                     value={data.address} onChange={(e) => setData({ ...data, address: e.target.value })}
-                    rows="3" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                    rows="3" className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm text-charcoal placeholder:text-gray-300"
                 />
             </div>
             <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Area / Neighborhood</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 px-2">Area / Neighborhood</label>
                 <input
                     type="text" placeholder="e.g. Gulshan 1"
                     value={data.area} onChange={(e) => setData({ ...data, area: e.target.value })}
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm text-charcoal placeholder:text-gray-300"
                 />
             </div>
             <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">Landmark (Optional)</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 px-2">Landmark (Optional)</label>
                 <input
                     type="text" placeholder="Beside ABC Tower"
                     value={data.landmark} onChange={(e) => setData({ ...data, landmark: e.target.value })}
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-primary transition-all text-sm text-charcoal placeholder:text-gray-300"
                 />
             </div>
         </div>
@@ -292,8 +329,8 @@ const StepShipping = ({ method, setMethod, next, back, total }) => {
 
     return (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <h2 className="text-4xl font-serif italic mb-2">Shipping Method</h2>
-            <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">How fast should your products arrive?</p>
+            <h2 className="text-4xl font-serif italic mb-2 text-charcoal">Shipping Method</h2>
+            <p className="text-gray-600 text-sm mb-10 tracking-widest uppercase">How fast should your products arrive?</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
                 {shippingOptions.map(opt => (
@@ -338,8 +375,8 @@ const StepPayment = ({ method, setMethod, next, back, total }) => {
 
     return (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <h2 className="text-4xl font-serif italic mb-2">Secure Payment</h2>
-            <p className="text-gray-400 text-sm mb-10 tracking-widest uppercase">Authorized transaction gateway</p>
+            <h2 className="text-4xl font-serif italic mb-2 text-charcoal">Secure Payment</h2>
+            <p className="text-gray-600 text-sm mb-10 tracking-widest uppercase">Authorized transaction gateway</p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
                 {paymentOptions.map(opt => (
@@ -399,19 +436,19 @@ const StepSuccess = ({ orderId, onClose, clearCart }) => (
             <CheckCircle2 size={48} />
         </div>
         <span className="text-primary font-bold tracking-[0.5em] uppercase text-[10px] mb-4">Mission Accomplished</span>
-        <h2 className="text-4xl md:text-5xl font-serif italic mb-6">Radiance Secured.</h2>
-        <p className="text-gray-500 text-sm max-w-md mx-auto mb-10 leading-relaxed font-light">
+        <h2 className="text-4xl md:text-5xl font-serif italic mb-6 text-charcoal">Radiance Secured.</h2>
+        <p className="text-gray-700 text-sm max-w-md mx-auto mb-10 leading-relaxed font-medium">
             Your transformation essentials are being prepared. You will receive a confirmation SMS and Email shortly.
         </p>
 
-        <div className="bg-gray-50 p-8 rounded-[3rem] border border-gray-100 mb-12 w-full max-w-sm">
-            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Order Identification</p>
+        <div className="bg-gray-100 p-8 rounded-[3rem] border border-gray-200 mb-12 w-full max-w-sm">
+            <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">Order Identification</p>
             <p className="text-2xl font-black text-charcoal mb-6">#{orderId}</p>
             <div className="grid grid-cols-2 gap-4">
-                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
+                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest text-charcoal hover:bg-gray-100 transition-all">
                     <Download size={16} /> Invoice
                 </button>
-                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
+                <button className="flex items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-gray-200 text-[10px] font-black uppercase tracking-widest text-charcoal hover:bg-gray-100 transition-all">
                     <ExternalLink size={16} /> Track
                 </button>
             </div>

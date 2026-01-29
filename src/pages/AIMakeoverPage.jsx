@@ -1,5 +1,5 @@
 import React from 'react';
-import AIPresetGenerator from '../components/ai/AIPresetGenerator';
+import AIPresetGenerator from '../components/AIPresetGenerator';
 import SEO from '../components/SEO';
 import { motion } from 'framer-motion';
 

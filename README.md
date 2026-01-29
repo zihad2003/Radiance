@@ -35,16 +35,30 @@ An advanced, AI-powered progressive web app for the Radiance Beauty Salon, servi
 
 ## 🚀 Getting Started
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-   *Note: Using `--legacy-peer-deps` may be required due to TensorFlow versioning.*
+### 1. Install Dependencies
+```bash
+npm install
+```
+*Note: Using `--legacy-peer-deps` may be required due to TensorFlow versioning.*
 
-2. **Run Development Server**
+### 2. Environment Configuration
+The application requires several environment variables to function correctly (e.g., Convex database URL, Analytics IDs).
+
+1. Copy the example environment file:
    ```bash
-   npm run dev
+   cp env.example .env.local
    ```
+2. Open `.env.local` and fill in the required values:
+   - `VITE_CONVEX_URL`: Your Convex deployment URL.
+   - `VITE_GA_MEASUREMENT_ID`: Google Analytics 4 ID (Optional).
+   - `VITE_CLARITY_PROJECT_ID`: Microsoft Clarity ID (Optional).
+
+*The app will perform a validation check on startup and alert you if required variables are missing.*
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
 
 3. **Build for Production**
    ```bash

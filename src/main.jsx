@@ -6,6 +6,11 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ToastProvider } from './context/ToastContext';
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import { validateEnv } from './utils/envValidator';
+import { AuthProvider } from './context/AuthContext';
+
+// Validate settings before mounting
+validateEnv();
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
 
@@ -15,7 +20,9 @@ createRoot(document.getElementById('root')).render(
       <HelmetProvider>
         <ConvexProvider client={convex}>
           <ToastProvider>
-            <App />
+            <AuthProvider>
+              <App />
+            </AuthProvider>
           </ToastProvider>
         </ConvexProvider>
       </HelmetProvider>

@@ -18,6 +18,12 @@ import BrowserCompatibilityWarning from './components/BrowserCompatibilityWarnin
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import OfflineIndicator from './components/OfflineIndicator';
 import { initAnalytics, trackPageView } from './utils/analytics';
+import { useShopStore } from './store/useShopStore';
+import CartSlideOut from './components/CartSlideOut';
+import PaymentGateway from './components/payment/PaymentGateway';
+import UserProfile from './components/user/UserProfile';
+import CustomCursor from './components/CustomCursor';
+import LoadingScreen from './components/ui/LoadingScreen';
 
 // Page Imports
 import HomePage from './pages/HomePage';
@@ -28,6 +34,9 @@ import ShopPage from './pages/ShopPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import AIMakeoverPage from './pages/AIMakeoverPage';
+import AuthPage from './pages/AuthPage';
+import AccountPage from './pages/AccountPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -51,22 +60,27 @@ function AnalyticsTracker() {
   return null;
 }
 
-import LoadingScreen from './components/ui/LoadingScreen';
-
 function AppContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Default to loading state
+  const { isCartOpen, setCartOpen, isPaymentOpen, setPaymentOpen } = useShopStore();
 
   useEffect(() => {
     // Initialize Analytics
     initAnalytics();
 
-    const handler = () => setShowAdmin(true);
-    window.addEventListener('open-admin', handler);
-    return () => window.removeEventListener('open-admin', handler);
+    const adminHandler = () => setShowAdmin(true);
+    const profileHandler = () => setShowProfile(true);
+    window.addEventListener('open-admin', adminHandler);
+    window.addEventListener('open-profile', profileHandler);
+    return () => {
+      window.removeEventListener('open-admin', adminHandler);
+      window.removeEventListener('open-profile', profileHandler);
+    };
   }, []);
 
   const handleBookService = (serviceName) => {
@@ -103,6 +117,9 @@ function AppContent() {
           <ScrollToTop />
 
           <SmoothScroll>
+            {/* Custom Cursor */}
+            <CustomCursor />
+
             <div className="relative min-h-screen bg-[#121110] selection:bg-primary selection:text-black">
               <Gamification />
               <ScrollProgress />
@@ -120,8 +137,18 @@ function AppContent() {
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/shop" element={<ShopPage />} />
                   <Route path="/about" element={<AboutPage />} />
-                  <Route path="/ai-makeover" element={<AIMakeoverPage />} />
+                  <Route path="/ai-makeover" element={
+                    <ProtectedRoute>
+                      <AIMakeoverPage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/account" element={
+                    <ProtectedRoute>
+                      <AccountPage />
+                    </ProtectedRoute>
+                  } />
                   {/* Fallback to home */}
                   <Route path="*" element={<HomePage onBook={handleBookService} />} />
                 </Routes>
@@ -132,12 +159,41 @@ function AppContent() {
             </div>
           </SmoothScroll>
 
+          {/* Global Shop Components */}
+          <CartSlideOut
+            isOpen={isCartOpen}
+            onClose={() => setCartOpen(false)}
+            onCheckout={() => {
+              setCartOpen(false);
+              setPaymentOpen(true);
+            }}
+          />
+
+          {isPaymentOpen && (
+            <PaymentGateway
+              onClose={() => setPaymentOpen(false)}
+              onSuccess={() => {
+                // handle success if needed
+              }}
+            />
+          )}
+
           {/* Booking Wizard Modal */}
           <BookingWizard
             isOpen={showBooking}
             onClose={() => setShowBooking(false)}
             initialService={selectedService}
           />
+
+          <AnimatePresence>
+            {showProfile && (
+              <UserProfile
+                isOpen={showProfile}
+                onClose={() => setShowProfile(false)}
+                onOpenAdmin={() => setShowAdmin(true)}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Admin Modal Overlay */}
           <AnimatePresence>

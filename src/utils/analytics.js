@@ -2,18 +2,23 @@ import ReactGA from 'react-ga4';
 
 // Initialize Analytics Service
 export const initAnalytics = () => {
+    const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+    const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID;
+
     // Google Analytics 4
-    // Replace 'G-XXXXXXXXXX' with your actual Measurement ID
-    ReactGA.initialize('G-DEMO-MEASUREMENT-ID');
-    console.log("Analytics Initialized (GA4)");
+    if (gaId) {
+        ReactGA.initialize(gaId);
+        console.log("Analytics Initialized (GA4)");
+    }
 
     // Microsoft Clarity (Injected dynamically)
-    // Replace 'your_clarity_id' with actual ID
-    (function (c, l, a, r, i, t, y) {
-        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
-        t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
-        y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-    })(window, document, "clarity", "script", "YOUR_CLARITY_ID");
+    if (clarityId) {
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+            t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", clarityId);
+    }
 };
 
 // Track Page Views (SPA support)

@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, User, MapPin, Phone, Mail, Check, Download, FileText } from 'lucide-react';
+import { Calendar, Clock, User, MapPin, Phone, Mail, Check, Download, FileText, MessageCircle } from 'lucide-react';
 import { getServiceById, calculateTotalPrice, calculateTotalDuration } from '../../data/servicesDatabase';
 import { getStylistById } from '../../data/stylistsDatabase';
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { logError, getErrorMessage } from '../../utils/errors';
 
 const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
+    const { user } = useAuth();
     const createBooking = useMutation(api.bookings.createBooking);
+    const toast = useToast();
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
@@ -30,8 +35,6 @@ const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
         return `${hours} hr${hours > 1 ? 's' : ''} ${mins} mins`;
     };
 
-
-
     const handleConfirmBooking = async () => {
         setIsConfirming(true);
 
@@ -42,7 +45,8 @@ const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
                 date: bookingData.selectedDate,
                 time: bookingData.selectedTime,
                 customer: details,
-                status: "pending"
+                status: "pending",
+                userId: user?._id
             });
 
             // Generate WhatsApp Message
@@ -61,9 +65,10 @@ Address: ${details.address}
             }
 
             setIsConfirmed(true);
+            toast.success("Booking confirmed! We can't wait to see you. ✨");
         } catch (error) {
-            console.error("Booking failed:", error);
-            alert("Failed to confirm booking. Please try again.");
+            logError(error, 'Booking Confirmation');
+            toast.error(getErrorMessage(error));
         } finally {
             setIsConfirming(false);
         }

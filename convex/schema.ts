@@ -18,6 +18,7 @@ export default defineSchema({
         description: v.string(),
         ingredients: v.array(v.string()),
         skinType: v.array(v.string()),
+        concerns: v.optional(v.array(v.string())),
         texture: v.string(),
         rating: v.number(),
         reviews: v.number(),
@@ -35,7 +36,8 @@ export default defineSchema({
         time: v.string(),
         customer: v.any(),
         status: v.string(),
-    }).index("by_date", ["date"]),
+        userId: v.optional(v.string()),
+    }).index("by_date", ["date"]).index("by_user", ["userId"]),
 
     generated_images: defineTable({
         prompt: v.string(),
@@ -49,9 +51,66 @@ export default defineSchema({
         orderId: v.string(),
         total: v.number(),
         items: v.any(),
-        delivery: v.any(), // Storing object as any/json for flexibility or define structure
+        delivery: v.any(),
         paymentMethod: v.string(),
         status: v.string(),
+        userId: v.optional(v.string()), // Link to user if logged in
         timestamp: v.number(),
-    }).index("by_orderId", ["orderId"]),
+    }).index("by_orderId", ["orderId"]).index("by_user", ["userId"]),
+
+    users: defineTable({
+        phone: v.optional(v.string()),
+        name: v.optional(v.string()),
+        email: v.string(),
+        passwordHash: v.optional(v.string()),
+        points: v.number(),
+        level: v.string(),
+        savedLooks: v.array(v.object({
+            id: v.string(),
+            imageUrl: v.string(),
+            type: v.string(),
+            timestamp: v.number(),
+        })),
+        createdAt: v.number(),
+    }).index("by_phone", ["phone"]).index("by_email", ["email"]),
+
+    contacts: defineTable({
+        firstName: v.string(),
+        lastName: v.string(),
+        email: v.string(),
+        subject: v.string(),
+        message: v.string(),
+        createdAt: v.number(),
+    }),
+
+    newsletters: defineTable({
+        email: v.string(),
+        createdAt: v.number(),
+    }).index("by_email", ["email"]),
+
+    reviews: defineTable({
+        productId: v.string(),
+        userName: v.string(),
+        rating: v.number(),
+        comment: v.string(),
+        timestamp: v.number(),
+    }).index("by_product", ["productId"]),
+
+    skinAnalysisResults: defineTable({
+        userId: v.optional(v.string()),
+        sessionId: v.string(),
+        timestamp: v.number(),
+        overallScore: v.number(),
+        skinType: v.string(),
+        agePrediction: v.number(),
+        metrics: v.object({
+            hydration: v.object({ score: v.number(), level: v.string() }),
+            radiance: v.object({ score: v.number(), level: v.string() }),
+            firmness: v.optional(v.object({ score: v.number(), level: v.string() })),
+        }),
+        concerns: v.any(),
+        faceMap: v.any(),
+        foundationShade: v.optional(v.object({ hex: v.string(), name: v.string() })),
+        products: v.array(v.any()),
+    }).index("by_user", ["userId"]).index("by_session", ["sessionId"]),
 });

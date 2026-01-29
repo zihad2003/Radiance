@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, ChevronRight, ChevronLeft } from 'lucide-react';
 import ServiceSelection from './booking/ServiceSelection';
@@ -6,8 +6,10 @@ import DateTimeSelection from './booking/DateTimeSelection';
 import StylistSelection from './booking/StylistSelection';
 import CustomerDetails from './booking/CustomerDetails';
 import ReviewConfirmation from './booking/ReviewConfirmation';
+import { useAuth } from '../context/AuthContext';
 
 const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
+    const { user } = useAuth();
     const [currentStep, setCurrentStep] = useState(1);
     const [bookingData, setBookingData] = useState({
         selectedServices: initialService ? [initialService] : [],
@@ -27,6 +29,20 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
         discount: 0,
         travelFee: 0
     });
+
+    useEffect(() => {
+        if (user) {
+            setBookingData(prev => ({
+                ...prev,
+                customerDetails: {
+                    ...prev.customerDetails,
+                    name: user.name || '',
+                    email: user.email || '',
+                    phone: user.phone || ''
+                }
+            }));
+        }
+    }, [user, isOpen]);
 
     const steps = [
         { number: 1, title: 'Select Services', icon: '🛍️', component: ServiceSelection },

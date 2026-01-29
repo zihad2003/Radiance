@@ -10,8 +10,13 @@ import {
     applyARHighlighter,
     analyzeFaceShape
 } from '../utils/arFilters';
+import { useAction } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useToast } from '../context/ToastContext';
 
 const AIBeautyAnalyzer = () => {
+    const analyzeSkinBackend = useAction(api.skinAnalysis.analyze);
+    const { error: toastError, info } = useToast();
     const [mode, setMode] = useState('idle'); // 'idle', 'camera', 'upload'
     const [analysis, setAnalysis] = useState(null);
     const [faceShape, setFaceShape] = useState(null);
@@ -109,11 +114,21 @@ const AIBeautyAnalyzer = () => {
             if (!source) throw new Error("No image source available");
 
             const result = await analyzeSkinTone(source);
-            setAnalysis(result);
+
+            // --- BACKEND AI ANALYSIS ---
+            info("Running advanced dermatological scan...");
+            const base64Image = canvasRef.current.toDataURL('image/jpeg', 0.8);
+            const cloudAnalysis = await analyzeSkinBackend({ image: base64Image });
+
+            // Merge results
+            setAnalysis({
+                ...result,
+                cloud: cloudAnalysis
+            });
             setShowResults(true);
         } catch (error) {
             console.error('Analysis error:', error);
-            // alert(error.message || 'Failed to analyze skin tone'); // Removed alert
+            toastError("Dermatological scan failed. Using local color match instead.");
         } finally {
             setLoading(false);
         }

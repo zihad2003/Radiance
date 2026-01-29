@@ -1,9 +1,37 @@
+import { useState } from 'react';
 import Shop from '../components/Shop';
 import FadeIn from '../components/ui/FadeIn';
 import SEO from '../components/SEO';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight, Mail, Loader2 } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useToast } from '../context/ToastContext';
 
 const ShopPage = () => {
+    const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const subscribeMutation = useMutation(api.forms.subscribeNewsletter);
+    const toast = useToast();
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+            toast.error("Please enter a valid email address.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await subscribeMutation({ email });
+            toast.success("You're on the list! Exclusive rewards coming your way. ✨");
+            setEmail('');
+        } catch (err) {
+            toast.error("Subscription failed. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#121110] pt-24">
             <SEO
@@ -42,14 +70,24 @@ const ShopPage = () => {
 
                             <div className="w-full max-w-md">
                                 <FadeIn delay={0.2}>
-                                    <form className="flex flex-col gap-4">
+                                    <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
                                         <input
                                             type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             placeholder="ENTER YOUR EMAIL"
                                             className="w-full px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 text-xs font-black uppercase tracking-widest outline-none focus:border-primary/50 transition-all text-center md:text-left"
+                                            required
                                         />
-                                        <button className="w-full bg-white text-black py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary transition-colors flex items-center justify-center gap-3 group">
-                                            Subscribe <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                        <button
+                                            disabled={isSubmitting}
+                                            className="w-full bg-white text-black py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary transition-colors flex items-center justify-center gap-3 group disabled:opacity-50"
+                                        >
+                                            {isSubmitting ? (
+                                                <Loader2 className="animate-spin" size={16} />
+                                            ) : (
+                                                <>Subscribe <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /></>
+                                            )}
                                         </button>
                                     </form>
                                 </FadeIn>

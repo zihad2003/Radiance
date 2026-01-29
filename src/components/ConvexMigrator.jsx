@@ -114,10 +114,15 @@ const ConvexMigratorContent = () => {
     );
 };
 
-const ConvexMigrator = () => (
-    <MigratorErrorBoundary>
-        <ConvexMigratorContent />
-    </MigratorErrorBoundary>
-);
+const ConvexMigrator = () => {
+    const isEnabled = import.meta.env.VITE_ENABLE_MIGRATOR === 'true';
+    if (!isEnabled) return null;
+
+    return (
+        <MigratorErrorBoundary>
+            <ConvexMigratorContent />
+        </MigratorErrorBoundary>
+    );
+};
 
 export default ConvexMigrator;

@@ -4,7 +4,7 @@ import {
     Search, Filter, Heart, Star, ChevronDown, ChevronRight,
     X, Plus, ShoppingBag, LayoutGrid,
     List, Sparkles, Droplet,
-    Wind, Palette, Waves, Tag, ArrowRight
+    Wind, Palette, Waves, Tag, ArrowRight, RefreshCw, Loader2
 } from 'lucide-react';
 
 import { useShopStore } from '../store/useShopStore';
@@ -13,9 +13,7 @@ import { getAllProducts, getBrands } from '../data/makeupBrands';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
-import PaymentGateway from './payment/PaymentGateway';
 import ProductModal from './ProductModal';
-import CartSlideOut from './CartSlideOut';
 import Image from './ui/Image';
 
 // --- ERROR BOUNDARY ---
@@ -40,13 +38,15 @@ class QueryErrorBoundary extends React.Component {
 
 // --- CLOUD DATA WRAPPER ---
 const ShopWithCloud = () => {
-    const cloudProducts = useQuery(api?.products?.list || null);
-    return <ShopContent cloudProducts={cloudProducts} />;
+    const cloudProducts = useQuery(api.products.list);
+    const isLoading = cloudProducts === undefined;
+
+    return <ShopContent cloudProducts={cloudProducts} isCloudLoading={isLoading} />;
 };
 
 // --- MAIN CONTENT ---
-const ShopContent = ({ cloudProducts }) => {
-    const { cart, wishlist, toggleWishlist, addToCart, getCartTotal, getCartCount } = useShopStore();
+const ShopContent = ({ cloudProducts, isCloudLoading }) => {
+    const { cart, wishlist, toggleWishlist, addToCart, getCartTotal, getCartCount, isCartOpen, setCartOpen, isPaymentOpen, setPaymentOpen } = useShopStore();
 
     // --- CONVEX DATA MERGE ---
     const localProducts = useMemo(() => {
@@ -65,8 +65,6 @@ const ShopContent = ({ cloudProducts }) => {
     const [priceRange, setPriceRange] = useState(100000); // 100k Max
     const [sortBy, setSortBy] = useState('popular');
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [showCheckout, setShowCheckout] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
     const [onlyInStock, setOnlyInStock] = useState(false);
     const [selectedBrands, setSelectedBrands] = useState([]);
@@ -280,23 +278,45 @@ const ShopContent = ({ cloudProducts }) => {
                         </div>
 
                         {/* Grid */}
-                        <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-                            <AnimatePresence mode="popLayout">
-                                {filteredProducts.map((p, idx) => (
-                                    <ProductCard
-                                        key={p.id}
-                                        product={p}
-                                        index={idx}
-                                        viewMode={viewMode}
-                                        onClick={() => setSelectedProduct(p)}
-                                    />
-                                ))}
-                            </AnimatePresence>
-                        </div>
-
-                        {filteredProducts.length === 0 && (
-                            <div className="py-20 text-center text-white/40">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em]">No items match your criteria</p>
+                        {isCloudLoading ? (
+                            <div className="flex flex-col items-center justify-center py-40 bg-white/5 rounded-[4rem] border border-white/10">
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}>
+                                    <Loader2 className="text-primary" size={48} />
+                                </motion.div>
+                                <p className="mt-6 text-[10px] font-black uppercase tracking-widest text-white/40">Synchronizing with Radiance Cloud...</p>
+                            </div>
+                        ) : filteredProducts.length > 0 ? (
+                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                                <AnimatePresence mode="popLayout">
+                                    {filteredProducts.map((p, idx) => (
+                                        <ProductCard
+                                            key={p.id}
+                                            product={p}
+                                            index={idx}
+                                            viewMode={viewMode}
+                                            onClick={() => setSelectedProduct(p)}
+                                        />
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-40 bg-white/5 rounded-[4rem] border border-white/10 text-center px-6">
+                                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10">
+                                    <Search className="text-white/20" size={32} />
+                                </div>
+                                <h3 className="text-2xl font-serif text-white italic mb-4">No treasures found</h3>
+                                <p className="text-sm text-white/40 max-w-sm mb-10 leading-relaxed uppercase tracking-tighter font-bold">Try adjusting your filters or search terms to find the perfect addition to your collection.</p>
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setActiveCategory('All');
+                                        setPriceRange([0, 10000]);
+                                        setSelectedBrands([]);
+                                    }}
+                                    className="flex items-center gap-3 px-8 py-4 bg-primary text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-white transition-all shadow-glow"
+                                >
+                                    <RefreshCw size={14} /> Reset All Filters
+                                </button>
                             </div>
                         )}
                     </div>
@@ -306,7 +326,7 @@ const ShopContent = ({ cloudProducts }) => {
             {/* Cart Trigger */}
             <motion.button
                 initial={{ scale: 0 }} animate={{ scale: 1 }}
-                onClick={() => setIsCartOpen(true)}
+                onClick={() => setCartOpen(true)}
                 className="fixed bottom-10 right-10 z-[100] w-16 h-16 bg-primary text-black rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
             >
                 <ShoppingBag size={24} />
@@ -318,22 +338,7 @@ const ShopContent = ({ cloudProducts }) => {
             {/* Modals */}
             <AnimatePresence>
                 {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
-                {isCartOpen && <CartSlideOut isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} onCheckout={() => { setIsCartOpen(false); setShowCheckout(true); }} />}
             </AnimatePresence>
-
-            {showCheckout && (
-                <PaymentGateway
-                    cart={cart}
-                    total={getCartTotal()}
-                    onClose={() => setShowCheckout(false)}
-                    onSuccess={async (details) => {
-                        try {
-                            await createOrder({ ...details, status: 'pending' });
-                            useShopStore.getState().clearCart();
-                        } catch (err) { console.error(err); }
-                    }}
-                />
-            )}
         </section>
     );
 };

@@ -19,8 +19,20 @@ export const createOrder = mutation({
         }),
         method: v.string(), // Payment method
         status: v.string(), // 'pending', 'paid', 'shipped'
+        userId: v.optional(v.string()),
     },
     handler: async (ctx: any, args: any) => {
+        // --- CUSTOM VALIDATION ---
+        if (args.total <= 0) {
+            throw new Error("Order total must be greater than zero.");
+        }
+        if (!args.items || args.items.length === 0) {
+            throw new Error("Order must contain at least one item.");
+        }
+        if (!args.delivery.phone.match(/^01[3-9]\d{8}$/)) {
+            throw new Error("Invalid Bangladeshi phone number.");
+        }
+
         const id = await ctx.db.insert("orders", {
             orderId: args.orderId,
             total: args.total,
@@ -28,6 +40,7 @@ export const createOrder = mutation({
             delivery: args.delivery,
             paymentMethod: args.method,
             status: args.status,
+            userId: args.userId,
             timestamp: Date.now(),
         });
         return id;
@@ -41,7 +54,18 @@ export const listOrders = query({
     },
 });
 
-// Get user orders (by phone for now, since auth is minimal)
+// Get user orders by userId
+export const getOrdersByUserId = query({
+    args: { userId: v.string() },
+    handler: async (ctx: any, args: any) => {
+        return await ctx.db
+            .query("orders")
+            .withIndex("by_user", (q: any) => q.eq("userId", args.userId))
+            .collect();
+    }
+});
+
+// Get user orders (by phone fallback)
 export const getOrdersByPhone = query({
     args: { phone: v.string() },
     handler: async (ctx: any, args: any) => {

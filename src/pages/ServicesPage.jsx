@@ -27,7 +27,7 @@ const ServicesPage = ({ onBook }) => {
             <Services onBook={onBook} />
 
             {/* Pricing Section */}
-            <Pricing />
+            <Pricing onBook={onBook} />
 
             {/* CTA Section */}
             <section className="py-32 bg-[#0A0A0A] border-t border-white/5 relative overflow-hidden">

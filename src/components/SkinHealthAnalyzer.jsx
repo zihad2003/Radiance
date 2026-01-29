@@ -1,14 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, AlertCircle, CheckCircle, ArrowRight, Droplets, Sun, Activity, Moon, X, Scan, Sparkles } from 'lucide-react';
+import { Camera, Upload, AlertCircle, CheckCircle, ArrowRight, Droplets, Sun, Activity, Moon, X, Scan, Sparkles, FileText } from 'lucide-react';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import SkinAnalysisReport from './skin-analysis/SkinAnalysisReport';
+import SkincareAiChat from './skin-analysis/SkincareAiChat';
 
 const SkinHealthAnalyzer = () => {
     const [image, setImage] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [showReport, setShowReport] = useState(false);
 
     const fileInputRef = useRef(null);
     const videoRef = useRef(null);
@@ -17,33 +20,88 @@ const SkinHealthAnalyzer = () => {
 
     const analyzeSkin = useAction(api.skinAnalysis.analyze);
 
+    const [lightingCondition, setLightingCondition] = useState('unknown'); // 'good', 'poor', 'too_bright'
+    const brightnessIntervalRef = useRef(null);
+
     // Camera Cleanup
     useEffect(() => {
         return () => {
-            if (videoRef.current && videoRef.current.srcObject) {
-                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-            }
+            stopCamera();
         };
     }, []);
 
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+        if (brightnessIntervalRef.current) {
+            clearInterval(brightnessIntervalRef.current);
+            brightnessIntervalRef.current = null;
+        }
+        setCameraActive(false);
+    };
+
+    // Analyze Lighting
+    const checkLighting = () => {
+        if (!videoRef.current || !videoRef.current.videoWidth) return;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 100; // Small sample
+        canvas.height = 100;
+        ctx.drawImage(videoRef.current, 0, 0, 100, 100);
+        const imageData = ctx.getImageData(0, 0, 100, 100);
+        const data = imageData.data;
+
+        let r, g, b, avg;
+        let colorSum = 0;
+
+        for (let x = 0, len = data.length; x < len; x += 4) {
+            r = data[x];
+            g = data[x + 1];
+            b = data[x + 2];
+            avg = Math.floor((r + g + b) / 3);
+            colorSum += avg;
+        }
+
+        const brightness = Math.floor(colorSum / (data.length / 4));
+
+        if (brightness < 60) setLightingCondition('poor');
+        else if (brightness > 200) setLightingCondition('too_bright');
+        else setLightingCondition('good');
+    };
+
     // Start Camera
     const startCamera = async () => {
+        setError(null);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
-                    frameRate: { ideal: 30, max: 30 },
                     facingMode: 'user'
                 }
             });
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                setCameraActive(true);
-                setError(null);
+                // Wait for video to play to confirm stream
+                videoRef.current.onloadedmetadata = () => {
+                    videoRef.current.play();
+                    setCameraActive(true);
+                    // Start checking lighting
+                    brightnessIntervalRef.current = setInterval(checkLighting, 1000);
+                };
             }
         } catch (err) {
-            setError("Unable to access camera. Please try uploading a photo instead.");
+            console.error("Camera Error:", err);
+            if (err.name === 'NotAllowedError') {
+                setError("Camera access denied. Please enable camera permissions in your browser settings.");
+            } else if (err.name === 'NotFoundError') {
+                setError("No camera device found. Please verify your hardware connection.");
+            } else {
+                setError("Unable to access camera. Please try uploading a photo instead.");
+            }
         }
     };
 
@@ -51,21 +109,32 @@ const SkinHealthAnalyzer = () => {
     const capturePhoto = () => {
         if (!videoRef.current || !canvasRef.current) return;
 
+        if (lightingCondition === 'poor') {
+            const proceed = window.confirm("Lighting seems poor. Capture anyway?");
+            if (!proceed) return;
+        }
+
         const context = canvasRef.current.getContext('2d');
-        // Set canvas size (downscale for performance)
-        canvasRef.current.width = 512;
-        canvasRef.current.height = 512;
 
-        // Draw video frame to canvas
-        context.drawImage(videoRef.current, 0, 0, 512, 512);
+        // Use video dimensions for better quality or fix to 720p aspect
+        const vidW = videoRef.current.videoWidth;
+        const vidH = videoRef.current.videoHeight;
 
-        // Stop camera stream
-        const stream = videoRef.current.srcObject;
-        stream?.getTracks().forEach(track => track.stop());
-        setCameraActive(false);
+        // Square crop from center
+        const size = Math.min(vidW, vidH);
+        const startX = (vidW - size) / 2;
+        const startY = (vidH - size) / 2;
+
+        canvasRef.current.width = 720;
+        canvasRef.current.height = 720;
+
+        // Draw cropped image
+        context.drawImage(videoRef.current, startX, startY, size, size, 0, 0, 720, 720);
+
+        stopCamera();
 
         // Get Data URL
-        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.8);
+        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.9);
         setImage(dataUrl);
         handleAnalysis(dataUrl);
     };
@@ -77,16 +146,21 @@ const SkinHealthAnalyzer = () => {
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            // Resize image before setting
             const img = new Image();
             img.src = reader.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                canvas.width = 512;
-                canvas.height = 512;
-                ctx.drawImage(img, 0, 0, 512, 512);
-                const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                // Fit to 720x720 cover
+                const size = Math.min(img.width, img.height);
+                const startX = (img.width - size) / 2;
+                const startY = (img.height - size) / 2;
+
+                canvas.width = 720;
+                canvas.height = 720;
+                ctx.drawImage(img, startX, startY, size, size, 0, 0, 720, 720);
+
+                const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
                 setImage(resizedDataUrl);
                 handleAnalysis(resizedDataUrl);
@@ -102,9 +176,10 @@ const SkinHealthAnalyzer = () => {
         try {
             const data = await analyzeSkin({ image: imageData });
             setResult(data);
+            setShowReport(true);
         } catch (err) {
             console.error("Analysis Failed:", err);
-            setError("Analysis failed. Please try again.");
+            setError("Analysis failed. Please try again or use a clearer photo.");
         } finally {
             setAnalyzing(false);
         }
@@ -161,13 +236,29 @@ const SkinHealthAnalyzer = () => {
                                     exit={{ opacity: 0 }}
                                     className="absolute inset-0 z-20 bg-black flex items-center justify-center"
                                 >
-                                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]" />
+
+                                    {/* Lighting Indicator */}
+                                    <div className={`absolute top-6 left-6 px-4 py-2 rounded-full backdrop-blur-md border flex items-center gap-2 z-30 transition-colors ${lightingCondition === 'poor' ? 'bg-red-500/20 border-red-500/50 text-red-200' :
+                                        lightingCondition === 'too_bright' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-200' :
+                                            'bg-green-500/20 border-green-500/50 text-green-200'
+                                        }`}>
+                                        {lightingCondition === 'poor' ? <Moon size={14} /> : <Sun size={14} />}
+                                        <span className="text-[10px] font-black uppercase tracking-widest">
+                                            {lightingCondition === 'poor' ? 'Low Light' :
+                                                lightingCondition === 'too_bright' ? 'Too Bright' : 'Lighting Good'}
+                                        </span>
+                                    </div>
+
                                     {/* Scanning Overlay */}
-                                    <div className="absolute inset-0 border-[2px] border-primary/30 opacity-50 m-8 rounded-3xl pointer-events-none">
-                                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
-                                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
-                                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
-                                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
+                                    <div className="absolute inset-0 border-[2px] border-primary/30 opacity-50 m-8 rounded-[3rem] pointer-events-none">
+                                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-[2rem]" />
+                                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-[2rem]" />
+                                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-[2rem]" />
+                                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-[2rem]" />
+
+                                        {/* Center Face Guide */}
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-64 border-2 border-dashed border-white/20 rounded-[50%] opacity-50" />
                                     </div>
 
                                     <button
@@ -178,11 +269,7 @@ const SkinHealthAnalyzer = () => {
                                     </button>
 
                                     <button
-                                        onClick={() => {
-                                            const stream = videoRef.current?.srcObject;
-                                            stream?.getTracks().forEach(track => track.stop());
-                                            setCameraActive(false);
-                                        }}
+                                        onClick={stopCamera}
                                         className="absolute top-6 right-6 bg-black/50 p-3 rounded-full text-white/70 hover:text-white hover:bg-black/70 transition-all z-30"
                                     >
                                         <X size={20} />
@@ -262,48 +349,116 @@ const SkinHealthAnalyzer = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="space-y-8"
                             >
-                                {/* Header */}
-                                <div className="border-b border-white/10 pb-6">
-                                    <h3 className="text-3xl font-serif italic mb-2 text-white">Analysis Complete</h3>
-                                    <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Clinical AI Assessment</p>
+                                {/* Header Stats */}
+                                <div className="border-b border-white/10 pb-6 mb-6">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="grid grid-cols-2 gap-4 flex-1 mr-4">
+                                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Skin Type</p>
+                                                <h3 className="text-2xl font-serif text-white italic">{result.skinType || 'Unknown'}</h3>
+                                            </div>
+                                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Est. Age</p>
+                                                <h3 className="text-2xl font-serif text-white italic">{result.agePrediction || '--'} <span className="text-sm not-italic opacity-50">years</span></h3>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowReport(true)}
+                                            className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 text-primary transition-all group"
+                                            title="View Full Report"
+                                        >
+                                            <FileText size={20} className="group-hover:scale-110 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Vital Metrics */}
+                                <div className="space-y-4">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Vital Signs</h4>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-2">
+                                                <span className="text-blue-300 font-bold uppercase tracking-wider">Hydration</span>
+                                                <span className="text-white">{result.skinHydration?.score}%</span>
+                                            </div>
+                                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${result.skinHydration?.score}%` }}
+                                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                                    className="h-full bg-blue-500 rounded-full"
+                                                />
+                                            </div>
+                                            <p className="text-[9px] text-gray-500 mt-1">{result.skinHydration?.level}</p>
+                                        </div>
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-2">
+                                                <span className="text-yellow-300 font-bold uppercase tracking-wider">Radiance</span>
+                                                <span className="text-white">{result.skinRadiance?.score}%</span>
+                                            </div>
+                                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${result.skinRadiance?.score}%` }}
+                                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                                    className="h-full bg-yellow-500 rounded-full"
+                                                />
+                                            </div>
+                                            <p className="text-[9px] text-gray-500 mt-1">{result.skinRadiance?.level}</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Concerns Grid */}
-                                <div className="grid grid-cols-1 gap-4">
-                                    {Object.entries(result.concerns).map(([key, data]) => (
-                                        <div key={key} className="bg-white/5 border border-white/5 rounded-2xl p-6 hover:border-primary/20 transition-all">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-black/40 rounded-full text-white/80">
-                                                        {getConcernIcon(key)}
+                                <div>
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Detailed Analysis</h4>
+                                    <div className="space-y-4">
+                                        {Object.entries(result.concerns).map(([key, data]) => (
+                                            <div key={key} className="bg-white/5 border border-white/5 rounded-2xl p-5 hover:border-primary/20 transition-all">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-black/40 rounded-full text-white/80">
+                                                            {getConcernIcon(key)}
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-bold capitalize block text-sm text-white mb-0.5">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{data.level}</span>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <span className="font-bold capitalize block text-sm text-white mb-1 leading-none">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{data.level}</span>
+                                                    <span className={`text-lg font-serif italic ${data.score > 50 ? 'text-red-400' : 'text-green-400'}`}>
+                                                        {data.score}%
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 leading-relaxed font-medium">
+                                                    {data.description}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Face Map */}
+                                {result.faceMap && (
+                                    <div className="bg-[#151515] rounded-2xl p-6 border border-white/10">
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                                            <Scan size={14} /> Regional Analysis
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {Object.entries(result.faceMap).map(([area, issues]) => (
+                                                <div key={area} className="text-xs">
+                                                    <span className="uppercase text-white/50 font-black tracking-widest text-[9px] block mb-1">{area}</span>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {issues.map((issue, idx) => (
+                                                            <span key={idx} className="bg-white/5 text-white/90 px-2 py-1 rounded-md text-[10px] font-bold border border-white/5">
+                                                                {issue}
+                                                            </span>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                                <span className={`text-xl font-serif italic ${data.score > 50 ? 'text-red-400' : 'text-green-400'}`}>
-                                                    {data.score}%
-                                                </span>
-                                            </div>
-                                            {/* Progress Bar */}
-                                            <div className="w-full h-1 bg-white/5 rounded-full mb-3 overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${data.score}%` }}
-                                                    transition={{ duration: 1 }}
-                                                    className={`h-full rounded-full ${key === 'acne' ? 'bg-red-400' :
-                                                        key === 'wrinkles' ? 'bg-orange-400' :
-                                                            key === 'darkCircles' ? 'bg-purple-400' : 'bg-blue-400'
-                                                        }`}
-                                                />
-                                            </div>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
-                                                {data.description}
-                                            </p>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                )}
 
                                 {/* Color Match Result */}
                                 {result.foundationShade && (
@@ -321,7 +476,7 @@ const SkinHealthAnalyzer = () => {
                                                 <div className="text-[9px] font-black uppercase tracking-widest text-gray-600">Accuracy: 96%</div>
                                             </div>
                                             <div
-                                                className="w-10 h-10 rounded-full border border-white/20 shadow-lg"
+                                                className="w-10 h-10 rounded-full border border-white/20 shadow-lg ring-2 ring-white/10"
                                                 style={{ backgroundColor: result.foundationShade.hex }}
                                             />
                                         </div>
@@ -376,6 +531,15 @@ const SkinHealthAnalyzer = () => {
                     </div>
                 </div>
             </div>
+            {/* Full Report Modal */}
+            <AnimatePresence>
+                {showReport && result && (
+                    <SkinAnalysisReport result={result} onClose={() => setShowReport(false)} />
+                )}
+            </AnimatePresence>
+
+            {/* AI Assistant - Floating Chat */}
+            {result && <SkincareAiChat analysisResult={result} />}
         </section>
     );
 };

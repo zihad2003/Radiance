@@ -18,6 +18,60 @@ export const getByCategory = query({
     },
 });
 
+export const getByBrand = query({
+    args: { brand: v.string() },
+    handler: async (ctx: any, args: any) => {
+        return await ctx.db
+            .query("products")
+            .withIndex("by_brand", (q: any) => q.eq("brand", args.brand))
+            .collect();
+    },
+});
+
+export const getById = query({
+    args: { id: v.string() },
+    handler: async (ctx: any, args: any) => {
+        return await ctx.db
+            .query("products")
+            .withIndex("by_id", (q: any) => q.eq("id", args.id))
+            .unique();
+    },
+});
+
+export const filter = query({
+    args: {
+        skinType: v.optional(v.string()),
+        concern: v.optional(v.string()),
+        minPrice: v.optional(v.number()),
+        maxPrice: v.optional(v.number()),
+    },
+    handler: async (ctx: any, args: any) => {
+        let products = await ctx.db.query("products").collect();
+
+        if (args.skinType) {
+            products = products.filter((p: any) =>
+                p.skinType.includes(args.skinType) || p.skinType.includes("All Skin Types")
+            );
+        }
+
+        if (args.concern) {
+            products = products.filter((p: any) =>
+                p.concerns?.includes(args.concern)
+            );
+        }
+
+        if (args.minPrice !== undefined) {
+            products = products.filter((p: any) => p.priceUSD >= args.minPrice);
+        }
+
+        if (args.maxPrice !== undefined) {
+            products = products.filter((p: any) => p.priceUSD <= args.maxPrice);
+        }
+
+        return products;
+    },
+});
+
 export const addProduct = mutation({
     args: {
         id: v.string(),

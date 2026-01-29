@@ -6,6 +6,12 @@ export const useShopStore = create(
         (set, get) => ({
             cart: [],
             wishlist: [],
+            isCartOpen: false,
+            isPaymentOpen: false,
+
+            // UI Actions
+            setCartOpen: (open) => set({ isCartOpen: open }),
+            setPaymentOpen: (open) => set({ isPaymentOpen: open }),
 
             // Cart Actions
             addToCart: (product, quantity = 1, variant = null) => {
@@ -18,9 +24,9 @@ export const useShopStore = create(
                 if (existingIndex > -1) {
                     const newCart = [...cart];
                     newCart[existingIndex].quantity += quantity;
-                    set({ cart: newCart });
+                    set({ cart: newCart, isCartOpen: true }); // Open cart on add
                 } else {
-                    set({ cart: [...cart, { ...product, quantity, selectedVariant: variant }] });
+                    set({ cart: [...cart, { ...product, quantity, selectedVariant: variant }], isCartOpen: true });
                 }
             },
 

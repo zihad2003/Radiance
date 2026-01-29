@@ -1,8 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
+const APP_TITLE = import.meta.env.VITE_APP_TITLE || 'Radiance Beauty Salon';
+
 const SEO = ({
-    title = 'Radiance Beauty Salon | AI Virtual Makeup & Hairstyling',
-    description = 'Experience Bangladesh\'s first AI-powered virtual makeup try-on. Professional hairstyling, premium beauty services, and instant booking in Dhaka.',
+    title = `${APP_TITLE} | AI Virtual Makeup & Hairstyling`,
+    description = `Experience Bangladesh's first AI-powered virtual makeup try-on. Professional hairstyling, premium beauty services, and instant booking in Dhaka with ${APP_TITLE}.`,
     keywords = 'beauty salon Dhaka, AI makeup, virtual try-on, hairstyling Gulshan, bridal makeup, skincare Bangladesh',
     image = '/og-image.jpg',
     url = 'https://radiance-salon.vercel.app/'
