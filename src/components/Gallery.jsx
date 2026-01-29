@@ -4,7 +4,7 @@ import { X, ZoomIn, ArrowUpRight, Star, TrendingUp } from 'lucide-react';
 import Image from './ui/Image';
 
 const galleryImages = [
-    { id: 1, src: "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=800", title: "Biye Special (Bridal)", height: "h-96" },
+    { id: 1, src: "/assets/services/makeup.png", title: "Signature Bridal", height: "h-96" },
     { id: 2, src: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=800", title: "Snigdho Look", height: "h-64" },
     { id: 3, src: "https://images.unsplash.com/photo-1596434300655-e48d371bd9d7?q=80&w=800", title: "Gaye Holud Vibrant", height: "h-80" },
     { id: 4, src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=800", title: "Party Hair Styling", height: "h-72" },
