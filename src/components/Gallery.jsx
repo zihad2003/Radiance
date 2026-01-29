@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ZoomIn, ArrowUpRight } from 'lucide-react';
+import { X, ZoomIn, ArrowUpRight, Star } from 'lucide-react';
 import Image from './ui/Image';
 
 const galleryImages = [
