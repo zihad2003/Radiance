@@ -11,7 +11,7 @@ import { validatePromoCode } from '../../data/promoCodes';
 import Counter from '../ui/Counter';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/ToastContextBase';
 import { useAuth } from '../../context/AuthContext';
 import { logError, getErrorMessage } from '../../utils/errors';
 

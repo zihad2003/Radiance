@@ -75,11 +75,14 @@ function AppContent() {
 
     const adminHandler = () => setShowAdmin(true);
     const profileHandler = () => setShowProfile(true);
+    const bookingHandler = (e) => handleBookService(e.detail);
     window.addEventListener('open-admin', adminHandler);
     window.addEventListener('open-profile', profileHandler);
+    window.addEventListener('open-booking', bookingHandler);
     return () => {
       window.removeEventListener('open-admin', adminHandler);
       window.removeEventListener('open-profile', profileHandler);
+      window.removeEventListener('open-booking', bookingHandler);
     };
   }, []);
 

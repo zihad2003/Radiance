@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { useAuthStore } from '../store/useAuthStore';
-import { useToast } from './ToastContext';
+import { useToast } from './ToastContextBase';
 import { AuthError, logError, getErrorMessage } from '../utils/errors';
 
 const AuthContext = createContext();

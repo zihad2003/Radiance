@@ -53,6 +53,9 @@ const AIPresetGenerator = () => {
 
             if (result && result.length > 0) {
                 setGeneratedImage(result[0]);
+                if (result[0] === selectedImage) {
+                    setError("Demo mode active. Set REPLICATE_API_TOKEN in Convex to enable AI generation.");
+                }
             } else {
                 throw new Error("No image generated");
             }
@@ -112,7 +115,7 @@ const AIPresetGenerator = () => {
                             />
 
                             {previewUrl ? (
-                                <div className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden">
+                                <div className="relative aspect-3/4 rounded-4xl overflow-hidden">
                                     <img src={previewUrl} alt="Original" className="w-full h-full object-cover opacity-80" />
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <div className="bento-ribbon text-white">
@@ -138,7 +141,7 @@ const AIPresetGenerator = () => {
                                 <Sparkles size={24} className="text-primary" />
                                 STYLE MATRIX
                             </h3>
-                            <div className="grid grid-cols-2 gap-6 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+                            <div className="grid grid-cols-2 gap-6 max-h-100 overflow-y-auto pr-4 custom-scrollbar">
                                 {aiPresets.map(preset => (
                                     <button
                                         key={preset.id}
@@ -149,7 +152,7 @@ const AIPresetGenerator = () => {
                                             }`}
                                     >
                                         <img src={preset.image} alt={preset.name} className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110 opacity-70" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent" />
                                         <div className="absolute bottom-0 left-0 p-4 w-full">
                                             <p className="text-white text-[10px] font-black uppercase tracking-widest truncate">{preset.name}</p>
                                         </div>
@@ -184,7 +187,7 @@ const AIPresetGenerator = () => {
 
                     {/* Right Panel - Result Viewer */}
                     <div className="lg:col-span-8">
-                        <div className="bento-card p-6 h-full min-h-[800px] border border-white/5 relative overflow-hidden group">
+                        <div className="bento-card p-6 h-full min-h-200 border border-white/5 relative overflow-hidden group">
                             <div className="relative w-full h-full rounded-[4rem] overflow-hidden bg-[#080808] flex items-center justify-center shadow-2xl">
                                 {!selectedImage ? (
                                     <div className="text-center">

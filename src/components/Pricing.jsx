@@ -225,7 +225,7 @@ const Pricing = ({ onBook }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
                     <div className="bento-card bg-gradient-to-r from-indigo-950 to-blue-950 border-white/5 p-12 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
-                            <Clock size={120} strokeWidth={1} text-white />
+                            <Clock size={120} strokeWidth={1} className="text-white" />
                         </div>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-primary mb-4">Limited Offer</h4>
                         <h3 className="text-3xl font-serif italic mb-6 text-white">Early Bird Bridal</h3>
@@ -236,7 +236,7 @@ const Pricing = ({ onBook }) => {
                     </div>
                     <div className="bento-card bg-gradient-to-r from-rose-950 to-pink-950 border-white/5 p-12 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
-                            <Users size={120} strokeWidth={1} text-white />
+                            <Users size={120} strokeWidth={1} className="text-white" />
                         </div>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-primary mb-4">Loyalty Reward</h4>
                         <h3 className="text-3xl font-serif italic mb-6 text-white">Sister & Bestie Special</h3>

@@ -4,7 +4,7 @@ import { Upload, Sparkles, Download, Share2, Calendar, X, Check, Loader2 } from 
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../context/ToastContextBase';
 
 /**
  * Makeup Presets Database
@@ -263,14 +263,14 @@ const AIPresetGenerator = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className="bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl p-8 backdrop-blur-md h-full">
+                        <div className="bg-white/5 border border-white/10 rounded-4xl shadow-2xl p-8 backdrop-blur-md h-full">
                             <h2 className="text-2xl font-serif italic mb-8 flex items-center gap-3 text-white">
                                 <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-sans not-italic font-bold">1</div>
                                 Upload Your Photo
                             </h2>
 
                             {!uploadedImage ? (
-                                <label className="flex flex-col items-center justify-center w-full h-[400px] border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-gold/50 transition-all bg-black/20 group relative overflow-hidden">
+                                <label className="flex flex-col items-center justify-center w-full h-100 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-gold/50 transition-all bg-black/20 group relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <div className="flex flex-col items-center relative z-10">
                                         <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -288,7 +288,7 @@ const AIPresetGenerator = () => {
                                     />
                                 </label>
                             ) : (
-                                <div className="relative h-[400px] group">
+                                <div className="relative h-100 group">
                                     <img
                                         src={uploadedImage}
                                         alt="Uploaded"
@@ -329,7 +329,7 @@ const AIPresetGenerator = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <div className="bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl p-8 backdrop-blur-md h-full flex flex-col">
+                        <div className="bg-white/5 border border-white/10 rounded-4xl shadow-2xl p-8 backdrop-blur-md h-full flex flex-col">
                             <h2 className="text-2xl font-serif italic mb-8 flex items-center gap-3 text-white">
                                 <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-sm font-sans not-italic font-bold">2</div>
                                 Choose Makeup Style
@@ -352,7 +352,7 @@ const AIPresetGenerator = () => {
                             </div>
 
                             {/* Presets Grid */}
-                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-2 custom-scrollbar-gold flex-grow max-h-[400px]">
+                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-2 custom-scrollbar-gold grow max-h-100">
                                 {filteredPresets.map(preset => (
                                     <motion.button
                                         key={preset.id}
@@ -419,7 +419,7 @@ const AIPresetGenerator = () => {
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
-                                    className="bg-gradient-to-r from-gold to-white h-full rounded-full shadow-[0_0_10px_rgba(245,230,200,0.5)]"
+                                    className="bg-linear-to-r from-gold to-white h-full rounded-full shadow-[0_0_10px_rgba(245,230,200,0.5)]"
                                 />
                             </div>
                             <p className="text-xs text-gold uppercase tracking-widest mt-4 animate-pulse">{progress}% Complete</p>
@@ -436,7 +436,7 @@ const AIPresetGenerator = () => {
                             exit={{ opacity: 0, y: -20 }}
                             className="bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl p-8 backdrop-blur-xl relative overflow-hidden"
                         >
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent opacity-50" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-gold to-transparent opacity-50" />
 
                             <h2 className="text-4xl font-serif italic text-center mb-12 text-white">
                                 Your <span className="text-gradient-gold">AI Transformation</span> ✨
@@ -449,7 +449,7 @@ const AIPresetGenerator = () => {
                                         itemOne={<ReactCompareSliderImage src={uploadedImage} alt="Before" />}
                                         itemTwo={<ReactCompareSliderImage src={generatedResult} alt="After" />}
                                         style={{ height: '500px' }}
-                                        className="grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                                        className="grayscale-20 group-hover:grayscale-0 transition-all duration-700"
                                     />
                                     <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
                                         <span className="bg-black/50 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md uppercase tracking-widest border border-white/10">Slide to Compare</span>

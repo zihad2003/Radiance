@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
-import BookingWizard from './booking/BookingWizard';
+import BookingWizard from './BookingWizard';
 
 const Booking = ({ initialService }) => {
     return (
@@ -43,8 +43,36 @@ const Booking = ({ initialService }) => {
                             whileInView={{ y: 0, opacity: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
+                            className="bg-white rounded-[2.5rem] p-12 shadow-2xl shadow-primary/5 border border-primary/10 text-center space-y-8 relative overflow-hidden group"
                         >
-                            <BookingWizard initialService={initialService} />
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                            <div className="relative z-10">
+                                <h4 className="text-3xl font-serif font-black text-charcoal mb-4">Ready for your transformation?</h4>
+                                <p className="text-gray-400 font-medium max-w-md mx-auto mb-10">
+                                    Experience the future of beauty in Dhaka. Our artisans are ready to create your masterpiece.
+                                </p>
+                                <button
+                                    onClick={() => window.dispatchEvent(new CustomEvent('open-booking', { detail: initialService }))}
+                                    className="px-12 py-5 bg-charcoal text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-black transition-all shadow-2xl shadow-charcoal/20 active:scale-95"
+                                >
+                                    Begin Your Experience
+                                </button>
+                            </div>
+
+                            <div className="pt-8 grid grid-cols-3 gap-4 border-t border-gray-100 relative z-10">
+                                <div>
+                                    <div className="text-xl font-black text-charcoal">50+</div>
+                                    <div className="text-[8px] font-black uppercase tracking-widest text-primary">Artisans</div>
+                                </div>
+                                <div>
+                                    <div className="text-xl font-black text-charcoal">10k+</div>
+                                    <div className="text-[8px] font-black uppercase tracking-widest text-primary">Styles</div>
+                                </div>
+                                <div>
+                                    <div className="text-xl font-black text-charcoal">4.9/5</div>
+                                    <div className="text-[8px] font-black uppercase tracking-widest text-primary">Rating</div>
+                                </div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

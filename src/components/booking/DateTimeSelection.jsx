@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Clock } from 'lucide-react';
 
 const DateTimeSelection = ({ bookingData, updateBookingData }) => {
     const [selectedDate, setSelectedDate] = useState(bookingData.selectedDate);
@@ -82,162 +82,155 @@ const DateTimeSelection = ({ bookingData, updateBookingData }) => {
     const timeSlots = selectedDate ? generateTimeSlots() : [];
 
     return (
-        <div className="space-y-8">
-            <div className="text-center">
-                <h3 className="text-3xl font-serif text-charcoal mb-2">Select Date & Time</h3>
-                <p className="text-gray-600">Choose your preferred appointment slot</p>
+        <div className="space-y-12 max-w-5xl mx-auto py-4">
+            <div className="text-center space-y-2">
+                <h3 className="text-4xl font-serif font-black text-charcoal">Reserve Your Moment</h3>
+                <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+                <p className="text-gray-400 font-medium pt-2">Select a date and time that fits your lifestyle</p>
             </div>
 
-            {/* Salon Hours Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                    <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
-                    <div className="text-sm text-blue-900">
-                        <div className="font-semibold mb-1">Salon Working Hours:</div>
-                        <div>Monday - Thursday & Saturday: 10:00 AM - 8:00 PM</div>
-                        <div>Friday: 10:00 AM - 12:00 PM, 4:00 PM - 8:00 PM (Prayer break)</div>
-                        <div className="text-red-600 font-semibold mt-1">Closed on Sundays</div>
+            {/* Salon Hours Recap */}
+            <div className="bg-charcoal text-white rounded-[2rem] p-8 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent" />
+                <div className="relative z-10 grid md:grid-cols-3 gap-8">
+                    <div className="space-y-1">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-primary">Luxury Hours</div>
+                        <div className="font-bold">Mon - Thu: 10AM - 8PM</div>
+                    </div>
+                    <div className="space-y-1">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-primary">Special Service</div>
+                        <div className="font-bold">Fri: 10AM-12PM, 4PM-8PM</div>
+                    </div>
+                    <div className="space-y-1">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-red-400">Rest Day</div>
+                        <div className="font-bold">Sun: Closed for Sanctuary</div>
                     </div>
                 </div>
             </div>
 
-            {/* Calendar */}
-            <div>
-                <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="text-primary" size={24} />
-                    <h4 className="text-xl font-bold text-charcoal">Select Date</h4>
-                </div>
-
-                <div className="grid grid-cols-7 gap-2">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                        <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
-                            {day}
+            <div className="grid lg:grid-cols-2 gap-16">
+                {/* Calendar Side */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shadow-sm">
+                            <Calendar size={24} />
                         </div>
-                    ))}
-
-                    {dates.map((date, index) => {
-                        const isDisabled = isDateDisabled(date);
-                        const isSelected = selectedDate === date.toISOString().split('T')[0];
-                        const isPast = date < new Date().setHours(0, 0, 0, 0);
-                        const availability = getDateAvailability();
-
-                        return (
-                            <motion.button
-                                key={index}
-                                whileHover={!isDisabled && !isPast ? { scale: 1.05 } : {}}
-                                whileTap={!isDisabled && !isPast ? { scale: 0.95 } : {}}
-                                onClick={() => !isDisabled && !isPast && handleDateSelect(date)}
-                                disabled={isDisabled || isPast}
-                                className={`aspect-square rounded-xl p-2 text-sm font-semibold transition-all ${isSelected
-                                        ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg'
-                                        : isDisabled || isPast
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : availability === 'available'
-                                                ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:border-green-400'
-                                                : availability === 'limited'
-                                                    ? 'bg-yellow-50 text-yellow-700 border-2 border-yellow-200 hover:border-yellow-400'
-                                                    : 'bg-red-50 text-red-700 border-2 border-red-200 cursor-not-allowed'
-                                    }`}
-                            >
-                                <div>{date.getDate()}</div>
-                                {index < 7 && (
-                                    <div className="text-xs opacity-70">
-                                        {date.toLocaleDateString('en-US', { month: 'short' })}
-                                    </div>
-                                )}
-                            </motion.button>
-                        );
-                    })}
-                </div>
-
-                {/* Legend */}
-                <div className="flex flex-wrap gap-4 mt-4 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-green-200 rounded"></div>
-                        <span>Available</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-yellow-200 rounded"></div>
-                        <span>Limited</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-red-200 rounded"></div>
-                        <span>Fully Booked</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-gray-200 rounded"></div>
-                        <span>Closed</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Time Slots */}
-            {selectedDate && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    <div className="flex items-center gap-2 mb-4">
-                        <Clock className="text-primary" size={24} />
-                        <h4 className="text-xl font-bold text-charcoal">Select Time</h4>
+                        <h4 className="text-2xl font-serif font-black text-charcoal text-left">Calendar</h4>
                     </div>
 
-                    <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                        {timeSlots.map((time) => {
-                            const availability = getSlotAvailability();
-                            const isSelected = selectedTime === time;
-                            const isBooked = availability.status === 'booked';
+                    <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-xl shadow-gray-100/50">
+                        <div className="grid grid-cols-7 gap-1 mb-4">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                                <div key={day} className="text-center text-[10px] font-black text-gray-300 py-2">
+                                    {day}
+                                </div>
+                            ))}
 
-                            return (
-                                <motion.button
-                                    key={time}
-                                    whileHover={!isBooked ? { scale: 1.05 } : {}}
-                                    whileTap={!isBooked ? { scale: 0.95 } : {}}
-                                    onClick={() => !isBooked && handleTimeSelect(time)}
-                                    disabled={isBooked}
-                                    className={`p-3 rounded-xl text-sm font-semibold transition-all ${isSelected
-                                            ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg'
-                                            : isBooked
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : availability.status === 'limited'
-                                                    ? 'bg-yellow-50 text-yellow-700 border-2 border-yellow-300 hover:border-yellow-500'
-                                                    : 'bg-green-50 text-green-700 border-2 border-green-300 hover:border-green-500'
-                                        }`}
-                                >
-                                    <div>{time}</div>
-                                    {!isSelected && (
-                                        <div className="text-xs mt-1 opacity-80">{availability.label}</div>
-                                    )}
-                                </motion.button>
-                            );
-                        })}
-                    </div>
-                </motion.div>
-            )}
+                            {dates.slice(0, 35).map((date, index) => {
+                                const isDisabled = isDateDisabled(date);
+                                const isSelected = selectedDate === date.toISOString().split('T')[0];
+                                const isPast = date < new Date().setHours(0, 0, 0, 0);
 
-            {/* Selection Summary */}
-            {selectedDate && selectedTime && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6"
-                >
-                    <div className="text-center">
-                        <div className="text-sm text-gray-600 mb-2">Your appointment is scheduled for:</div>
-                        <div className="text-2xl font-bold text-charcoal">
-                            {new Date(selectedDate).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => !isDisabled && !isPast && handleDateSelect(date)}
+                                        disabled={isDisabled || isPast}
+                                        className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-bold transition-all relative ${isSelected
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-110 z-10'
+                                            : isDisabled || isPast
+                                                ? 'opacity-10 cursor-not-allowed grayscale'
+                                                : 'text-charcoal hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {date.getDate()}
+                                        {isSelected && <motion.div layoutId="cal-ring" className="absolute inset-0 rounded-xl border-2 border-white/30" />}
+                                    </button>
+                                );
                             })}
                         </div>
-                        <div className="text-xl font-semibold text-primary mt-2">
-                            at {selectedTime}
+
+                        <div className="flex justify-center gap-8 pt-4 border-t border-gray-50">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-primary" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Selected</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-gray-100" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Available</span>
+                            </div>
                         </div>
                     </div>
-                </motion.div>
-            )}
+                </div>
+
+                {/* Time Center */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shadow-sm">
+                            <Clock size={24} />
+                        </div>
+                        <h4 className="text-2xl font-serif font-black text-charcoal text-left">Time Slots</h4>
+                    </div>
+
+                    {!selectedDate ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
+                                <Calendar size={24} className="text-gray-300" />
+                            </div>
+                            <p className="text-gray-400 font-bold text-sm tracking-wide uppercase">Select a date first</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                            {timeSlots.map((time) => {
+                                const availability = getSlotAvailability();
+                                const isSelected = selectedTime === time;
+                                const isBooked = availability.status === 'booked';
+
+                                return (
+                                    <button
+                                        key={time}
+                                        onClick={() => !isBooked && handleTimeSelect(time)}
+                                        disabled={isBooked}
+                                        className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${isSelected
+                                            ? 'bg-charcoal text-white shadow-xl shadow-charcoal/20 scale-105'
+                                            : isBooked
+                                                ? 'bg-gray-100 text-gray-200 cursor-not-allowed opacity-30 grayscale'
+                                                : 'bg-white border-2 border-transparent text-gray-400 hover:border-primary/30 hover:text-charcoal hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {time}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Selection Status */}
+            <AnimatePresence>
+                {selectedDate && selectedTime && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 30 }}
+                        className="bg-charcoal text-white p-8 rounded-[2.5rem] shadow-3xl shadow-charcoal/20 relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent" />
+                        <div className="flex items-center justify-between relative z-10">
+                            <div>
+                                <div className="text-[10px] uppercase font-black tracking-widest text-primary mb-2">Final Schedule</div>
+                                <div className="text-3xl font-serif font-bold italic">
+                                    {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} at {selectedTime}
+                                </div>
+                            </div>
+                            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                                <Check size={32} className="text-primary" />
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

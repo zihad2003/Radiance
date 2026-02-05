@@ -170,12 +170,13 @@ export const analyzeSkinTone = async (imageSource) => {
             });
         }
 
-        // Detect face
-        const detections = await faceapi.detectSingleFace(input, new faceapi.TinyFaceDetectorOptions())
+        // Detect face with more permissive options for better detection rate
+        const detections = await faceapi.detectSingleFace(input, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 }))
             .withFaceLandmarks();
 
         if (!detections) {
-            throw new Error('No face detected in image. Please ensure your face is clearly visible and well-lit.');
+            console.warn("Face detection failed with TinyFaceDetector");
+            throw new Error('No face detected. Try adjusting lighting or moving closer to the camera.');
         }
 
         // Extract face region

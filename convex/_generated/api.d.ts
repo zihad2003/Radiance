@@ -14,6 +14,7 @@ import type * as aiUtils from "../aiUtils.js";
 import type * as auth from "../auth.js";
 import type * as bookings from "../bookings.js";
 import type * as chat from "../chat.js";
+import type * as fixImages from "../fixImages.js";
 import type * as forms from "../forms.js";
 import type * as http from "../http.js";
 import type * as orders from "../orders.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   bookings: typeof bookings;
   chat: typeof chat;
+  fixImages: typeof fixImages;
   forms: typeof forms;
   http: typeof http;
   orders: typeof orders;

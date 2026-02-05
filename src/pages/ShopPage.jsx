@@ -5,7 +5,7 @@ import SEO from '../components/SEO';
 import { ArrowRight, Mail, Loader2 } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../context/ToastContextBase';
 
 const ShopPage = () => {
     const [email, setEmail] = useState('');
@@ -48,9 +48,9 @@ const ShopPage = () => {
             {/* Newsletter Section - Bento Style */}
             <section className="py-20 relative">
                 <div className="container mx-auto px-6">
-                    <div className="bento-card p-12 md:p-20 relative overflow-hidden bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] border border-white/5">
+                    <div className="bento-card p-12 md:p-20 relative overflow-hidden bg-linear-to-br from-[#1A1A1A] to-[#0A0A0A] border border-white/5">
                         {/* Background Decor */}
-                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute top-0 right-0 w-125 h-125 bg-primary/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
                         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                             <div className="max-w-2xl text-center md:text-left">

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin, Send, ArrowRight, Loader2 } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../context/ToastContextBase';
 import { logError, getErrorMessage } from '../utils/errors';
 
 const ContactFooter = () => {

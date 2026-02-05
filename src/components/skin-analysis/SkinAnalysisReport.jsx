@@ -4,7 +4,7 @@ import { Download, Share2, Save, X, Calendar, ArrowRight, Droplets, Sun, Activit
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/ToastContextBase';
 import RoutineBuilder from './RoutineBuilder';
 
 const SkinAnalysisReport = ({ result, onClose }) => {

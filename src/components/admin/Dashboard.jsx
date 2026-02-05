@@ -199,6 +199,7 @@ const Dashboard = ({ onClose }) => {
     const deleteService = useMutation(api.services.deleteService);
     const upsertStylist = useMutation(api.stylists.addStylist);
     const deleteStylist = useMutation(api.stylists.deleteStylist);
+    const updateBookingStatus = useMutation(api.bookings.updateStatus);
 
     const [view, setView] = useState('bookings');
     const [filter, setFilter] = useState('all');
@@ -284,7 +285,68 @@ const Dashboard = ({ onClose }) => {
                                         </td>
                                     </tr>
                                 ))}
-                                {/* Render Bookings/Orders similar to previous implementation but refactored */}
+
+                                {view === 'bookings' && bookings.map(booking => (
+                                    <tr key={booking._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-charcoal">{booking.customer?.name}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{booking.customer?.phone}</span>
+                                                {booking.customer?.referralCode && (
+                                                    <span className="mt-1 text-[8px] bg-primary/10 text-primary px-2 py-0.5 rounded-full self-start font-black uppercase tracking-widest">Ref: {booking.customer.referralCode}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-charcoal">{booking.service}</span>
+                                                <span className="text-xs text-gray-400">{booking.date} at {booking.time}</span>
+                                                {booking.customer?.specialRequests && (
+                                                    <span className="mt-1 text-xs text-red-500 italic">" {booking.customer.specialRequests} "</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <select
+                                                value={booking.status}
+                                                onChange={(e) => updateBookingStatus({ id: booking._id, status: e.target.value })}
+                                                className={`text-[10px] font-black px-4 py-2 rounded-xl border-none outline-none appearance-none cursor-pointer uppercase tracking-widest ${booking.status === 'confirmed' ? 'bg-green-50 text-green-600' :
+                                                    booking.status === 'cancelled' ? 'bg-red-50 text-red-600' :
+                                                        'bg-yellow-50 text-yellow-600'
+                                                    }`}
+                                            >
+                                                <option value="pending">Pending</option>
+                                                <option value="confirmed">Confirmed</option>
+                                                <option value="cancelled">Cancelled</option>
+                                            </select>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button className="p-2 text-gray-400 hover:text-primary transition-colors">
+                                                <Clock size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+
+                                {view === 'orders' && orders.map(order => (
+                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-charcoal">{order.customer?.name}</span>
+                                                <span className="text-xs text-gray-400">{order.customer?.phone}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <p className="text-sm text-gray-600">{order.items?.length} Items</p>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="font-bold">৳{order.total?.toLocaleString()}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right text-xs uppercase font-black text-primary">
+                                            {order.status}
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>

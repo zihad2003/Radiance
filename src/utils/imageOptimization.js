@@ -174,24 +174,23 @@ export const getLoadingProps = (isAboveFold = false) => {
     };
 };
 
-import EXIF from 'exif-js';
+import ExifReader from 'exifreader';
 
 /**
  * Reads EXIF orientation and returns a new Image/Canvas with corrected orientation
  * @param {File} file - The image file
  * @returns {Promise<string>} Data URL of the corrected image
  */
-export const fixImageOrientation = (file) => {
-    return new Promise((resolve, reject) => {
-        // EXIF.getData side-effects the file/image object, so we pass the file directly.
-        EXIF.getData(file, function () {
-            const orientation = EXIF.getTag(this, "Orientation");
-            const reader = new FileReader();
+export const fixImageOrientation = async (file) => {
+    try {
+        const tags = await ExifReader.load(file);
+        const orientation = tags['Orientation']?.value;
 
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    // ... (rest of logic)
                     if (!orientation || orientation === 1) {
                         resolve(e.target.result);
                         return;
@@ -200,7 +199,7 @@ export const fixImageOrientation = (file) => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
 
-                    if ([5, 6, 7, 8].indexOf(orientation) > -1) {
+                    if ([5, 6, 7, 8].includes(orientation)) {
                         canvas.width = img.height;
                         canvas.height = img.width;
                     } else {
@@ -228,5 +227,13 @@ export const fixImageOrientation = (file) => {
             reader.onerror = () => reject(new Error("Failed to read file"));
             reader.readAsDataURL(file);
         });
-    });
+    } catch (error) {
+        console.warn("Error reading EXIF data, skipping orientation fix:", error);
+        return new Promise((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onload = (e) => resolve(e.target.result);
+             reader.onerror = reject;
+             reader.readAsDataURL(file);
+        });
+    }
 };

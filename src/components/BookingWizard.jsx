@@ -95,112 +95,126 @@ const BookingWizard = ({ isOpen, onClose, initialService = null }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[2000] flex items-center justify-center p-0 md:p-10 overflow-hidden">
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+                initial={{ scale: 0.95, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 30 }}
+                className="bg-white rounded-none md:rounded-[3rem] w-full h-full md:max-h-[85vh] md:max-w-7xl overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="booking-wizard-title"
             >
                 {/* Header */}
-                <div className="bg-gradient-to-r from-primary to-accent p-6 text-white relative">
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white"
-                        aria-label="Close Booking Wizard"
-                    >
-                        <X size={20} />
-                    </button>
+                <div className="bg-charcoal p-8 md:p-14 text-white relative border-b border-white/5 overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-primary-500),transparent)] opacity-15" />
+                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
 
-                    <h2 id="booking-wizard-title" className="text-3xl font-serif mb-2">Book Your Appointment</h2>
-                    <p className="text-white/80">Step {currentStep} of 5</p>
+                    <div className="absolute top-6 left-8 md:left-14 text-[9px] font-black text-primary/40 uppercase tracking-[0.5em] pointer-events-none">
+                        Progress Architecture • Step {currentStep} of 5
+                    </div>
+
+                    <div className="flex justify-between items-end relative z-10 w-full mt-4">
+                        <div>
+                            <h2 id="booking-wizard-title" className="text-4xl md:text-6xl font-serif font-black text-white flex items-center gap-4 leading-tight">
+                                Radiance <span className="text-primary italic font-light">Atelier</span>
+                            </h2>
+                            <p className="text-gray-400 font-bold tracking-[0.3em] uppercase text-[10px] mt-3">Bespoke Beauty Experience • Dhaka Excellence</p>
+                        </div>
+
+                        <button
+                            onClick={onClose}
+                            className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-2xl flex items-center justify-center hover:bg-white/10 hover:border-white/20 border border-white/10 transition-all group shadow-2xl"
+                            aria-label="Exit Wizard"
+                        >
+                            <X size={28} className="group-hover:rotate-90 transition-transform duration-500" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Progress Indicator */}
-                <div className="bg-gray-50 px-6 py-4">
-                    <div className="flex items-center justify-between max-w-4xl mx-auto">
+                <div className="bg-white px-10 py-8 border-b border-gray-50">
+                    <div className="flex items-center justify-between max-w-5xl mx-auto relative">
+                        {/* Connecting Line */}
+                        <div className="absolute top-7 left-0 right-0 h-px bg-gray-100 -z-0" />
+
                         {steps.map((step, index) => (
                             <React.Fragment key={step.number}>
-                                <div className="flex flex-col items-center flex-1">
+                                <div className="flex flex-col items-center relative z-10 group flex-1">
                                     <div
                                         aria-current={currentStep === step.number ? "step" : undefined}
-                                        className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all ${currentStep > step.number
-                                            ? 'bg-green-500 text-white'
+                                        className={`w-14 h-14 rounded-full flex items-center justify-center text-xl transition-all duration-700 ${currentStep > step.number
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/30 border-transparent rotate-[360deg]'
                                             : currentStep === step.number
-                                                ? 'bg-gradient-to-r from-primary to-accent text-white scale-110 shadow-lg'
-                                                : 'bg-gray-200 text-gray-400'
+                                                ? 'bg-charcoal text-white scale-110 shadow-2xl border-transparent'
+                                                : 'bg-white text-gray-300 border-2 border-gray-100 group-hover:border-gray-300'
                                             }`}
                                     >
-                                        {currentStep > step.number ? <Check size={24} /> : step.icon}
+                                        {currentStep > step.number ? <Check size={24} strokeWidth={3} /> : <span className="opacity-80 scale-125">{step.icon}</span>}
                                     </div>
-                                    <div className="text-xs mt-2 text-center hidden md:block">
-                                        <div className={`font-semibold ${currentStep >= step.number ? 'text-charcoal' : 'text-gray-400'}`}>
+                                    <div className="mt-4 text-center">
+                                        <div className={`text-[9px] font-black uppercase tracking-[0.2em] transition-colors duration-500 ${currentStep >= step.number ? 'text-charcoal' : 'text-gray-300'}`}>
                                             {step.title}
                                         </div>
                                     </div>
                                 </div>
-                                {index < steps.length - 1 && (
-                                    <div
-                                        className={`flex-1 h-1 mx-2 rounded transition-all ${currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
-                                            }`}
-                                    />
-                                )}
                             </React.Fragment>
                         ))}
                     </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <CurrentStepComponent
-                                bookingData={bookingData}
-                                updateBookingData={updateBookingData}
-                                onNext={goToNextStep}
-                            />
-                        </motion.div>
-                    </AnimatePresence>
+                <div className="flex-1 overflow-y-auto bg-white/50">
+                    <div className="p-8 lg:p-12">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentStep}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+                            >
+                                <CurrentStepComponent
+                                    bookingData={bookingData}
+                                    updateBookingData={updateBookingData}
+                                    onNext={goToNextStep}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* Navigation Footer */}
-                <div className="border-t border-gray-200 p-6 bg-gray-50">
-                    <div className="flex justify-between items-center max-w-4xl mx-auto">
+                <div className="border-t border-gray-100 p-8 bg-white backdrop-blur-md">
+                    <div className="flex justify-between items-center max-w-5xl mx-auto">
                         <button
                             onClick={goToPreviousStep}
                             disabled={currentStep === 1}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="group flex items-center gap-3 px-8 py-4 bg-white border-2 border-charcoal text-charcoal rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-charcoal hover:text-white transition-all disabled:opacity-10 disabled:grayscale shadow-sm active:scale-95"
                         >
-                            <ChevronLeft size={20} />
-                            Previous
+                            <ChevronLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                            Return
                         </button>
 
-                        <div className="text-center">
-                            <div className="text-sm text-gray-600">Step {currentStep} of 5</div>
-                            <div className="text-xs text-gray-500 mt-1">{steps[currentStep - 1].title}</div>
+                        <div className="hidden lg:flex items-center gap-4">
+                            {steps.map(s => (
+                                <div key={s.number} className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${currentStep === s.number ? 'bg-primary w-8' : 'bg-gray-200'}`} />
+                            ))}
+                            <span className="ml-4 text-[10px] font-black uppercase tracking-widest text-charcoal/40">Step {currentStep} of 5</span>
                         </div>
 
-                        {currentStep < 5 && (
+                        {currentStep < 5 ? (
                             <button
                                 onClick={goToNextStep}
                                 disabled={!canProceed()}
-                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="group flex items-center gap-3 px-12 py-4 bg-charcoal text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all disabled:opacity-20 shadow-2xl shadow-charcoal/20 active:scale-95"
                             >
-                                Next
-                                <ChevronRight size={20} />
+                                Proceed
+                                <ChevronRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
                             </button>
+                        ) : (
+                            <div className="w-[140px]" />
                         )}
-                        {/* Final step confirmation is handled inside the component */}
-                        {currentStep === 5 && <div className="w-[100px]" />}
                     </div>
                 </div>
             </motion.div>

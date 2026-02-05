@@ -13,21 +13,12 @@ import {
 import { fixImageOrientation } from '../utils/imageOptimization';
 import { useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../context/ToastContextBase';
 
 const AIBeautyAnalyzer = () => {
     const analyzeSkinBackend = useAction(api.skinAnalysis.analyze);
     const { error: toastError, info } = useToast();
 
-    // Lazy-load models only when needed
-    useEffect(() => {
-        if (mode !== 'idle') {
-            loadFaceDetectionModels().catch(err => {
-                console.error('Failed to load face detection models:', err);
-                toastError("Neural engine initialization failed. Please refresh.");
-            });
-        }
-    }, [mode]);
     const [mode, setMode] = useState('idle'); // 'idle', 'camera', 'upload'
     const [analysis, setAnalysis] = useState(null);
     const [faceShape, setFaceShape] = useState(null);
@@ -39,6 +30,16 @@ const AIBeautyAnalyzer = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    // Lazy-load models only when needed
+    useEffect(() => {
+        if (mode !== 'idle') {
+            loadFaceDetectionModels().catch(err => {
+                console.error('Failed to load face detection models:', err);
+                toastError("Neural engine initialization failed. Please refresh.");
+            });
+        }
+    }, [mode]);
 
     // AR Filter presets
     const filterPresets = [
@@ -383,7 +384,7 @@ const AIBeautyAnalyzer = () => {
 
                     {/* Right Column: Camera/Canvas Area */}
                     <div className="lg:col-span-2">
-                        <div className="relative bg-black/40 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/3] backdrop-blur-sm group">
+                        <div className="relative bg-black/40 border border-white/10 rounded-4xl overflow-hidden shadow-2xl aspect-4/3 backdrop-blur-sm group">
 
                             {/* Idle State - "Turn on Camera" */}
                             {mode === 'idle' && !cameraError && (
@@ -504,19 +505,13 @@ const AIBeautyAnalyzer = () => {
                 {/* Results Modal */}
                 <AnimatePresence>
                     {showResults && analysis && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
+                        <div
+                            className="fixed inset-0 z-9999 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4"
                             onClick={() => setShowResults(false)}
                         >
-                            <motion.div
-                                initial={{ scale: 0.9, y: 20 }}
-                                animate={{ scale: 1, y: 0 }}
-                                exit={{ scale: 0.9, y: 20 }}
+                            <div
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-[#0A0A0A] border border-white/10 rounded-[2rem] max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl"
+                                className="bg-[#0A0A0A] border border-white/10 rounded-4xl max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl"
                             >
                                 {/* Header */}
                                 <div className="bg-white/5 border-b border-white/5 p-8 text-white flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl">
@@ -588,8 +583,8 @@ const AIBeautyAnalyzer = () => {
                                         </button>
                                     </div>
                                 </div>
-                            </motion.div>
-                        </motion.div>
+                            </div>
+                        </div>
                     )}
                 </AnimatePresence>
             </div>

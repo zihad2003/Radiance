@@ -1,28 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getImageUrl } from '../../utils/imageHelpers';
 
 /**
  * Image Component with Error Handling and Fallbacks
  * 
- * @param {string} src - The image source URL (absolute path from public)
+ * @param {string} src - The image source URL
  * @param {string} alt - Alt text for accessibility
- * @param {string} fallback - Fallback image if the main src fails
+ * @param {string} category - Category for specialized fallbacks (skincare, makeup, spa)
  * @param {string} className - Additional CSS classes
  */
 export default function Image({
     src,
     alt,
-    fallback = '/assets/placeholders/product.svg',
+    category = 'default',
     className = '',
     ...props
 }) {
-    const [imgSrc, setImgSrc] = useState(src);
+    const [imgSrc, setImgSrc] = useState(getImageUrl(src, category));
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+
+    useEffect(() => {
+        setImgSrc(getImageUrl(src, category));
+        setError(false);
+        setLoading(true);
+    }, [src, category]);
 
     const handleError = () => {
         if (!error) {
             setError(true);
-            setImgSrc(fallback);
+            setImgSrc(getImageUrl(null, category));
             setLoading(false);
         }
     };

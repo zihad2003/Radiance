@@ -6,7 +6,7 @@ import { getStylistById } from '../../data/stylistsDatabase';
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/ToastContextBase';
 import { logError, getErrorMessage } from '../../utils/errors';
 
 const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
@@ -52,11 +52,15 @@ const ReviewConfirmation = ({ bookingData, updateBookingData }) => {
             // Generate WhatsApp Message
             const whatsappMessage = `
 *New Booking Request* 📅
-Name: ${details.name}
-Phone: ${details.phone}
-Service: ${selectedServices.map(s => s.name).join(", ")}
-Date: ${bookingData.selectedDate} at ${bookingData.selectedTime}
-Address: ${details.address}
+-------------------
+*Name:* ${details.name}
+*Phone:* ${details.phone}
+*Service:* ${selectedServices.map(s => s.name).join(", ")}
+*Date:* ${bookingData.selectedDate} at ${bookingData.selectedTime}
+*Stylist:* ${bookingData.selectedStylist === 'any' ? 'Any Available' : stylist?.name}
+*Address:* ${details.address}
+${details.specialRequests ? `*Special Requests:* ${details.specialRequests}` : ''}
+${details.referralCode ? `*Referral Code:* ${details.referralCode}` : ''}
             `.trim();
 
             // Send WhatsApp (Auto-open)
@@ -81,244 +85,202 @@ Address: ${details.address}
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12 px-4"
+                className="text-center py-20 px-4 max-w-2xl mx-auto"
             >
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-10 relative">
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                        className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-2xl shadow-primary/30"
                     >
-                        <Check size={48} className="text-green-600" />
+                        <Check size={48} strokeWidth={4} className="text-white" />
                     </motion.div>
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1.5, opacity: 0 }}
-                        transition={{ duration: 0.8, repeat: Infinity }}
-                        className="absolute inset-0 rounded-full border-2 border-green-400"
+                        animate={{ scale: 1.8, opacity: 0 }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="absolute inset-0 rounded-full border-2 border-primary"
                     />
                 </div>
-                <h3 className="text-4xl font-serif text-charcoal mb-4">You're All Set! ✨</h3>
-                <p className="text-gray-600 mb-8 text-lg">Your appointment has been successfully booked.</p>
 
-                <div className="bg-gradient-to-r from-primary to-accent text-white p-8 rounded-3xl max-w-sm mx-auto mb-10 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10"><Calendar size={120} /></div>
-                    <div className="text-xs font-bold uppercase tracking-widest opacity-80 mb-2">Booking Reference</div>
-                    <div className="text-4xl font-mono font-bold tracking-wider mb-2">RAD{Date.now().toString().slice(-6)}</div>
-                    <div className="h-px bg-white/20 my-4" />
-                    <div className="flex justify-between items-center text-sm">
-                        <span>{new Date(bookingData.selectedDate).toLocaleDateString()}</span>
-                        <span>{bookingData.selectedTime}</span>
+                <h3 className="text-5xl font-serif font-black text-charcoal mb-4">Masterpiece Set. ✨</h3>
+                <p className="text-gray-400 font-medium mb-12 text-lg">Your appointment has been secured. Get ready to shine.</p>
+
+                <div className="bg-charcoal text-white p-10 rounded-[3rem] shadow-3xl shadow-charcoal/30 relative overflow-hidden border border-primary/20">
+                    <div className="absolute top-0 right-0 p-8 opacity-5"><Calendar size={180} /></div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Booking Identifier</div>
+                    <div className="text-5xl font-mono font-black tracking-tighter mb-6">RAD{Date.now().toString().slice(-6)}</div>
+
+                    <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
+                        <div className="text-left">
+                            <div className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1">Date</div>
+                            <div className="font-bold text-lg">{new Date(bookingData.selectedDate).toLocaleDateString()}</div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1">Time</div>
+                            <div className="font-bold text-lg">{bookingData.selectedTime}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button className="flex items-center justify-center gap-2 px-8 py-4 bg-charcoal text-white rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg hover:shadow-xl active:scale-95">
-                        <Download size={20} />
-                        Download Receipt
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+                    <button className="flex items-center justify-center gap-2 px-10 py-5 bg-charcoal text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl active:scale-95">
+                        <Download size={18} />
+                        Receipt
                     </button>
-                    <button className="flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-charcoal text-charcoal rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95">
-                        <Calendar size={20} />
-                        Add to Calendar
+                    <button className="flex items-center justify-center gap-2 px-10 py-5 bg-white border-2 border-charcoal text-charcoal rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-95">
+                        <Calendar size={18} />
+                        Calendar
                     </button>
-                </div>
-
-                <div className="mt-12 p-4 bg-green-50 rounded-xl max-w-lg mx-auto border border-green-100">
-                    <p className="text-sm text-green-800 flex items-center justify-center gap-2">
-                        <MessageCircle size={16} />
-                        {details.whatsappNotification ? 'Authentication & Details sent via WhatsApp.' : 'Booking details sent to your email.'}
-                    </p>
                 </div>
             </motion.div>
         );
     }
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto pb-20">
-            {/* Same review content... */}
-            <div className="text-center">
-                <h3 className="text-3xl font-serif text-charcoal mb-2">Review Your Booking</h3>
-                <p className="text-gray-600">Please review all details before confirming</p>
+        <div className="space-y-10 max-w-5xl mx-auto pb-20">
+            <div className="text-center space-y-2">
+                <h3 className="text-4xl font-serif font-black text-charcoal">Final Approval</h3>
+                <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+                <p className="text-gray-400 font-medium pt-2">Verify your luxury experience details</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-                {/* Left Column - Services & Details */}
-                <div className="space-y-6">
-                    {/* Selected Services */}
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                        <h4 className="font-bold text-lg text-charcoal mb-4">Selected Services</h4>
-                        <div className="space-y-3">
+            <div className="grid lg:grid-cols-3 gap-10">
+                {/* Left Columns - Details */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Services */}
+                    <div className="bg-white rounded-4xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Service Menu</h4>
+                        <div className="space-y-4">
                             {selectedServices.map((service) => (
-                                <div key={service.id} className="flex justify-between items-start pb-3 border-b border-gray-100 last:border-0">
-                                    <div className="flex-1">
-                                        <div className="font-semibold text-charcoal">{service.name}</div>
-                                        <div className="text-sm text-gray-500">{formatDuration(service.duration)}</div>
+                                <div key={service.id} className="flex justify-between items-center group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all">
+                                            {service.icon || '✨'}
+                                        </div>
+                                        <div>
+                                            <div className="font-black text-charcoal">{service.name}</div>
+                                            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{formatDuration(service.duration)}</div>
+                                        </div>
                                     </div>
-                                    <div className="font-bold text-charcoal">৳{service.price.toLocaleString()}</div>
+                                    <div className="font-mono font-bold text-lg text-charcoal">৳{service.price.toLocaleString()}</div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Date & Time */}
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                        <h4 className="font-bold text-lg text-charcoal mb-4">Appointment Details</h4>
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                                <Calendar className="text-primary" size={20} />
+                    {/* Appointment & Customer */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div className="bg-charcoal text-white rounded-4xl p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5"><Calendar size={80} /></div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">When</h4>
+                            <div className="space-y-4 relative z-10">
+                                <div className="text-2xl font-serif font-bold">
+                                    {new Date(bookingData.selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                </div>
+                                <div className="text-4xl font-black text-primary">{bookingData.selectedTime}</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-4xl p-8">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Guest</h4>
+                            <div className="space-y-4">
                                 <div>
-                                    <div className="text-sm text-gray-600">Date</div>
-                                    <div className="font-semibold">
-                                        {new Date(bookingData.selectedDate).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
+                                    <div className="text-xs font-bold text-gray-400">Name</div>
+                                    <div className="font-black text-charcoal">{details.name}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-400">Contact</div>
+                                        <div className="font-black text-charcoal">{details.phone}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-400">Artisan</div>
+                                        <div className="font-black text-charcoal">{bookingData.selectedStylist === 'any' ? 'Open' : stylist?.name}</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Clock className="text-primary" size={20} />
                                 <div>
-                                    <div className="text-sm text-gray-600">Time</div>
-                                    <div className="font-semibold">{bookingData.selectedTime}</div>
+                                    <div className="text-xs font-bold text-gray-400">Destination</div>
+                                    <div className="font-black text-charcoal line-clamp-1">{details.address}</div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Clock className="text-primary" size={20} />
-                                <div>
-                                    <div className="text-sm text-gray-600">Duration</div>
-                                    <div className="font-semibold">{formatDuration(duration)}</div>
-                                </div>
+                                {(details.specialRequests || details.referralCode) && (
+                                    <div className="pt-4 border-t border-gray-200 mt-4 space-y-3">
+                                        {details.specialRequests && (
+                                            <div>
+                                                <div className="text-[8px] font-black uppercase tracking-widest text-primary mb-1">Special Requests</div>
+                                                <div className="text-xs text-charcoal italic leading-relaxed">"{details.specialRequests}"</div>
+                                            </div>
+                                        )}
+                                        {details.referralCode && (
+                                            <div>
+                                                <div className="text-[8px] font-black uppercase tracking-widest text-primary mb-1">Referral Applied</div>
+                                                <div className="text-xs font-black text-charcoal">{details.referralCode}</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
-
-                    {/* Stylist */}
-                    {stylist && (
-                        <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                            <h4 className="font-bold text-lg text-charcoal mb-4">Your Stylist</h4>
-                            <div className="flex items-center gap-4">
-                                <img
-                                    src={stylist.image}
-                                    alt={stylist.name}
-                                    className="w-16 h-16 rounded-full object-cover"
-                                />
-                                <div>
-                                    <div className="font-semibold text-charcoal">{stylist.name}</div>
-                                    <div className="text-sm text-gray-600">{stylist.title}</div>
-                                    <div className="text-sm text-primary">{stylist.experience} years exp.</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
-                {/* Right Column - Customer Info & Payment */}
-                <div className="space-y-6">
-                    {/* Customer Details */}
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                        <h4 className="font-bold text-lg text-charcoal mb-4">Customer Information</h4>
-                        <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                                <User className="text-gray-400 flex-shrink-0 mt-1" size={18} />
-                                <div>
-                                    <div className="text-sm text-gray-600">Name</div>
-                                    <div className="font-semibold">{details.name}</div>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Phone className="text-gray-400 flex-shrink-0 mt-1" size={18} />
-                                <div>
-                                    <div className="text-sm text-gray-600">Phone</div>
-                                    <div className="font-semibold">{details.phone}</div>
-                                </div>
-                            </div>
-                            {details.email && (
-                                <div className="flex items-start gap-3">
-                                    <Mail className="text-gray-400 flex-shrink-0 mt-1" size={18} />
-                                    <div>
-                                        <div className="text-sm text-gray-600">Email</div>
-                                        <div className="font-semibold">{details.email}</div>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="flex items-start gap-3">
-                                <MapPin className="text-gray-400 flex-shrink-0 mt-1" size={18} />
-                                <div>
-                                    <div className="text-sm text-gray-600">Address</div>
-                                    <div className="font-semibold">{details.address}</div>
-                                </div>
-                            </div>
-                            {details.homeService && (
-                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
-                                    <div className="text-sm font-semibold text-amber-800">Home Service Requested</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                {/* Right Column - Payment */}
+                <div className="space-y-8">
+                    <div className="bg-white rounded-4xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 sticky top-8">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-8 text-center">Investment Summary</h4>
 
-                    {/* Payment Summary */}
-                    <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200">
-                        <h4 className="font-bold text-lg text-charcoal mb-4">Payment Summary</h4>
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-gray-700">
-                                <span>Subtotal ({selectedServices.length} services)</span>
+                        <div className="space-y-6">
+                            <div className="flex justify-between text-sm font-bold text-gray-500">
+                                <span>Subtotal</span>
                                 <span>৳{subtotal.toLocaleString()}</span>
                             </div>
-                            {discount > 0 && (
-                                <div className="flex justify-between text-green-600">
-                                    <span>Discount (5%)</span>
-                                    <span>-৳{discount.toLocaleString()}</span>
-                                </div>
-                            )}
                             {travelFee > 0 && (
-                                <div className="flex justify-between text-gray-700">
-                                    <span>Travel Fee</span>
-                                    <span>৳{travelFee.toLocaleString()}</span>
+                                <div className="flex justify-between text-sm font-bold text-amber-600">
+                                    <span>Home Service</span>
+                                    <span>+৳{travelFee.toLocaleString()}</span>
                                 </div>
                             )}
-                            <div className="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
-                                <span className="text-xl font-bold text-charcoal">Total</span>
-                                <span className="text-3xl font-bold text-primary">৳{total.toLocaleString()}</span>
+                            <div className="h-px bg-gray-100" />
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs font-black uppercase tracking-widest text-charcoal">Total Amount</span>
+                                <span className="text-4xl font-black text-primary">৳{total.toLocaleString()}</span>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Terms & Conditions */}
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                        <label className="flex items-start gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={agreedToTerms}
-                                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                                className="mt-1 w-5 h-5 text-primary rounded focus:ring-primary"
-                            />
-                            <div className="text-sm text-gray-700">
-                                I agree to the <a href="#" className="text-primary font-semibold hover:underline">Terms & Conditions</a> and <a href="#" className="text-primary font-semibold hover:underline">Cancellation Policy</a>
-                            </div>
-                        </label>
-                    </div>
+                        <div className="mt-10 space-y-4">
+                            <label className="flex gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    className="mt-1 w-5 h-5 accent-charcoal"
+                                />
+                                <span className="text-[10px] leading-relaxed text-gray-400 font-medium">
+                                    I agree to the <span className="text-charcoal font-bold">Radiance Terms</span> & Cancellation Policy.
+                                </span>
+                            </label>
 
-                    {/* Confirm Button */}
-                    <button
-                        onClick={handleConfirmBooking}
-                        disabled={!agreedToTerms || isConfirming}
-                        className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isConfirming ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Confirming...
-                            </>
-                        ) : (
-                            <>
-                                <Check size={24} />
-                                Confirm & Book Appointment
-                            </>
-                        )}
-                    </button>
+                            <button
+                                onClick={handleConfirmBooking}
+                                disabled={!agreedToTerms || isConfirming}
+                                className="w-full py-5 bg-charcoal text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all disabled:opacity-30 flex items-center justify-center gap-3 shadow-2xl shadow-charcoal/20"
+                            >
+                                {isConfirming ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>Secure Booking</>
+                                )}
+                            </button>
+
+                            {details.whatsappNotification && (
+                                <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-green-600 uppercase tracking-widest pt-2">
+                                    <MessageCircle size={14} />
+                                    WhatsApp Enabled
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

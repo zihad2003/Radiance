@@ -1,14 +1,15 @@
 
-import { createContext, useContext, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
-
-const ToastContext = createContext();
-
-export const useToast = () => useContext(ToastContext);
+import { ToastContext } from './ToastContextBase';
 
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
+
+    const removeToast = useCallback((id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
 
     const addToast = useCallback((message, type = 'info', duration = 3000) => {
         const id = Date.now();
@@ -19,11 +20,7 @@ export const ToastProvider = ({ children }) => {
                 removeToast(id);
             }, duration);
         }
-    }, []);
-
-    const removeToast = useCallback((id) => {
-        setToasts(prev => prev.filter(t => t.id !== id));
-    }, []);
+    }, [removeToast]);
 
     const success = (msg, duration) => addToast(msg, 'success', duration);
     const error = (msg, duration) => addToast(msg, 'error', duration);
@@ -39,7 +36,7 @@ export const ToastProvider = ({ children }) => {
 
 const ToastContainer = ({ toasts, removeToast }) => {
     return (
-        <div className="fixed top-24 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+        <div className="fixed top-24 right-6 z-200 flex flex-col gap-3 pointer-events-none">
             <AnimatePresence>
                 {toasts.map(toast => (
                     <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
@@ -63,17 +60,14 @@ const Toast = ({ message, type, onClose }) => {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 50, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 50, scale: 0.9 }}
-            className={`pointer-events-auto min-w-[300px] max-w-sm p-4 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border flex items-center gap-3 ${bgColors[type] || bgColors.info} backdrop-blur-md`}
+        <div
+            className={`pointer-events-auto min-w-75 max-w-sm p-4 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border flex items-center gap-3 ${bgColors[type] || bgColors.info} backdrop-blur-md`}
         >
             <div className="shrink-0">{icons[type] || icons.info}</div>
             <p className="flex-1 text-sm font-medium text-gray-700">{message}</p>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                 <X size={14} />
             </button>
-        </motion.div>
+        </div>
     );
 };

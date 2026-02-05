@@ -80,7 +80,7 @@ export const servicesDatabase = [
         category: 'Bridal',
         price: 18000,
         duration: 240,
-        image: 'https://images.unsplash.com/photo-1522337360705-8763d84a783a?w=800',
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800',
         popular: false,
         trending: true,
         included: [
@@ -427,7 +427,7 @@ export const servicesDatabase = [
         category: 'Mehendi',
         price: 1500,
         duration: 60,
-        image: 'https://images.unsplash.com/photo-1598378294821-c9e0c9a66b7d?w=800',
+        image: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=800',
         popular: true,
         trending: false,
         included: [
@@ -446,7 +446,7 @@ export const servicesDatabase = [
         category: 'Styling',
         price: 800,
         duration: 30,
-        image: 'https://images.unsplash.com/photo-1583391733981-5ead0c0c2c1e?w=800',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800',
         popular: true,
         trending: false,
         included: [

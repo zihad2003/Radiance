@@ -72,161 +72,138 @@ const CustomerDetails = ({ bookingData, updateBookingData }) => {
     );
 
     return (
-        <div className="space-y-6 max-w-3xl mx-auto">
-            <div className="text-center">
-                <h3 className="text-3xl font-serif text-charcoal mb-2">Your Details</h3>
-                <p className="text-gray-600">Please provide your contact information to proceed</p>
+        <div className="space-y-10 max-w-2xl mx-auto py-4">
+            <div className="text-center space-y-2">
+                <h3 className="text-4xl font-serif font-black text-charcoal">Personal Details</h3>
+                <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+                <p className="text-gray-400 font-medium pt-2">Tell us more about how we can reach you</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 space-y-6 border border-gray-100 shadow-sm">
+            <div className="grid grid-cols-1 gap-8">
                 {/* Name */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <User size={18} className="text-primary" />
-                        Full Name <span className="text-red-500">*</span>
+                <div className="group">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                        Your Full Name
                     </label>
-                    <input
-                        {...register('name')}
-                        type="text"
-                        placeholder="Enter your full name"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.name ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
-                            }`}
-                    />
+                    <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors" size={20} />
+                        <input
+                            {...register('name')}
+                            type="text"
+                            placeholder="John Doe"
+                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-2xl outline-none transition-all ${errors.name ? 'border-red-100 bg-red-50/30' : 'border-transparent focus:border-primary focus:bg-white focus:shadow-xl focus:shadow-primary/5'}`}
+                        />
+                    </div>
                     <ErrorParams field="name" />
                 </div>
 
-                {/* Phone */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Phone size={18} className="text-primary" />
-                        Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        {...register('phone')}
-                        type="tel"
-                        placeholder="017XXXXXXXX"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.phone ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
-                            }`}
-                    />
-                    <ErrorParams field="phone" />
-                    {!errors.phone && touchedFields.phone && (
-                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                            <MessageCircle size={10} /> Valid number format
-                        </p>
-                    )}
-                </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                    {/* Phone */}
+                    <div className="group">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                            Contact Phone
+                        </label>
+                        <div className="relative">
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors" size={20} />
+                            <input
+                                {...register('phone')}
+                                type="tel"
+                                placeholder="017XXXXXXXX"
+                                className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-2xl outline-none transition-all ${errors.phone ? 'border-red-100 bg-red-50/30' : 'border-transparent focus:border-primary focus:bg-white focus:shadow-xl focus:shadow-primary/5'}`}
+                            />
+                        </div>
+                        <ErrorParams field="phone" />
+                    </div>
 
-                {/* Email */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Mail size={18} className="text-primary" />
-                        Email Address
-                    </label>
-                    <input
-                        {...register('email')}
-                        type="email"
-                        placeholder="your.email@example.com"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.email ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
-                            }`}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Optional but recommended for booking receipt</p>
-                    <ErrorParams field="email" />
+                    {/* Email */}
+                    <div className="group">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                            Email (Optional)
+                        </label>
+                        <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors" size={20} />
+                            <input
+                                {...register('email')}
+                                type="email"
+                                placeholder="name@luxury.com"
+                                className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-2xl outline-none transition-all ${errors.email ? 'border-red-100 bg-red-50/30' : 'border-transparent focus:border-primary focus:bg-white focus:shadow-xl focus:shadow-primary/5'}`}
+                            />
+                        </div>
+                        <ErrorParams field="email" />
+                    </div>
                 </div>
 
                 {/* Address */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <MapPin size={18} className="text-primary" />
-                        Address <span className="text-red-500">*</span>
+                <div className="group">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                        Detailed Address
                     </label>
-                    <textarea
-                        {...register('address')}
-                        placeholder="Enter your complete address"
-                        rows="3"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${errors.address ? 'border-red-300 focus:ring-red-200 bg-red-50' : 'border-gray-300 focus:ring-primary/20'
-                            }`}
-                    />
+                    <div className="relative">
+                        <MapPin className="absolute left-4 top-4 text-gray-300 group-focus-within:text-primary transition-colors" size={20} />
+                        <textarea
+                            {...register('address')}
+                            placeholder="Apartment, Street, House Name..."
+                            rows="3"
+                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-2xl outline-none transition-all resize-none ${errors.address ? 'border-red-100 bg-red-50/30' : 'border-transparent focus:border-primary focus:bg-white focus:shadow-xl focus:shadow-primary/5'}`}
+                        />
+                    </div>
                     <ErrorParams field="address" />
                 </div>
 
-                {/* Home Service */}
-                <div className={`border rounded-xl p-4 transition-colors ${formValues.homeService ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
-                    <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            {...register('homeService')}
-                            className="mt-1 w-5 h-5 text-primary rounded focus:ring-primary"
-                        />
+                <div className="grid md:grid-cols-2 gap-6">
+                    {/* Home Service Toggle */}
+                    <label className={`relative flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer group ${formValues.homeService ? 'border-primary bg-primary/5 shadow-lg shadow-primary/5' : 'border-gray-100 bg-white hover:border-gray-200'}`}>
+                        <input type="checkbox" {...register('homeService')} className="hidden" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${formValues.homeService ? 'bg-primary text-white rotate-12' : 'bg-gray-100 text-gray-400'}`}>
+                            <Home size={22} />
+                        </div>
                         <div className="flex-1">
-                            <div className="flex items-center gap-2 font-semibold text-gray-800">
-                                <Home size={18} />
-                                Request Home Service
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Our stylist will come to your location (within Dhaka)
-                            </p>
-                            {formValues.homeService && (
-                                <p className="text-sm font-semibold text-amber-700 mt-2 animate-in fade-in slide-in-from-top-1">
-                                    Additional travel fee: ৳2,000
-                                </p>
-                            )}
+                            <div className="font-bold text-charcoal">Home Service</div>
+                            <div className="text-[10px] text-gray-400 uppercase font-black tracking-wider">At Your Location</div>
+                        </div>
+                        {formValues.homeService && <div className="absolute top-2 right-4 text-[10px] font-black text-primary">+৳2,000</div>}
+                    </label>
+
+                    {/* WhatsApp Notification Toggle */}
+                    <label className={`relative flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer group ${formValues.whatsappNotification ? 'border-green-500 bg-green-50/30' : 'border-gray-100 bg-white hover:border-gray-200'}`}>
+                        <input type="checkbox" {...register('whatsappNotification')} className="hidden" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${formValues.whatsappNotification ? 'bg-green-500 text-white shadow-lg shadow-green-200' : 'bg-gray-100 text-gray-400'}`}>
+                            <MessageCircle size={22} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-bold text-charcoal">WhatsApp Alerts</div>
+                            <div className="text-[10px] text-gray-400 uppercase font-black tracking-wider">Instant Updates</div>
                         </div>
                     </label>
                 </div>
 
-                {/* Special Requests */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <MessageCircle size={18} className="text-primary" />
-                        Special Requests / Allergies
-                    </label>
-                    <textarea
-                        {...register('specialRequests')}
-                        placeholder="Any allergies, preferences, or special requirements..."
-                        rows="3"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                </div>
-
-                {/* Referral Code */}
-                <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                        <Gift size={18} className="text-primary" />
-                        Referral Code
-                    </label>
-                    <input
-                        {...register('referralCode')}
-                        type="text"
-                        placeholder="Enter referral code for discount"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                </div>
-
-                {/* WhatsApp Notification */}
-                <div className={`border rounded-xl p-4 transition-colors ${formValues.whatsappNotification ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-                    <label className="flex items-start gap-3 cursor-pointer">
+                {/* Extras */}
+                <div className="grid md:grid-cols-2 gap-8">
+                    <div className="group">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                            Special Requests
+                        </label>
                         <input
-                            type="checkbox"
-                            {...register('whatsappNotification')}
-                            className="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                            {...register('specialRequests')}
+                            className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl outline-none transition-all focus:border-primary focus:bg-white"
+                            placeholder="Allergies, preferences..."
                         />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 font-semibold text-gray-800">
-                                <MessageCircle size={18} className="text-green-600" />
-                                Send booking confirmation via WhatsApp
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Receive instant booking confirmation and reminders on WhatsApp
-                            </p>
-                        </div>
-                    </label>
+                    </div>
+                    <div className="group">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-focus-within:text-primary transition-colors block mb-2">
+                            Promo/Referral Code
+                        </label>
+                        <input
+                            {...register('referralCode')}
+                            className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl outline-none transition-all focus:border-primary focus:bg-white"
+                            placeholder="REFR-XXXX"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Privacy Notice */}
-            <div className="text-center text-xs text-gray-500">
-                <p>Your information is secure and will only be used for booking purposes.</p>
-                <p className="mt-1">By continuing, you agree to our Terms & Conditions and Privacy Policy.</p>
+            <div className="pt-6 text-center opacity-40">
+                <p className="text-[10px] font-black uppercase tracking-[3px]">Secure Checkout • Encrypted Data</p>
             </div>
         </div>
     );

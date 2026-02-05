@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Mic, MessageCircle, Calendar, User, Clock, Loader2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../context/ToastContextBase';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 

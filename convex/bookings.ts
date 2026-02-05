@@ -10,8 +10,11 @@ export const createBooking = mutation({
             name: v.string(),
             phone: v.string(),
             address: v.string(),
-            email: v.optional(v.string()), // Updated schema to match usage
+            email: v.optional(v.string()),
             homeService: v.optional(v.boolean()),
+            referralCode: v.optional(v.string()),
+            specialRequests: v.optional(v.string()),
+            whatsappNotification: v.optional(v.boolean()),
         }),
         status: v.string(),
         userId: v.optional(v.string()),

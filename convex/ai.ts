@@ -38,6 +38,9 @@ export const generateMakeover = action({
         strength: v.optional(v.number())
     },
     handler: async (ctx, args) => {
+        if (!process.env.REPLICATE_API_TOKEN) {
+            return [args.imageUrl];
+        }
         const cached = await ctx.runQuery(internal.ai.getCachedImage, {
             inputImageUrl: args.imageUrl,
             preset: args.prompt

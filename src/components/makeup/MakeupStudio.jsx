@@ -36,7 +36,7 @@ import {
 import Product3DPreview from './Product3DPreview';
 import PresetGallery from './PresetGallery';
 import PresetDetailModal from './PresetDetailModal';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/ToastContextBase';
 
 const MakeupStudio = () => {
     // Media & Hardware State

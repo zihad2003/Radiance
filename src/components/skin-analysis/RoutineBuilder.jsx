@@ -4,7 +4,7 @@ import { useAction, useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Sparkles, Sun, Moon, Beaker, Check, DollarSign, AlertCircle, Loader2, Database, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/ToastContextBase';
 
 const RoutineBuilder = ({ analysisResult }) => {
     const generate = useAction(api.recommendations.generate);
