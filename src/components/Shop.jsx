@@ -68,6 +68,8 @@ const ShopContent = ({ cloudProducts, isCloudLoading }) => {
     const [viewMode, setViewMode] = useState('grid');
     const [onlyInStock, setOnlyInStock] = useState(false);
     const [selectedBrands, setSelectedBrands] = useState([]);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(12);
 
     const createOrder = async (orderData) => {
         console.log('Mock Order Created:', orderData);
@@ -132,6 +134,13 @@ const ShopContent = ({ cloudProducts, isCloudLoading }) => {
         });
         return result;
     }, [products, searchQuery, activeCategory, activeSub, priceRange, sortBy, onlyInStock, selectedBrands]);
+
+    const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredProducts.length / pageSize)), [filteredProducts.length, pageSize]);
+    const currentPage = useMemo(() => Math.min(page, totalPages), [page, totalPages]);
+    const visibleProducts = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return filteredProducts.slice(start, start + pageSize);
+    }, [filteredProducts, currentPage, pageSize]);
 
     const activeCategoryObj = SHOP_CATEGORIES.find(c => c.id === activeCategory);
 
@@ -288,7 +297,7 @@ const ShopContent = ({ cloudProducts, isCloudLoading }) => {
                         ) : filteredProducts.length > 0 ? (
                             <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'} relative`}>
                                 <AnimatePresence mode="popLayout">
-                                    {filteredProducts.map((p, idx) => (
+                                    {visibleProducts.map((p, idx) => (
                                         <ProductCard
                                             key={p.id}
                                             product={p}
@@ -317,6 +326,42 @@ const ShopContent = ({ cloudProducts, isCloudLoading }) => {
                                 >
                                     <RefreshCw size={14} /> Reset All Filters
                                 </button>
+                            </div>
+                        )}
+                        {filteredProducts.length > 0 && (
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                                    Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredProducts.length)} of {filteredProducts.length}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setPage(Math.max(1, currentPage - 1))}
+                                        disabled={currentPage <= 1}
+                                        className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-40 hover:bg-white/10"
+                                    >
+                                        Prev
+                                    </button>
+                                    <div className="px-4 py-2 rounded-lg bg-white text-black text-[10px] font-black uppercase tracking-widest">
+                                        {currentPage}/{totalPages}
+                                    </div>
+                                    <button
+                                        onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+                                        disabled={currentPage >= totalPages}
+                                        className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-40 hover:bg-white/10"
+                                    >
+                                        Next
+                                    </button>
+                                    <select
+                                        value={pageSize}
+                                        onChange={(e) => { setPage(1); setPageSize(parseInt(e.target.value)); }}
+                                        className="ml-2 bg-white/5 text-white border-none outline-none px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10"
+                                    >
+                                        <option className="bg-[#0A0A0A]" value="9">9</option>
+                                        <option className="bg-[#0A0A0A]" value="12">12</option>
+                                        <option className="bg-[#0A0A0A]" value="18">18</option>
+                                        <option className="bg-[#0A0A0A]" value="24">24</option>
+                                    </select>
+                                </div>
                             </div>
                         )}
                     </div>
